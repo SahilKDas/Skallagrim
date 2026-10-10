@@ -26,7 +26,7 @@ python python/pipeline.py --kind cnn --generations 50 --games 1250 --window-game
 python python/pipeline.py --kind nnue --generations 50 --games 1250 --window-games 20000 --movetime 100 --run runs/nnue-training
 ```
 
-Each generation persists data, replay, export, PyTorch state, metrics, and completion markers. Completed generations resume without retraining. Promotion uses a 50-game, 300-ms paired match against the previous checkpoint; it requires a lower 95% score bound above 0.5, at least 50% on each side, and no protocol forfeits. Passing this gate is internal training validation, not external strength certification. Iota and Beta can initially share an NNUE checkpoint; their search methods remain different. Beta uses explicit uniform PUCT priors. Rho uses learned policy priors over legal moves.
+Each generation persists data, replay, export, PyTorch state, metrics, and completion markers. Completed generations resume without retraining. Promotion uses the [role-balanced league](LEAGUE.md): champion and historical 50-game/300-ms gauntlets, a separate held-out difficult-position gate, role-specific score floors, zero operational failures, and the champion confidence gate. Shared NNUE checkpoints must pass both Iota and Beta. Passing these gates is internal validation, not external strength certification. Iota and Beta can initially share an NNUE checkpoint; their search methods remain different. Beta uses explicit uniform PUCT priors. Rho uses learned policy priors over legal moves.
 
 Training indexes record offsets and loads only each current batch, preserving the game-level split and optimization order. Replay assembly also streams whole games. The default working replay cap is 8 GiB (`--replay-max-gib`); if the budget cannot fit 1,250 completed games, collection/training fails rather than lowering the minimum. The entire learning run has a 16-GiB storage guard (`--max-storage-gib`) and a 2-GiB free-disk reserve. Budget exhaustion stops only the owned stage and its children, preserving completed checkpoints.
 
@@ -56,3 +56,10 @@ The first 12-game checkpoints were smoke artifacts only. A separate 1,250-game c
 ```
 
 Run the trainings sequentially on memory-constrained machines. Binary feature caches are stored as uint8 and expanded per batch. Metadata includes data hashes, game counts, role coverage, architecture, validation loss, and provenance.
+## Resume and interruption safety
+
+Self-play validates positive limits and stops after ten times the requested completed-game count in attempts by default. `--max-attempts` changes that bound; truncated rows remain unlabelled and partial files are preserved on failure. New samples record the referee's rules identity.
+
+Trainer checkpoints use atomic `.pt` replacement, and new metadata hashes both the JSON export and PyTorch state. Pipeline resume verifies those hashes and rejects changed kind, games, move time, epochs, replay-window size or device before modifying the run. Completed generations with missing checkpoint files are rejected. Legacy metadata without artifact hashes can only be checked for file presence and its training-game gate; independently archived hashes remain the stronger evidence for those models.
+
+New self-play runs validate each chosen move through the separate Rust referee and mirror only accepted moves to the search engine. Full audit replays are stored in a compressed `.referee.jsonl.gz` sidecar and individual durable game files; failed or timed-out collection stops without labeling a forfeit as game-theoretic training truth.

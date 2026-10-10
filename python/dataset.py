@@ -12,12 +12,14 @@ def open_data(path):
 
 
 class DatasetIndex:
-    def __init__(self, path):
+    def __init__(self, path, excluded_fens=()):
         self.path = Path(path)
         self.groups = {}
         self.sides = {}
         self.sizes = {}
         digest = hashlib.sha256()
+        excluded_fens = set(excluded_fens)
+        contaminated = set()
         with open_data(path) as stream:
             while True:
                 offset = stream.tell()
@@ -28,6 +30,8 @@ class DatasetIndex:
                 if not line.strip():
                     continue
                 row = json.loads(line)
+                if row.get("fen") in excluded_fens:
+                    contaminated.add(row["game"])
                 if row.get("target") is None:
                     continue
                 game = row["game"]
@@ -38,6 +42,10 @@ class DatasetIndex:
                 if side in counts:
                     counts[side] += 1
         self.sha256 = digest.hexdigest()
+        for game in contaminated:
+            self.groups.pop(game, None)
+            self.sides.pop(game, None)
+            self.sizes.pop(game, None)
 
     @staticmethod
     def read_batch(stream, offsets):
@@ -48,13 +56,13 @@ class DatasetIndex:
         return rows
 
 
-def make_replay(sources, output, max_games, max_bytes, minimum_games=1250, check=None):
+def make_replay(sources, output, max_games, max_bytes, minimum_games=1250, check=None, excluded_fens=()):
     selected = []
     seen = set()
     total = 0
     full = False
     for source in reversed(sources):
-        index = DatasetIndex(source)
+        index = DatasetIndex(source, excluded_fens)
         chosen = []
         for game in reversed(list(index.groups)):
             if game in seen:

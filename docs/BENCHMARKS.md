@@ -48,6 +48,8 @@ The two Python checkouts have **no pretrained weights** at their pinned revision
 
 The initial candidates can also overrun under long histories and ambient scheduling. The saved `timing-probe.json` replays one long Beta position on the otherwise free efficiency core: five 300-ms requests returned in 308–317 ms, close to the common 325-ms transport threshold. This diagnostic does not change match scores. Deadline enforcement and forfeits remain part of the published evidence; the current implementation does not guarantee strict real-time response.
 
+The v3 bug-fix pass replaces copied histories with persistent histories and makes CNN convolutions cancellable. Its separate `benchmarks/deadline-regression.json` contains 60 requests across all three bots at the start and a 315-ply position: all returned below 300 ms on CPU 6. This diagnostic supports the timing fix for those fixtures; it does not guarantee arbitrary scheduling or replace the original match results. The 750 historical games used v2. Replay them using the archived binary and artifact overrides documented in [FIXES.md](FIXES.md).
+
 Run all fifteen pairings with one command (sequential by default):
 
 ```powershell
@@ -62,3 +64,6 @@ Bundle binaries, models, source and documentation using `python python/package_r
 
 Use `--matches-root runs/gauntlets` for a custom campaign directory. Match evidence also includes the exact locally trained upstream checkpoints and their metadata under `evidence/opponent-artifacts/external/`. Fetch the pinned repositories before copying these checkpoint files into the corresponding `external/` directories. TaflZero's network remains available from its pinned repository.
 
+
+
+New runs use the dedicated Rust referee, pin its executable hash, and embed its audited event timeline. Its clock starts at receipt of the arm request and ends at receipt of the proposed move, including referee IPC and persistence acknowledgment. The configured transport allowance is separate from the requested search time. Historical results retain their original timing semantics. See [referee details](REFEREE.md).

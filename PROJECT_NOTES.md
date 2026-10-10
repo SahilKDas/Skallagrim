@@ -115,3 +115,10 @@ Proposed interpretation: run a 50-game match for each candidate/opponent pairing
 ## Current status
 
 Rust rules, search, protocol, and tiny-skia GUI plus Python training/export, self-play, iterative replay tooling, and match infrastructure are implemented. Full federation-rule certification, sustained neural self-play, checkpoint-backed Python-opponent validation, and final external strength proof remain outstanding. Consult docs/RULES.md, docs/TRAINING.md, and docs/BENCHMARKS.md before interpreting results.
+## October 9 bug-fix pass
+
+The current implementation uses `copenhagen-static-v3`. [FIXES.md](docs/FIXES.md) records corrected input parsing, capture triggering, fort reachability, search deadlines, replay validation, draw-proof tooling, training resume safety and report provenance. Validation: 40 Rust tests, 17 Python tests, 80 neural-parity positions, 60 timed search requests, and re-audit of all 1,250 training games. The original 750-game campaign remains historical v2 evidence; its exact engine is archived in the repository. General dynamic-fort recognition and federation repetition/draw interpretation remain explicitly uncertified.
+
+## Added league, Discord and dynamic proofs
+
+The GUI now has optional configurable Discord IPC presence. The pipeline uses versioned role-balanced league schedules, historical promoted opponents and disjoint difficult-position suites; NNUE promotion tests Iota and Beta. Bounded dynamic fort analysis exports independently checked strategy graphs and commits only verified, current-revision rulings. Unknown remains unresolved. See docs/LEAGUE.md, docs/DISCORD.md and docs/REFEREE.md. These additions do not establish new playing-strength results.

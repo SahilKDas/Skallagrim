@@ -1,0 +1,51 @@
+{
+  "created_utc": "2026-10-10T03:53:59.629596+00:00",
+  "rules": "copenhagen-static-v3",
+  "referee_protocol": "skallagrim-referee-v1",
+  "revision": "c36ca1d6f741e19a7e8f0b6e99144c68d190b3cc",
+  "dirty": true,
+  "binaries": {
+    "target/release/skallagrim-gui.exe": "b24f67c0aaabaa9c44deec2a65cdadf27f4af5a7611ef195cebdec50e1a24983",
+    "target/release/skallagrim-referee.exe": "80aaeb097a5acc86f549355423cad7387b9889c9ee152b0cbac855823ae79eca",
+    "target/release/skallagrim.exe": "cc09f03f9f98ee9bb687472e917c892d34e207a991e49430115bf8d3fc9b33f3"
+  },
+  "tests": {
+    "rust": {
+      "passed": 50,
+      "rules_conformance": 40,
+      "referee": 10
+    },
+    "python": {
+      "passed": 27,
+      "existing": 17,
+      "referee_process": 10
+    },
+    "cargo_fmt": "passed",
+    "cargo_clippy": "passed",
+    "ruff_F": "passed"
+  },
+  "integration": {
+    "games": 2,
+    "plies": 16,
+    "search_ms": 300,
+    "transport_allowance_ms": 25,
+    "authoritative_deadline_ms": 325,
+    "audit": "benchmarks/referee-smoke/audit.json",
+    "strength_evidence": false
+  },
+  "gui": {
+    "render": "benchmarks/charts/referee-panel.png",
+    "sizes_checked": [
+      [
+        1180,
+        880
+      ],
+      [
+        900,
+        600
+      ]
+    ],
+    "live_native_interaction": "not automated"
+  },
+  "scope": "GUI, gauntlets and self-play use a separate authoritative referee process. Unknown proofs remain unresolved. Rules core is shared, not independently certified."
+}

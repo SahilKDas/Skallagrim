@@ -2,6 +2,9 @@
 use crate::game::{Game, Piece, Side, corner};
 use fontdue::Font;
 use tiny_skia::*;
+pub fn referee_scale(height: u32) -> f32 {
+    ((height as f32 - 140.0) / 740.0).clamp(0.35, 1.0)
+}
 pub struct Renderer {
     font: Option<Font>,
 }
@@ -50,6 +53,7 @@ pub struct View<'a> {
     pub thinking: bool,
     pub mouse: Option<(f32, f32)>,
     pub rules_open: bool,
+    pub referee: Option<(&'a [String], &'a str, Option<&'a str>, usize)>,
 }
 fn paint(rgb: (u8, u8, u8)) -> Paint<'static> {
     let mut p = Paint::default();
@@ -417,6 +421,122 @@ impl Renderer {
                 84.0,
                 12.0,
                 gold,
+            );
+        }
+        if let Some((evidence, note, pending, scroll)) = v.referee {
+            let scale = referee_scale(h);
+            let panel_text = |pix: &mut Pixmap, text: &str, x: f32, y: f32, size: f32, color| {
+                self.text(
+                    pix,
+                    text,
+                    x,
+                    98.0 + (y - 98.0) * scale,
+                    (size * scale).max(10.0),
+                    color,
+                );
+            };
+            let panel_rect = |pix: &mut Pixmap, x: f32, y: f32, width: f32, height: f32, color| {
+                rect(
+                    pix,
+                    x,
+                    98.0 + (y - 98.0) * scale,
+                    width,
+                    height * scale,
+                    color,
+                );
+            };
+            panel_rect(&mut pix, px, 98.0, pw, 740.0, (24, 32, 43));
+            panel_text(&mut pix, "DEDICATED REFEREE", px + 20.0, 135.0, 18.0, cream);
+            panel_text(
+                &mut pix,
+                crate::game::RULES_VERSION,
+                px + 20.0,
+                162.0,
+                12.0,
+                muted,
+            );
+            panel_text(
+                &mut pix,
+                "Unknown requires human judgment",
+                px + 20.0,
+                187.0,
+                12.0,
+                muted,
+            );
+            for (y, label) in [
+                (208.0, "Analyze draw"),
+                (248.0, "Analyze exit fort"),
+                (465.0, "Claim draw"),
+                (505.0, "Claim defender fort"),
+                (642.0, "Confirm human ruling"),
+                (688.0, "Discard decision"),
+                (740.0, "Close panel / J"),
+            ] {
+                panel_rect(&mut pix, px + 16.0, y, pw - 32.0, 34.0, (43, 57, 72));
+                panel_text(&mut pix, label, px + 28.0, y + 22.0, 12.0, cream);
+            }
+            let columns = ((pw - 40.0) / (7.0 * scale).max(5.5)).max(10.0) as usize;
+            let lines: Vec<String> = evidence
+                .iter()
+                .flat_map(|item| {
+                    let chars: Vec<_> = item.chars().collect();
+                    chars
+                        .chunks(columns)
+                        .map(|chunk| chunk.iter().collect())
+                        .collect::<Vec<String>>()
+                })
+                .collect();
+            for (row, text) in lines
+                .iter()
+                .skip(scroll.min(lines.len().saturating_sub(1)))
+                .take(8)
+                .enumerate()
+            {
+                panel_text(
+                    &mut pix,
+                    text,
+                    px + 20.0,
+                    309.0 + row as f32 * 18.0,
+                    12.0,
+                    cream,
+                );
+            }
+            panel_text(
+                &mut pix,
+                "Scroll evidence with mouse wheel",
+                px + 20.0,
+                457.0,
+                11.0,
+                muted,
+            );
+            panel_rect(&mut pix, px + 16.0, 555.0, pw - 32.0, 65.0, (14, 23, 32));
+            let prompt = if note.is_empty() {
+                "Click here; type ruling reason"
+            } else {
+                note
+            };
+            let chars: Vec<_> = prompt.chars().collect();
+            for (row, chunk) in chars
+                .chunks(columns)
+                .skip(chars.len().div_ceil(columns).saturating_sub(3))
+                .enumerate()
+            {
+                panel_text(
+                    &mut pix,
+                    &chunk.iter().collect::<String>(),
+                    px + 22.0,
+                    574.0 + row as f32 * 17.0,
+                    12.0,
+                    cream,
+                );
+            }
+            panel_text(
+                &mut pix,
+                &format!("Pending: {}", pending.unwrap_or("none")),
+                px + 20.0,
+                635.0,
+                12.0,
+                muted,
             );
         }
         if v.rules_open {

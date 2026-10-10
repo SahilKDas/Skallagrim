@@ -1,0 +1,23 @@
+{
+  "rules": "copenhagen-static-v3",
+  "rust_tests": 40,
+  "python_tests": 17,
+  "neural_parity_positions": 80,
+  "max_neural_error": 9.54e-06,
+  "timed_requests": 60,
+  "requests_over_300ms": 0,
+  "training_audit": {
+    "kept_games": 1250,
+    "rejected": []
+  },
+  "historical_replay_audit": {
+    "games": 750,
+    "plies": 35361,
+    "replay_verified": true,
+    "independent_rules_certification": false,
+    "verified_artifacts": 20
+  },
+  "engine_sha256": "b01a579d2f32531ad62c40c9a47ff9a70164db136efb75ee13362ac3f7f321ae",
+  "gui_sha256": "48ffb014163eade8b1cca45443140de6f91fc81c96c19245058f760200b3f1b2",
+  "all_rules_certified": false
+}

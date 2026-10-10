@@ -2,11 +2,13 @@
 
 Skallagrim is a Copenhagen Hnefatafl engine and research platform in Rust and Python, with a polished desktop GUI rendered using tiny-skia. Its goal is strong play as both attackers and defenders, backed by reproducible matches against existing open-source engines.
 
-**Status:** Working Rust rules/search engine, three neural candidates, UCI-style protocol, tiny-skia desktop GUI, streamed Python training and benchmark tooling. The audited initial corpus contains 1,250 completed games: 1,000 for training and 250 for validation.
+**Status:** Working Rust rules/search engine, three neural candidates, UCI-style protocol, tiny-skia desktop GUI, streamed Python training and benchmark tooling, and a dedicated authoritative Rust referee process. The audited initial corpus contains 1,250 completed games: 1,000 for training and 250 for validation.
 
-The initial **750-game campaign is complete**: fifteen 50-game pairings with 300-ms search requests and a documented common 25-ms IPC allowance. All games and 35,361 plies replay-verified; results include role scores, confidence intervals and forfeits. [Results](benchmarks/RESULTS.md) do **not establish superiority** because timing failures and upstream rules mismatches limit interpretation. Automatic exit-fort recognition uses sufficient static proofs; qualitative forts and impossible-to-finish draws also support explicit referee adjudication; see [rules limitations](docs/RULES.md).
+The initial **750-game campaign is complete**: fifteen 50-game pairings with 300-ms search requests and a documented common 25-ms IPC allowance. All games and 35,361 plies replay-verified; results include role scores, confidence intervals and forfeits. [Results](benchmarks/RESULTS.md) do **not establish superiority** because timing failures and upstream rules mismatches limit interpretation. Exit-fort recognition uses sufficient static proofs and independently verified bounded dynamic strategy certificates; qualitative forts and impossible-to-finish draws also support explicit referee adjudication; see [rules limitations](docs/RULES.md).
 
 ## Three candidate bots
+
+The current bug-fix pass uses `copenhagen-static-v3`: persistent search history, cancellable CNN inference, reachable-space fort proofs, validated replays, bounded draw-proof tooling, and safer training resumes. See the [fix log and remaining interpretation gaps](docs/FIXES.md). The charts below remain historical v2 results.
 
 | Bot | Evaluation | Search |
 | --- | --- | --- |
@@ -23,6 +25,16 @@ The [upstream architecture review](docs/RESEARCH.md) compares the existing CNN/M
 The rules authority is the [World Tafl Federation's Copenhagen rules page](https://aagenielsen.dk/copenhagen_rules.php). Correctness includes shieldwalls, throne and corner restrictions, king capture, exit forts, encirclement, repetition, and terminal outcomes.
 
 Skallagrim exposes a [documented UCI-style text protocol](docs/PROTOCOL.md) for tafl. Existing precedents include the [OpenTafl engine protocol](https://github.com/jslater89/OpenTafl/blob/master/opentafl-engine-protocol.txt) and [TaflZero's UCI-style interface](https://github.com/sovelin/taflzero). Adopt or adapt an existing protocol where practical; specify new extensions only where needed.
+
+## Dedicated referee
+
+The separate Rust referee owns moves, captures, repetition and clocks in the GUI, benchmarks and self-play. Press **J** for its evidence panel; **D/F** select a human draw/fort claim that requires a recorded reason before confirmation. Unknown analyses stay unresolved. Every ruling is saved in an audited replay with its rules version, proof or human decision. See [referee controls and protocol](docs/REFEREE.md).
+
+## Training league and Discord presence
+
+The [role-balanced league](docs/LEAGUE.md) trains against champions and historical checkpoints with difficult starts, held-out positions, and separate attacker/defender promotion gates. Shared NNUE candidates must pass as both Iota and Beta. The minimum remains 1,000 training games plus validation.
+
+The GUI supports [Discord Rich Presence](docs/DISCORD.md). Configure `--discord-app-id ID` or `SKALLAGRIM_DISCORD_APP_ID`; disable with `--no-discord`. Without an ID, presence stays disabled. The referee now verifies dynamic fort certificates before automatic rulings, with strategy previews in its panel.
 
 ## GUI
 
@@ -54,7 +66,7 @@ Regenerate both images with `python python/plot_benchmarks.py` (requires Matplot
 ## Build and run
 
 ```powershell
-cargo build --release
+cargo build --release --bins
 cargo test
 .\target\release\skallagrim-gui.exe
 .\target\release\skallagrim.exe

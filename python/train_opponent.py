@@ -30,10 +30,8 @@ def main():
     p.add_argument("--batch", type=int, default=64)
     p.add_argument("--device", default="auto")
     args = p.parse_args()
-    if args.device == "auto":
-        args.device = "cuda" if torch.cuda.is_available() else "cpu"
-    if args.device.startswith("cuda"):
-        torch.cuda.set_per_process_memory_fraction(0.5)
+    if args.epochs <= 0 or args.batch <= 0 or args.channels <= 0 or args.blocks < 0:
+        raise SystemExit("invalid training limits or model dimensions")
     torch.manual_seed(args.seed)
     torch.set_num_threads(1)
     rng = random.Random(args.seed)
@@ -45,6 +43,10 @@ def main():
     held = set(games[: max(1, len(games) // 5)])
     if len(games) - len(held) < 1000:
         raise SystemExit("Need >=1,000 completed training games plus validation")
+    if args.device == "auto":
+        args.device = "cuda" if torch.cuda.is_available() else "cpu"
+    if args.device.startswith("cuda"):
+        torch.cuda.set_per_process_memory_fraction(0.5)
     train = [r for r in rows if r["game"] not in held]
     valid = [r for r in rows if r["game"] in held]
 

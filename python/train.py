@@ -5,6 +5,7 @@ import json
 from pathlib import Path
 import random
 import copy
+import hashlib
 import torch
 from models import CNN, NNUE, encode, policy_index
 from records import save
@@ -30,6 +31,14 @@ def main():
         help="Permit fewer than 1,000 training games; output is never a strength candidate",
     )
     args = p.parse_args()
+    if (
+        args.epochs <= 0
+        or args.batch <= 0
+        or not 1 <= args.hidden <= 1024
+        or not 1 <= args.channels <= 128
+        or not 0 <= args.blocks <= 32
+    ):
+        raise SystemExit("invalid epochs, batch, or model dimensions")
     torch.set_num_threads(1)
     torch.manual_seed(args.seed)
     random.seed(args.seed)
@@ -139,7 +148,10 @@ def main():
     net.load_state_dict(best_state)
     net.cpu().eval()
     net.export(args.output)
-    torch.save(net.state_dict(), args.output.with_suffix(".pt"))
+    checkpoint = args.output.with_suffix(".pt")
+    staging = checkpoint.with_suffix(".pt.tmp")
+    torch.save(net.state_dict(), staging)
+    staging.replace(checkpoint)
     save(
         args.output.with_suffix(".meta.json"),
         dict(
@@ -162,6 +174,10 @@ def main():
                 for side in ["a", "d"]
             },
             validation_loss=best_loss,
+            model_artifacts={
+                path.name: hashlib.sha256(path.read_bytes()).hexdigest()
+                for path in [args.output, checkpoint]
+            },
             config=vars(args)
             | {
                 "data": str(args.data),

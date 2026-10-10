@@ -103,7 +103,15 @@ impl Context<'_> {
             return handcrafted(g);
         }
         if self.bot == Bot::Rho {
-            return self.models.cnn.as_ref().unwrap().infer(g).0;
+            return self
+                .models
+                .cnn
+                .as_ref()
+                .unwrap()
+                .infer_cancellable(g, &|| self.expired())
+                .map(|result| result.0)
+                .filter(|v| v.is_finite())
+                .unwrap_or_else(|| handcrafted(g));
         }
         let nn = self.models.nnue.as_ref().unwrap();
         if let Some(a) = acc {
@@ -253,7 +261,10 @@ pub fn search(
         'simulations: while !ctx.expired() {
             let mut path = vec![0];
             let mut at = 0;
-            while arena[at].expanded && !arena[at].children.is_empty() {
+            while arena[at].expanded
+                && !arena[at].children.is_empty()
+                && path.len() <= limits.depth as usize
+            {
                 if ctx.expired() {
                     break 'simulations;
                 }
@@ -316,11 +327,25 @@ pub fn search(
                 let moves = arena[at].g.legal_moves();
                 let logits;
                 if bot == Bot::Rho {
-                    let (val, p) = models.cnn.as_ref().unwrap().infer(&arena[at].g);
-                    v = val;
+                    let Some((val, p)) = models
+                        .cnn
+                        .as_ref()
+                        .unwrap()
+                        .infer_cancellable(&arena[at].g, &|| ctx.expired())
+                    else {
+                        break 'simulations;
+                    };
+                    v = if val.is_finite() {
+                        val
+                    } else {
+                        handcrafted(&arena[at].g)
+                    };
                     logits = moves
                         .iter()
-                        .map(|m| p[policy_index(*m)])
+                        .map(|m| {
+                            let v = p[policy_index(*m)];
+                            if v.is_finite() { v } else { 0.0 }
+                        })
                         .collect::<Vec<_>>();
                 } else {
                     v = ctx.value(&arena[at].g, arena[at].acc.as_ref());
@@ -331,11 +356,15 @@ pub fn search(
                 let sum: f32 = probabilities.iter().sum();
                 // Child states are materialized only when visited. Eager creation
                 // copied every history hundreds of times and delayed teardown.
-                arena[at].children = moves
-                    .into_iter()
-                    .zip(probabilities)
-                    .map(|(m, p)| (m, p / sum, None))
-                    .collect();
+                arena[at].children = if path.len() <= limits.depth as usize {
+                    moves
+                        .into_iter()
+                        .zip(probabilities)
+                        .map(|(m, p)| (m, p / sum, None))
+                        .collect()
+                } else {
+                    vec![]
+                };
                 arena[at].expanded = true;
             }
             ctx.nodes += 1;

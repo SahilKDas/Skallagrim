@@ -1,0 +1,292 @@
+{
+  "final_fen": "3aaaaa1a1/5a5/1a9/a3d1d3a/a3dkd3a/a2dd1dd2a/a3ddd3a/a4d5/10a/5a5/2a1aaaa3 a",
+  "format": "skallagrim-referee-replay-v1",
+  "moves": [
+    "j6j1",
+    "f4g4",
+    "d11c11",
+    "f5f4",
+    "k8k9",
+    "f6f5",
+    "b6b3",
+    "f4e4"
+  ],
+  "outcome": {
+    "reason": "move-limit-adjudication",
+    "winner": null
+  },
+  "referee": {
+    "events": [
+      {
+        "evidence": {
+          "moves": [],
+          "start": "3aaaaa3/5a5/11/a4d4a/a3ddd3a/aa1ddkdd1aa/a3ddd3a/a4d4a/11/5a5/3aaaaa3 a"
+        },
+        "fen": "3aaaaa3/5a5/11/a4d4a/a3ddd3a/aa1ddkdd1aa/a3ddd3a/a4d4a/11/5a5/3aaaaa3 a",
+        "kind": "start",
+        "outcome": null,
+        "ply": 0,
+        "reason": "Validated starting position and opening",
+        "revision": 1,
+        "rules": "copenhagen-static-v3",
+        "sequence": 0
+      },
+      {
+        "evidence": {
+          "budget_ms": 325,
+          "side": "Attacker"
+        },
+        "fen": "3aaaaa3/5a5/11/a4d4a/a3ddd3a/aa1ddkdd1aa/a3ddd3a/a4d4a/11/5a5/3aaaaa3 a",
+        "kind": "clock-start",
+        "outcome": null,
+        "ply": 0,
+        "reason": "Turn deadline armed",
+        "revision": 1,
+        "rules": "copenhagen-static-v3",
+        "sequence": 1
+      },
+      {
+        "evidence": {
+          "captures": [],
+          "elapsed_ms": 293,
+          "move": "j6j1"
+        },
+        "fen": "3aaaaa1a1/5a5/11/a4d4a/a3ddd3a/aa1ddkdd2a/a3ddd3a/a4d4a/11/5a5/3aaaaa3 d",
+        "kind": "move",
+        "outcome": null,
+        "ply": 1,
+        "reason": "Legal move; Copenhagen captures and repetition transition",
+        "revision": 2,
+        "rules": "copenhagen-static-v3",
+        "sequence": 2
+      },
+      {
+        "evidence": {
+          "budget_ms": 325,
+          "side": "Defender"
+        },
+        "fen": "3aaaaa1a1/5a5/11/a4d4a/a3ddd3a/aa1ddkdd2a/a3ddd3a/a4d4a/11/5a5/3aaaaa3 d",
+        "kind": "clock-start",
+        "outcome": null,
+        "ply": 1,
+        "reason": "Turn deadline armed",
+        "revision": 2,
+        "rules": "copenhagen-static-v3",
+        "sequence": 3
+      },
+      {
+        "evidence": {
+          "captures": [],
+          "elapsed_ms": 291,
+          "move": "f4g4"
+        },
+        "fen": "3aaaaa1a1/5a5/11/a5d3a/a3ddd3a/aa1ddkdd2a/a3ddd3a/a4d4a/11/5a5/3aaaaa3 a",
+        "kind": "move",
+        "outcome": null,
+        "ply": 2,
+        "reason": "Legal move; Copenhagen captures and repetition transition",
+        "revision": 3,
+        "rules": "copenhagen-static-v3",
+        "sequence": 4
+      },
+      {
+        "evidence": {
+          "budget_ms": 325,
+          "side": "Attacker"
+        },
+        "fen": "3aaaaa1a1/5a5/11/a5d3a/a3ddd3a/aa1ddkdd2a/a3ddd3a/a4d4a/11/5a5/3aaaaa3 a",
+        "kind": "clock-start",
+        "outcome": null,
+        "ply": 2,
+        "reason": "Turn deadline armed",
+        "revision": 3,
+        "rules": "copenhagen-static-v3",
+        "sequence": 5
+      },
+      {
+        "evidence": {
+          "captures": [],
+          "elapsed_ms": 292,
+          "move": "d11c11"
+        },
+        "fen": "3aaaaa1a1/5a5/11/a5d3a/a3ddd3a/aa1ddkdd2a/a3ddd3a/a4d4a/11/5a5/2a1aaaa3 d",
+        "kind": "move",
+        "outcome": null,
+        "ply": 3,
+        "reason": "Legal move; Copenhagen captures and repetition transition",
+        "revision": 4,
+        "rules": "copenhagen-static-v3",
+        "sequence": 6
+      },
+      {
+        "evidence": {
+          "budget_ms": 325,
+          "side": "Defender"
+        },
+        "fen": "3aaaaa1a1/5a5/11/a5d3a/a3ddd3a/aa1ddkdd2a/a3ddd3a/a4d4a/11/5a5/2a1aaaa3 d",
+        "kind": "clock-start",
+        "outcome": null,
+        "ply": 3,
+        "reason": "Turn deadline armed",
+        "revision": 4,
+        "rules": "copenhagen-static-v3",
+        "sequence": 7
+      },
+      {
+        "evidence": {
+          "captures": [],
+          "elapsed_ms": 291,
+          "move": "f5f4"
+        },
+        "fen": "3aaaaa1a1/5a5/11/a4dd3a/a3d1d3a/aa1ddkdd2a/a3ddd3a/a4d4a/11/5a5/2a1aaaa3 a",
+        "kind": "move",
+        "outcome": null,
+        "ply": 4,
+        "reason": "Legal move; Copenhagen captures and repetition transition",
+        "revision": 5,
+        "rules": "copenhagen-static-v3",
+        "sequence": 8
+      },
+      {
+        "evidence": {
+          "budget_ms": 325,
+          "side": "Attacker"
+        },
+        "fen": "3aaaaa1a1/5a5/11/a4dd3a/a3d1d3a/aa1ddkdd2a/a3ddd3a/a4d4a/11/5a5/2a1aaaa3 a",
+        "kind": "clock-start",
+        "outcome": null,
+        "ply": 4,
+        "reason": "Turn deadline armed",
+        "revision": 5,
+        "rules": "copenhagen-static-v3",
+        "sequence": 9
+      },
+      {
+        "evidence": {
+          "captures": [],
+          "elapsed_ms": 292,
+          "move": "k8k9"
+        },
+        "fen": "3aaaaa1a1/5a5/11/a4dd3a/a3d1d3a/aa1ddkdd2a/a3ddd3a/a4d5/10a/5a5/2a1aaaa3 d",
+        "kind": "move",
+        "outcome": null,
+        "ply": 5,
+        "reason": "Legal move; Copenhagen captures and repetition transition",
+        "revision": 6,
+        "rules": "copenhagen-static-v3",
+        "sequence": 10
+      },
+      {
+        "evidence": {
+          "budget_ms": 325,
+          "side": "Defender"
+        },
+        "fen": "3aaaaa1a1/5a5/11/a4dd3a/a3d1d3a/aa1ddkdd2a/a3ddd3a/a4d5/10a/5a5/2a1aaaa3 d",
+        "kind": "clock-start",
+        "outcome": null,
+        "ply": 5,
+        "reason": "Turn deadline armed",
+        "revision": 6,
+        "rules": "copenhagen-static-v3",
+        "sequence": 11
+      },
+      {
+        "evidence": {
+          "captures": [],
+          "elapsed_ms": 293,
+          "move": "f6f5"
+        },
+        "fen": "3aaaaa1a1/5a5/11/a4dd3a/a3dkd3a/aa1dd1dd2a/a3ddd3a/a4d5/10a/5a5/2a1aaaa3 a",
+        "kind": "move",
+        "outcome": null,
+        "ply": 6,
+        "reason": "Legal move; Copenhagen captures and repetition transition",
+        "revision": 7,
+        "rules": "copenhagen-static-v3",
+        "sequence": 12
+      },
+      {
+        "evidence": {
+          "budget_ms": 325,
+          "side": "Attacker"
+        },
+        "fen": "3aaaaa1a1/5a5/11/a4dd3a/a3dkd3a/aa1dd1dd2a/a3ddd3a/a4d5/10a/5a5/2a1aaaa3 a",
+        "kind": "clock-start",
+        "outcome": null,
+        "ply": 6,
+        "reason": "Turn deadline armed",
+        "revision": 7,
+        "rules": "copenhagen-static-v3",
+        "sequence": 13
+      },
+      {
+        "evidence": {
+          "captures": [],
+          "elapsed_ms": 292,
+          "move": "b6b3"
+        },
+        "fen": "3aaaaa1a1/5a5/1a9/a4dd3a/a3dkd3a/a2dd1dd2a/a3ddd3a/a4d5/10a/5a5/2a1aaaa3 d",
+        "kind": "move",
+        "outcome": null,
+        "ply": 7,
+        "reason": "Legal move; Copenhagen captures and repetition transition",
+        "revision": 8,
+        "rules": "copenhagen-static-v3",
+        "sequence": 14
+      },
+      {
+        "evidence": {
+          "budget_ms": 325,
+          "side": "Defender"
+        },
+        "fen": "3aaaaa1a1/5a5/1a9/a4dd3a/a3dkd3a/a2dd1dd2a/a3ddd3a/a4d5/10a/5a5/2a1aaaa3 d",
+        "kind": "clock-start",
+        "outcome": null,
+        "ply": 7,
+        "reason": "Turn deadline armed",
+        "revision": 8,
+        "rules": "copenhagen-static-v3",
+        "sequence": 15
+      },
+      {
+        "evidence": {
+          "captures": [],
+          "elapsed_ms": 292,
+          "move": "f4e4"
+        },
+        "fen": "3aaaaa1a1/5a5/1a9/a3d1d3a/a3dkd3a/a2dd1dd2a/a3ddd3a/a4d5/10a/5a5/2a1aaaa3 a",
+        "kind": "move",
+        "outcome": null,
+        "ply": 8,
+        "reason": "Legal move; Copenhagen captures and repetition transition",
+        "revision": 9,
+        "rules": "copenhagen-static-v3",
+        "sequence": 16
+      },
+      {
+        "evidence": {
+          "evidence": {
+            "max_plies": 8
+          },
+          "reason": "move-limit-adjudication",
+          "source": "match-controller"
+        },
+        "fen": "3aaaaa1a1/5a5/1a9/a3d1d3a/a3dkd3a/a2dd1dd2a/a3ddd3a/a4d5/10a/5a5/2a1aaaa3 a",
+        "kind": "ruling",
+        "outcome": {
+          "reason": "move-limit-adjudication",
+          "winner": null
+        },
+        "ply": 8,
+        "reason": "move-limit-adjudication",
+        "revision": 10,
+        "rules": "copenhagen-static-v3",
+        "sequence": 17
+      }
+    ],
+    "rules": "copenhagen-static-v3",
+    "semantics": "dynamic-fort-v1",
+    "version": 2
+  },
+  "start": "3aaaaa3/5a5/11/a4d4a/a3ddd3a/aa1ddkdd1aa/a3ddd3a/a4d4a/11/5a5/3aaaaa3 a"
+}

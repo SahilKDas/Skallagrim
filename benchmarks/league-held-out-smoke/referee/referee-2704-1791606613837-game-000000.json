@@ -1,0 +1,13 @@
+{
+  "final_fen": "3aaaaa3/5a5/11/a4d4a/a3ddd3a/aa1ddkdd1aa/a3ddd3a/a4d4a/11/5a5/3aaaaa3 a",
+  "format": "skallagrim-referee-replay-v1",
+  "moves": [],
+  "outcome": null,
+  "referee": {
+    "events": [],
+    "rules": "copenhagen-static-v3",
+    "semantics": "dynamic-fort-v1",
+    "version": 2
+  },
+  "start": "3aaaaa3/5a5/11/a4d4a/a3ddd3a/aa1ddkdd1aa/a3ddd3a/a4d4a/11/5a5/3aaaaa3 a"
+}

@@ -10,6 +10,152 @@ from benchmark import summarize, paired_interval
 
 
 class SystemTests(unittest.TestCase):
+    def test_report_uses_recorded_settings_and_requires_game_logs(self):
+        import sys
+
+        with tempfile.TemporaryDirectory() as folder:
+            root = Path(folder)
+            manifest = dict(
+                options=dict(
+                    candidate="rho",
+                    movetime=777,
+                    games=50,
+                    ipc_allowance=0,
+                    max_plies=999,
+                    cpu=2,
+                ),
+                strength_evidence=False,
+                platform="test-platform",
+                processor="test-processor",
+                rules="test-rules",
+            )
+            (root / "manifest.json").write_text(json.dumps(manifest))
+            summary = summarize(
+                [
+                    dict(
+                        score=1,
+                        candidate_side="Attacker" if i % 2 == 0 else "Defender",
+                        reason="corner-escape",
+                    )
+                    for i in range(50)
+                ],
+                42,
+            )
+            summary["completed"] = True
+            (root / "iota-summary.json").write_text(json.dumps(summary))
+            output = root / "report.md"
+            result = subprocess.run(
+                [
+                    sys.executable,
+                    str(ROOT / "python/report.py"),
+                    "--root",
+                    str(root),
+                    "--output",
+                    str(output),
+                ],
+                capture_output=True,
+                text=True,
+                timeout=5,
+            )
+            self.assertEqual(result.returncode, 0, result.stderr)
+            text = output.read_text(encoding="utf8")
+            self.assertIn("777 ms search, 0 ms IPC allowance, 999 plies", text)
+            self.assertIn("test-processor / test-platform", text)
+            self.assertNotIn("i7-1255U", text)
+            self.assertEqual(
+                json.loads(output.with_suffix(".json").read_text())[
+                    "complete_pairings"
+                ],
+                0,
+            )
+
+    def test_protocol_rejects_startpos_junk(self):
+        with Engine() as e:
+            before = e.snapshot()["fen"]
+            e.send("position startpos junk")
+            e.send("isready")
+            with self.assertRaises(RuntimeError):
+                e.until("readyok")
+            e.until("readyok")
+            self.assertEqual(e.snapshot()["fen"], before)
+
+    def test_draw_proof_cancels_without_changing_game(self):
+        with Engine() as e:
+            before = e.snapshot()["fen"]
+            e.send("prove draw nodes 100000 movetime 60000")
+            e.send("stop")
+            result = json.loads(e.until("proof", 2)[0])
+            self.assertEqual(result["status"], "Unknown")
+            self.assertEqual(e.snapshot()["fen"], before)
+            e.ready()
+
+    def test_selfplay_invalid_limits_and_truncation_are_bounded(self):
+        import sys
+
+        with tempfile.TemporaryDirectory() as folder:
+            output = Path(folder) / "samples.jsonl"
+            base = [
+                sys.executable,
+                str(ROOT / "python/selfplay.py"),
+                "--output",
+                str(output),
+            ]
+            invalid = subprocess.run(
+                base + ["--max-plies", "0"], capture_output=True, text=True, timeout=5
+            )
+            self.assertNotEqual(invalid.returncode, 0)
+            self.assertFalse(output.exists())
+            truncated = subprocess.run(
+                base
+                + [
+                    "--games",
+                    "1",
+                    "--max-plies",
+                    "1",
+                    "--max-attempts",
+                    "1",
+                    "--movetime",
+                    "1",
+                ],
+                capture_output=True,
+                text=True,
+                timeout=10,
+            )
+            self.assertNotEqual(truncated.returncode, 0)
+            self.assertIn("partial corpus preserved", truncated.stderr)
+            self.assertTrue(output.exists())
+
+    def test_pipeline_rejects_incompatible_resume_before_launch(self):
+        import sys
+
+        with tempfile.TemporaryDirectory() as folder:
+            root = Path(folder)
+            config = dict(
+                kind="cnn",
+                games=1250,
+                movetime=100,
+                epochs=10,
+                window_games=20000,
+                device="auto",
+            )
+            (root / "config.json").write_text(json.dumps(config))
+            result = subprocess.run(
+                [
+                    sys.executable,
+                    str(ROOT / "python/pipeline.py"),
+                    "--kind",
+                    "nnue",
+                    "--run",
+                    str(root),
+                ],
+                capture_output=True,
+                text=True,
+                timeout=5,
+            )
+            self.assertNotEqual(result.returncode, 0)
+            self.assertIn("Resume rejected: changed kind", result.stderr)
+            self.assertEqual(json.loads((root / "config.json").read_text()), config)
+
     def test_protocol_invalid_position_is_atomic(self):
         with Engine() as e:
             before = e.snapshot()["fen"]
@@ -41,6 +187,8 @@ class SystemTests(unittest.TestCase):
         self.assertIsNone(result["by_side"]["Defender"]["score_rate"])
         self.assertIsNone(result["paired_bootstrap_95"])
         self.assertEqual(paired_interval([1, 0] * 25), [0.5, 0.5])
+        self.assertIsNone(paired_interval([]))
+        self.assertIsNone(summarize([], 42)["score_rate"])
 
     def test_teardown_terminates_a_stuck_engine_and_child(self):
         import sys

@@ -13,6 +13,7 @@ import time
 from pathlib import Path
 from records import save
 from transport import Engine, ROOT
+from referee import Referee
 
 
 def fingerprint(entry):
@@ -37,7 +38,7 @@ def open_engine(entry, stderr):
     if entry.get("warmup", False):
         try:
             engine.position([])
-            engine.go(entry.get("warmup_ms",1000), 5000)
+            engine.go(entry.get("warmup_ms", 1000), 5000)
             engine.ready()
         except BaseException:
             engine.close()
@@ -46,6 +47,8 @@ def open_engine(entry, stderr):
 
 
 def paired_interval(scores, seed=42):
+    if not scores or len(scores) % 2:
+        return None
     pairs = [scores[i : i + 2] for i in range(0, len(scores), 2)]
     rng = random.Random(seed)
     samples = sorted(
@@ -71,7 +74,7 @@ def summarize(games, seed):
         wins=scores.count(1),
         draws=scores.count(0.5),
         losses=scores.count(0),
-        score_rate=statistics.mean(scores),
+        score_rate=statistics.mean(scores) if scores else None,
         paired_bootstrap_95=paired_interval(scores, seed)
         if len(scores) % 2 == 0
         else None,
@@ -89,6 +92,7 @@ def main():
     p.add_argument("--candidate", required=True)
     p.add_argument("--opponents", nargs="+", required=True)
     p.add_argument("--games", type=int, default=50)
+    p.add_argument("--openings", type=Path, default=ROOT / "benchmarks/openings.json")
     p.add_argument("--movetime", type=int, default=300)
     p.add_argument("--max-plies", type=int, default=600)
     p.add_argument("--ipc-allowance", type=int, default=25)
@@ -110,6 +114,10 @@ def main():
         help="Allow nonstandard short matches; never label as strength evidence",
     )
     args = p.parse_args()
+    if args.movetime <= 0 or args.max_plies <= 0 or args.ipc_allowance < 0:
+        raise SystemExit(
+            "movetime/max-plies must be positive and IPC allowance nonnegative"
+        )
     if args.games < 2 or args.games % 2:
         raise SystemExit("Use a positive even game count for paired sides.")
     if not args.smoke and (args.games != 50 or args.movetime != 300):
@@ -120,7 +128,7 @@ def main():
     if args.cpu is not None:
         for name in [args.candidate, *args.opponents]:
             entries[name]["cpu"] = args.cpu
-    suite = json.loads((ROOT / "benchmarks/openings.json").read_text())
+    suite = json.loads(args.openings.read_text())
     if len(suite["openings"]) < args.games // 2:
         raise SystemExit("Not enough paired openings")
     args.output.mkdir(parents=True, exist_ok=True)
@@ -148,6 +156,14 @@ def main():
     dirty = subprocess.run(
         ["git", "status", "--porcelain"], cwd=ROOT, capture_output=True, text=True
     ).stdout.strip()
+    with Referee() as authority:
+        rules_version = authority.snapshot()["rules"]
+        referee_path = authority.executable.resolve()
+        referee_artifact = (
+            referee_path.relative_to(ROOT).as_posix()
+            if referee_path.is_relative_to(ROOT)
+            else referee_path.as_posix()
+        )
     metadata = dict(
         format="skallagrim-gauntlet-v1",
         created=time.time(),
@@ -158,17 +174,23 @@ def main():
         python=sys.version,
         engines=pinned,
         openings=suite,
-        options=vars(args) | {"config": str(args.config), "output": str(args.output)},
+        options=vars(args)
+        | {
+            "config": str(args.config),
+            "output": str(args.output),
+            "openings": str(args.openings),
+        },
         strength_evidence=False,
         provisional_gauntlet=not args.smoke and not unaudited,
-        rules="copenhagen-static-v2",
-        rules_limitations="material-aware static forts plus referee adjudication; qualitative rules require certification",
-        timing="300 ms search request; clock from go send to bestmove receipt; shared IPC allowance logged separately",
+        rules=rules_version,
+        referee=fingerprint({"artifacts": [referee_artifact]}),
+        rules_limitations="static forts plus verified conservative dynamic strategies and human adjudication; general qualitative rules require certification",
+        timing=f"{args.movetime} ms search request; dedicated referee clock from receipt of clock request through receipt of move; shared IPC allowance logged separately",
     )
     manifest = args.output / "manifest.json"
     if args.resume and manifest.exists():
         previous = json.loads(manifest.read_text())
-        for key in ["engines", "openings", "rules"]:
+        for key in ["engines", "openings", "rules", "referee"]:
             if previous[key] != metadata[key]:
                 raise SystemExit(f"Resume rejected: changed {key}")
         for key in [
@@ -191,7 +213,10 @@ def main():
         )
     else:
         save(manifest, metadata)
-    with contextlib.ExitStack() as lifecycle, Engine() as referee:
+    with (
+        contextlib.ExitStack() as lifecycle,
+        Referee(log_dir=args.output / "referee") as referee,
+    ):
         for opponent in args.opponents:
             games = []
             times = []
@@ -211,7 +236,7 @@ def main():
                 candidate_side = "Attacker" if i % 2 == 0 else "Defender"
                 opening = suite["openings"][i // 2]
                 history = list(opening["moves"])
-                referee.position(history)
+                referee.position(history, opening.get("start"))
                 state = referee.snapshot()
                 if state["outcome"]:
                     raise RuntimeError("opening is terminal")
@@ -222,6 +247,7 @@ def main():
                     candidate=args.candidate,
                     candidate_side=candidate_side,
                     opening=opening,
+                    start=opening.get("start", referee.export()["start"]),
                     moves=[],
                     reason=None,
                     winner=None,
@@ -245,15 +271,16 @@ def main():
                                 candidate if state["side"] == candidate_side else enemy
                             )
                             try:
-                                engine.position(history)
+                                engine.position(history, opening.get("start"))
+                                referee.start_clock(args.movetime + args.ipc_allowance)
                                 move, elapsed, _, lines = engine.go(
                                     args.movetime, args.ipc_allowance
                                 )
                                 times.append(elapsed)
                                 if elapsed > args.movetime + args.ipc_allowance:
                                     raise TimeoutError("late bestmove")
-                                if move not in state["moves"]:
-                                    raise ValueError(f"illegal move {move}")
+                                prior_side = state["side"]
+                                next_state = referee.play(move)
                             except (
                                 TimeoutError,
                                 RuntimeError,
@@ -275,11 +302,22 @@ def main():
                                     else "Attacker",
                                     error=str(exc),
                                 )
+                                state = referee.snapshot()
+                                if not state["outcome"]:
+                                    state = referee.call(
+                                        "forfeit",
+                                        reason=record["reason"],
+                                        evidence=str(exc),
+                                    )
+                                record.update(
+                                    reason=state["outcome"]["reason"],
+                                    winner=state["outcome"]["winner"],
+                                )
                                 break
                             record["moves"].append(
                                 dict(
                                     move=move,
-                                    side=state["side"],
+                                    side=prior_side,
                                     elapsed_ms=elapsed,
                                     over_search_budget_ms=max(
                                         0, elapsed - args.movetime
@@ -288,7 +326,7 @@ def main():
                                 )
                             )
                             history.append(move)
-                            state = referee.play(move)
+                            state = next_state
                 if record["reason"] in [
                     "timeout",
                     "engine-failure",
@@ -307,7 +345,11 @@ def main():
                             winner=state["outcome"]["winner"],
                         )
                     else:
-                        record.update(reason="move-limit-adjudication", winner=None)
+                        state = referee.call(
+                            "limit", evidence={"max_plies": args.max_plies}
+                        )
+                        record.update(reason=state["outcome"]["reason"], winner=None)
+                record["referee"] = referee.export()["referee"]
                 record["final_fen"] = state["fen"]
                 record["score"] = (
                     0.5

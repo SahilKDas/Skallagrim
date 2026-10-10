@@ -18,7 +18,7 @@ fn position(side: Side, pieces: &[(usize, Piece)]) -> Game {
     }
     g.side = side;
     g.outcome = None;
-    g.history = vec![g.fen().into()];
+    g.history = vec![g.fen().into()].into();
     g
 }
 #[test]
@@ -53,6 +53,291 @@ fn rejects_invalid_input_without_mutation() {
     }
     assert!("é1a2".parse::<Move>().is_err());
     assert!("a0k11".parse::<Move>().is_err());
+    for text in ["", "é1", "a+1", "a01", "a111", "a1 ", "a1junk"] {
+        assert!(square(text).is_err(), "accepted {text:?}");
+    }
+    for text in [
+        "11!/11/11/11/11/5k5/11/11/11/11/11 a",
+        "11!junk/11/11/11/11/5k5/11/11/11/11/11 a",
+    ] {
+        assert!(Game::from_fen(text).is_err(), "accepted embedded sentinel");
+    }
+}
+
+#[test]
+fn persistent_history_branches_and_serializes_in_order() {
+    let mut history = History::default();
+    history.push("first".into());
+    let mut branch = history.clone();
+    branch.push("second".into());
+    assert_eq!(history.len(), 1);
+    assert_eq!(branch.len(), 2);
+    assert_eq!(
+        serde_json::to_value(&branch).unwrap(),
+        serde_json::json!(["first", "second"])
+    );
+    // Dropping a long uniquely-owned chain must not recurse through the stack.
+    for _ in 0..100_000 {
+        history.push("tail".into());
+    }
+    drop(history);
+    assert_eq!(branch.iter().last().unwrap().as_ref(), "first");
+}
+
+#[test]
+fn captures_reset_irreversible_repetition_history() {
+    let mut g = position(
+        Side::Attacker,
+        &[
+            (23, Piece::Attacker),
+            (25, Piece::Defender),
+            (26, Piece::Attacker),
+        ],
+    );
+    g.history.push("old position".into());
+    g.play(Move { from: 23, to: 24 }).unwrap();
+    assert_eq!(g.history.len(), 1);
+    assert_eq!(g.history.iter().next().unwrap().as_ref(), g.fen());
+}
+
+#[test]
+fn unrelated_attacker_move_does_not_close_a_king_capture() {
+    let mut g = position(
+        Side::Attacker,
+        &[
+            (59, Piece::Attacker),
+            (61, Piece::Attacker),
+            (49, Piece::Attacker),
+            (71, Piece::Attacker),
+            (12, Piece::Defender),
+            (88, Piece::Attacker),
+        ],
+    );
+    g.play(Move { from: 88, to: 89 }).unwrap();
+    assert_eq!(g.board[60], Piece::King);
+    assert_ne!(
+        g.outcome.as_ref().map(|o| o.reason.as_str()),
+        Some("king-captured")
+    );
+}
+
+#[test]
+fn cnn_shape_validation_cannot_overflow() {
+    let conv = Conv {
+        input: usize::MAX,
+        output: usize::MAX,
+        kernel: 3,
+        weights: vec![],
+        bias: vec![],
+    };
+    let cnn = Cnn {
+        format: "skallagrim-cnn-v1".into(),
+        channels: 1,
+        stem: conv.clone(),
+        blocks: vec![],
+        policy: conv,
+        value: vec![0.0],
+        value_bias: 0.0,
+    };
+    assert!(cnn.validate().is_err());
+}
+
+#[test]
+fn cnn_inference_obeys_cancellation_inside_convolutions() {
+    fn conv(input: usize, output: usize, kernel: usize) -> Conv {
+        Conv {
+            input,
+            output,
+            kernel,
+            weights: vec![0.01; input * output * kernel * kernel],
+            bias: vec![0.0; output],
+        }
+    }
+    let cnn = Cnn {
+        format: "skallagrim-cnn-v1".into(),
+        channels: 8,
+        stem: conv(6, 8, 3),
+        blocks: vec![[conv(8, 8, 3), conv(8, 8, 3)]],
+        policy: conv(8, 40, 1),
+        value: vec![0.0; 8],
+        value_bias: 0.0,
+    };
+    cnn.validate().unwrap();
+    let checks = std::cell::Cell::new(0);
+    assert!(
+        cnn.infer_cancellable(&Game::default(), &|| {
+            checks.set(checks.get() + 1);
+            checks.get() > 4
+        })
+        .is_none()
+    );
+    assert_eq!(checks.get(), 5);
+}
+
+#[test]
+fn mcts_obeys_depth_limit() {
+    let models = Models {
+        nnue: Some(Nnue {
+            format: "skallagrim-nnue-v1".into(),
+            hidden: 1,
+            weights: vec![0.0; FEATURES],
+            bias: vec![0.0],
+            output: vec![0.0],
+            output_bias: 0.0,
+        }),
+        ..Models::default()
+    };
+    let game = Game::default();
+    let result = search::search(
+        &game,
+        Bot::Beta,
+        &models,
+        Limits {
+            time: Duration::from_secs(5),
+            nodes: 300,
+            depth: 1,
+        },
+        Arc::new(AtomicBool::new(false)),
+    )
+    .unwrap();
+    assert!(game.legal_moves().contains(&result.best.unwrap()));
+    assert!(result.depth <= 2); // Root counts as the first visited node.
+    assert_eq!(result.nodes, 300);
+}
+
+#[test]
+fn draw_proof_returns_a_replayable_finishing_witness() {
+    use skallagrim::proof::{ProofStatus, prove_draw};
+    let game = position(
+        Side::Defender,
+        &[(60, Piece::Empty), (5, Piece::King), (33, Piece::Attacker)],
+    );
+    let proof = prove_draw(&game, 1000, Duration::from_secs(2), &AtomicBool::new(false));
+    assert_eq!(proof.status, ProofStatus::FinishReachable);
+    let mut replay = game.clone();
+    for text in proof.witness {
+        replay.play(text.parse().unwrap()).unwrap();
+    }
+    assert!(replay.outcome.is_some());
+}
+
+#[test]
+fn draw_proof_never_calls_budget_exhaustion_a_draw() {
+    use skallagrim::proof::{ProofStatus, prove_draw};
+    let game = Game::default();
+    let fen = game.fen();
+    for stop in [false, true] {
+        let proof = prove_draw(&game, 1, Duration::from_millis(50), &AtomicBool::new(stop));
+        assert_eq!(proof.status, ProofStatus::Unknown);
+    }
+    assert_eq!(game.fen(), fen);
+    assert!(game.outcome.is_none());
+}
+
+#[test]
+fn replay_preserves_custom_start_and_rejects_forged_outcomes() {
+    use skallagrim::replay::Replay;
+    let game = position(
+        Side::Defender,
+        &[(60, Piece::Empty), (5, Piece::King), (33, Piece::Attacker)],
+    );
+    let replay = Replay::from_value(&serde_json::json!({"start":game.fen(),"moves":["f1a1"],
+        "outcome":{"winner":"Defender","reason":"corner-escape"}}))
+    .unwrap();
+    assert_eq!(replay.to_value()["start"], game.fen());
+    assert_eq!(
+        Replay::from_value(&replay.to_value())
+            .unwrap()
+            .states
+            .last()
+            .unwrap()
+            .fen(),
+        replay.states.last().unwrap().fen()
+    );
+    assert!(Replay::from_value(&serde_json::json!({"moves":[],"outcome":{"winner":"Defender","reason":"corner-escape"}})).is_err());
+    assert!(
+        Replay::from_value(&serde_json::json!({"moves":[],"winner":"Attacker","reason":"timeout"}))
+            .is_err()
+    );
+    assert!(Replay::from_value(&serde_json::json!({"moves":[],"final_fen":game.fen()})).is_err());
+}
+
+#[test]
+fn replay_checks_referee_fort_and_move_side() {
+    use skallagrim::replay::Replay;
+    assert!(Replay::from_value(&serde_json::json!({"moves":[],"outcome":{"winner":"Defender","reason":"exit-fort-referee"}})).is_err());
+    assert!(
+        Replay::from_value(&serde_json::json!({"moves":[{"move":"d1d2","side":"Defender"}]}))
+            .is_err()
+    );
+    let replay=Replay::from_value(&serde_json::json!({"moves":[],"outcome":{"winner":null,"reason":"impossible-to-finish-referee"}})).unwrap();
+    assert_eq!(
+        replay
+            .states
+            .last()
+            .unwrap()
+            .outcome
+            .as_ref()
+            .unwrap()
+            .winner,
+        None
+    );
+}
+
+#[test]
+fn king_can_flank_a_defender_shieldwall_capture() {
+    let mut g = position(
+        Side::Defender,
+        &[
+            (60, Piece::Empty),
+            (25, Piece::King),
+            (1, Piece::Attacker),
+            (2, Piece::Attacker),
+            (12, Piece::Defender),
+            (13, Piece::Defender),
+            (99, Piece::Attacker),
+        ],
+    );
+    g.play(Move { from: 25, to: 3 }).unwrap();
+    assert!(g.captures.contains(&1));
+    assert!(g.captures.contains(&2));
+}
+
+#[test]
+fn exit_fort_does_not_teleport_attackers_across_sealed_pockets() {
+    let mut game = position(
+        Side::Attacker,
+        &[
+            (60, Piece::Empty),
+            (5, Piece::King),
+            (93, Piece::Attacker),
+            (115, Piece::Attacker),
+        ],
+    );
+    // Two adjacent three-square pockets on the opposite edge. Both attackers
+    // share the left pocket; they cannot sandwich its separating wall from
+    // the empty right pocket. Both sides still have legal moves.
+    for s in [92, 103, 114, 94, 105, 116, 96, 107, 118, 82, 84] {
+        game.board[s] = Piece::Defender;
+    }
+    assert!(!game.moves_for(Side::Attacker).is_empty());
+    assert!(game.exit_fort());
+    game.adjudicate();
+    assert_eq!(game.outcome.as_ref().unwrap().reason, "exit-fort");
+}
+
+#[test]
+fn finite_extreme_nnue_weights_cannot_emit_nan_scores() {
+    let nn = Nnue {
+        format: "skallagrim-nnue-v1".into(),
+        hidden: 4,
+        weights: vec![0.0; FEATURES * 4],
+        bias: vec![1.0; 4],
+        output: vec![f32::MAX, f32::MAX, -f32::MAX, -f32::MAX],
+        output_bias: 0.0,
+    };
+    nn.validate().unwrap();
+    assert!(nn.value(&nn.accumulator(&Game::default())).is_finite());
 }
 #[test]
 fn empty_throne_passage_and_reentry() {
@@ -277,7 +562,7 @@ fn encirclement_requires_all_defenders() {
 #[test]
 fn repetition_is_defender_loss() {
     let mut g = Game::default();
-    g.history = vec![g.fen().into(); 3];
+    g.history = vec![g.fen().into(); 3].into();
     g.adjudicate();
     assert_eq!(g.outcome.unwrap().reason, "perpetual-repetition");
 }
@@ -453,7 +738,7 @@ fn rules_and_captures_preserve_all_board_symmetries() {
             for s in 0..SQ {
                 game.board[transform(s, symmetry)] = original.board[s];
             }
-            game.history = vec![game.fen().into()];
+            game.history = vec![game.fen().into()].into();
             game
         })
         .collect();

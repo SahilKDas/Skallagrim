@@ -22,3 +22,7 @@ path = "src/main.rs"
 [[bin]]
 name = "skallagrim-gui"
 path = "src/bin/gui.rs"
+
+[[bin]]
+name = 'skallagrim-referee'
+path = 'src/bin/referee.rs'

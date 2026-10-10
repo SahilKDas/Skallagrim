@@ -16,7 +16,7 @@ def main():
     p.add_argument("--matches-root", type=Path, default=ROOT / "runs/final-gauntlets")
     args = p.parse_args()
     files = {}
-    for name in ["skallagrim.exe", "skallagrim-gui.exe"]:
+    for name in ["skallagrim.exe", "skallagrim-gui.exe", "skallagrim-referee.exe"]:
         files[ROOT / "target/release" / name] = name
     for name in [
         "README.md",

@@ -40,11 +40,11 @@ def main():
             summary["termination_counts"].get(key, 0) for key in FAILURES
         )
 
-        played = [
+        recorded_games = [
             json.loads(game.read_text())
             for game in path.parent.glob(opponent + "-??.json")
         ]
-        played = [game for game in played if game["reason"] not in FAILURES]
+        played = [game for game in recorded_games if game["reason"] not in FAILURES]
         played_by_side = {}
         for side in ["Attacker", "Defender"]:
             values = [
@@ -70,6 +70,13 @@ def main():
             manifest=str(path.parent / "manifest.json"),
             cpu=manifest["options"].get("cpu"),
             strength_evidence=manifest["strength_evidence"],
+            settings={
+                key: manifest["options"].get(key)
+                for key in ["games", "movetime", "ipc_allowance", "max_plies"]
+            },
+            platform=manifest.get("platform", "unrecorded"),
+            processor=manifest.get("processor", "unrecorded"),
+            rules=manifest.get("rules", "unrecorded"),
         )
 
         rows.append(record)
@@ -78,18 +85,40 @@ def main():
             summary["completed"]
             and summary["games"] == 50
             and manifest["options"]["movetime"] == 300
+            and len(recorded_games) == 50
+            and all(
+                summary["by_side"][side]["games"] == 25
+                for side in ["Attacker", "Defender"]
+            )
+            and all(
+                sum(game["candidate_side"] == side for game in recorded_games) == 25
+                for side in ["Attacker", "Defender"]
+            )
         ):
             complete.add((candidate, opponent))
 
     missing = sorted(EXPECTED - complete)
+    complete &= EXPECTED
+    configurations = sorted(
+        {json.dumps(row["settings"], sort_keys=True) for row in rows}
+    )
+    settings_text = (
+        "; ".join(
+            f"{s['games']} games, {s['movetime']} ms search, {s['ipc_allowance']} ms IPC allowance, {s['max_plies']} plies maximum"
+            for s in map(json.loads, configurations)
+        )
+        or "no match settings recorded"
+    )
+    environments = sorted({f"{row['processor']} / {row['platform']}" for row in rows})
+    cpus = sorted({row["cpu"] for row in rows if row["cpu"] is not None})
 
     if args.require_complete and missing:
         raise SystemExit(f"Incomplete required pairings: {missing}")
 
     text = [
-        "# Skallagrim initial gauntlet results",
+        "# Skallagrim gauntlet results",
         "",
-        f"Completed required pairings: {len(complete)}/15. Each pairing requires 50 games, 300 ms search requests, 25 swapped-role opening pairs. The common IPC allowance is 25 ms and maximum game length is 600 plies.",
+        f"Completed required pairings: {len(complete)}/15. Required format: 50 games, 300 ms search requests, 25 swapped-role opening pairs. Recorded settings: {settings_text}.",
         "",
         "These are bootstrap experiments, not a claim of federation-certified superiority. Native Python opponents have documented shieldwall mismatches and use our labeled warm-start weights. Interpret timeout/illegal-move/compatibility forfeits separately from play. Static fort detection and referee rules remain subject to federation compatibility certification.",
         "",
@@ -126,7 +155,9 @@ def main():
         "",
         "Match scores include protocol forfeits; the last column before CPU counts those forfeits. Played score is conditional on a game finishing without a protocol failure and can be selection-biased; it is not an independent strength estimate. Full termination breakdowns and side results are preserved in JSON summaries. Confidence intervals resample opening pairs, not individual games.",
         "",
-        "Hardware: Intel Core i7-1255U, 16 GiB RAM. Both players in each match are pinned to one equivalent Windows efficiency core. CPU-only inference; single-thread PyTorch/ONNX; Java heap 256 MiB. Three concurrent campaigns use logical CPUs 4, 5 and 6. Ambient desktop scheduling and package power limits remain uncontrolled.",
+        "Recorded environments: "
+        + ("; ".join(environments) or "none")
+        + f". Affinity CPUs: {cpus or 'unrecorded'}. Detailed resource settings and ambient-load notes are in each manifest; timing and hardware are not inferred from this report's host.",
         "",
         "Incomplete pairings: "
         + ("none" if not missing else ", ".join(f"{c}–{o}" for c, o in missing)),

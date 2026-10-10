@@ -16,11 +16,19 @@ PAIRINGS = {
 def main():
     p = argparse.ArgumentParser()
     p.add_argument("--output", type=Path, required=True)
+    p.add_argument(
+        "--report-output",
+        type=Path,
+        help="Defaults to RESULTS.md inside this campaign; preserves historical reports",
+    )
     p.add_argument("--cpus", nargs=3, type=int)
     p.add_argument("--resume", action="store_true")
     p.add_argument("--allow-unaudited", action="store_true")
     p.add_argument("--load-note", default="Ambient desktop load uncontrolled")
     args = p.parse_args()
+    args.output = args.output.resolve()
+    if args.report_output:
+        args.report_output = args.report_output.resolve()
     if args.cpus and len(set(args.cpus)) != 3:
         raise SystemExit("Use three distinct logical CPUs")
     args.output = args.output.resolve()
@@ -67,7 +75,7 @@ def main():
                 "--root",
                 str(args.output),
                 "--output",
-                str(ROOT / "benchmarks/RESULTS.md"),
+                str(args.report_output or args.output / "RESULTS.md"),
                 "--require-complete",
             ],
             cwd=ROOT,

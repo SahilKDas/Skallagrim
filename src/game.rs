@@ -1,6 +1,7 @@
 //! Copenhagen rules, independently implemented from the federation's prose.
 use serde::{Deserialize, Serialize};
 use std::{collections::VecDeque, sync::Arc};
+pub const RULES_VERSION: &str = "copenhagen-static-v3";
 pub const N: usize = 11;
 pub const SQ: usize = 121;
 pub const THRONE: usize = 60;
@@ -54,7 +55,11 @@ pub struct Move {
 }
 pub fn square(s: &str) -> Result<usize, String> {
     let b = s.as_bytes();
-    if b.len() < 2 || !(b'a'..=b'k').contains(&b[0]) {
+    if !(2..=3).contains(&b.len())
+        || !(b'a'..=b'k').contains(&b[0])
+        || b[1] == b'0'
+        || !b[1..].iter().all(u8::is_ascii_digit)
+    {
         return Err("invalid square".into());
     }
     let row = s[1..].parse::<usize>().map_err(|_| "invalid rank")?;
@@ -116,9 +121,66 @@ pub struct Game {
     pub board: [Piece; SQ],
     pub side: Side,
     pub outcome: Option<Outcome>,
-    pub history: Vec<Arc<str>>,
+    pub history: History,
     pub last_move: Option<Move>,
     pub captures: Vec<usize>,
+}
+/// Persistent history: cloning a search position never copies its entire past.
+/// Iteration is newest first; serialization retains chronological protocol order.
+#[derive(Clone, Default)]
+pub struct History {
+    head: Option<Arc<HistoryEntry>>,
+    len: usize,
+}
+struct HistoryEntry {
+    fen: Arc<str>,
+    previous: Option<Arc<HistoryEntry>>,
+}
+impl Drop for HistoryEntry {
+    fn drop(&mut self) {
+        let mut previous = self.previous.take();
+        while let Some(entry) = previous {
+            match Arc::try_unwrap(entry) {
+                Ok(mut unique) => previous = unique.previous.take(),
+                Err(_) => break,
+            }
+        }
+    }
+}
+impl History {
+    pub fn push(&mut self, fen: Arc<str>) {
+        self.head = Some(Arc::new(HistoryEntry {
+            fen,
+            previous: self.head.take(),
+        }));
+        self.len += 1;
+    }
+    pub fn iter(&self) -> impl Iterator<Item = &Arc<str>> {
+        std::iter::successors(self.head.as_deref(), |entry| entry.previous.as_deref())
+            .map(|entry| &entry.fen)
+    }
+    pub fn len(&self) -> usize {
+        self.len
+    }
+    pub fn is_empty(&self) -> bool {
+        self.len == 0
+    }
+}
+impl From<Vec<Arc<str>>> for History {
+    fn from(entries: Vec<Arc<str>>) -> Self {
+        let mut history = Self::default();
+        for entry in entries {
+            history.push(entry);
+        }
+        history
+    }
+}
+impl Serialize for History {
+    fn serialize<S: serde::Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
+        let mut entries: Vec<_> = self.iter().collect();
+        entries.reverse();
+        entries.serialize(serializer)
+    }
 }
 impl Default for Game {
     fn default() -> Self {
@@ -142,6 +204,12 @@ impl Game {
         }
         let mut board = [Piece::Empty; SQ];
         for (y, row) in rows.iter().enumerate() {
+            if !row
+                .chars()
+                .all(|c| c.is_ascii_digit() || matches!(c, 'a' | 'd' | 'k'))
+            {
+                return Err("invalid piece".into());
+            }
             let mut x = 0;
             let mut digits = String::new();
             for c in row.chars().chain(std::iter::once('!')) {
@@ -187,7 +255,7 @@ impl Game {
             board,
             side,
             outcome: None,
-            history: vec![],
+            history: History::default(),
             last_move: None,
             captures: vec![],
         };
@@ -335,6 +403,7 @@ impl Game {
         if mover == Side::Attacker
             && let Some(k) = self.king()
             && !edge(k)
+            && DIRS.iter().any(|&(dx, dy)| step(k, dx, dy) == Some(mv.to))
             && DIRS.iter().all(|&(dx, dy)| {
                 let s = step(k, dx, dy).unwrap();
                 self.board[s] == Piece::Attacker || s == THRONE
@@ -345,6 +414,10 @@ impl Game {
             self.finish(Some(Side::Attacker), "king-captured");
         }
         self.side = enemy;
+        // Captured material never returns, so pre-capture positions cannot repeat.
+        if !self.captures.is_empty() {
+            self.history = History::default();
+        }
         self.history.push(self.fen().into());
         self.adjudicate();
     }
@@ -435,7 +508,7 @@ impl Game {
             .all(|(s, _)| !reached[s])
     }
     /// Sufficient static proof: an attacker-free king region behind walls that
-    /// survive an overapproximation allowing unlimited attackers outside it.
+    /// survive an overapproximation of attacker movement and captures.
     /// Conservative: some valid dynamic forts are not recognized (see RULES.md).
     pub fn exit_fort(&self) -> bool {
         let Some(k) = self.king() else {
@@ -464,7 +537,32 @@ impl Game {
                     }
                 }
             }
-            let outside = |s: usize| !inside[s] && !wall[s];
+            // Attackers cannot teleport into disconnected empty pockets. Flood
+            // their reachable space while keeping the proposed defender walls
+            // fixed. Ignoring other attackers as blockers is an overapproximation.
+            let mut reachable = [false; SQ];
+            let mut attack_queue = VecDeque::new();
+            for (s, p) in self.board.iter().enumerate() {
+                if *p == Piece::Attacker {
+                    reachable[s] = true;
+                    attack_queue.push_back(s);
+                }
+            }
+            while let Some(s) = attack_queue.pop_front() {
+                for (dx, dy) in DIRS {
+                    if let Some(t) = step(s, dx, dy)
+                        && !wall[t]
+                        && !inside[t]
+                        && !corner(t)
+                        && !reachable[t]
+                    {
+                        reachable[t] = true;
+                        attack_queue.push_back(t);
+                    }
+                }
+            }
+            // The throne may be crossed but cannot support an attacker.
+            let outside = |s: usize| reachable[s] && s != THRONE;
             let mut remove = vec![];
             for (s, &is_wall) in wall.iter().enumerate() {
                 if !is_wall {
@@ -543,6 +641,6 @@ impl Game {
             .sum()
     }
     pub fn snapshot(&self) -> serde_json::Value {
-        serde_json::json!({"fen": self.fen(), "side": self.side, "outcome": self.outcome, "moves": self.legal_moves().iter().map(ToString::to_string).collect::<Vec<_>>(), "history": self.history, "captures": self.captures, "rules": "copenhagen-static-v2"})
+        serde_json::json!({"fen": self.fen(), "side": self.side, "outcome": self.outcome, "moves": self.legal_moves().iter().map(ToString::to_string).collect::<Vec<_>>(), "history": self.history, "captures": self.captures, "rules": RULES_VERSION})
     }
 }

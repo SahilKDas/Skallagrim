@@ -113,13 +113,14 @@ impl Nnue {
         Accumulator { values, active }
     }
     pub fn value(&self, a: &Accumulator) -> f32 {
-        (self.output_bias
+        let value = (self.output_bias
             + a.values
                 .iter()
                 .zip(&self.output)
                 .map(|(x, w)| x.clamp(0.0, 1.0) * w)
                 .sum::<f32>())
-        .tanh()
+        .tanh();
+        if value.is_finite() { value } else { 0.0 }
     }
 }
 #[derive(Clone, Serialize, Deserialize)]
@@ -133,17 +134,20 @@ pub struct Conv {
 impl Conv {
     fn validate(&self) -> bool {
         (self.kernel == 1 || self.kernel == 3)
-            && self.input > 0
-            && self.output > 0
+            && (1..=128).contains(&self.input)
+            && (1..=128).contains(&self.output)
             && self.weights.len() == self.input * self.output * self.kernel * self.kernel
             && self.bias.len() == self.output
             && self.weights.iter().chain(&self.bias).all(|v| v.is_finite())
     }
-    fn run(&self, input: &[f32]) -> Vec<f32> {
+    fn run(&self, input: &[f32], cancelled: &impl Fn() -> bool) -> Option<Vec<f32>> {
         let mut out = vec![0.0; self.output * SQ];
         let pad = (self.kernel / 2) as i32;
         for oc in 0..self.output {
             for y in 0..11 {
+                if cancelled() {
+                    return None;
+                }
                 for x in 0..11 {
                     let mut v = self.bias[oc];
                     for ic in 0..self.input {
@@ -164,7 +168,7 @@ impl Conv {
                 }
             }
         }
-        out
+        Some(out)
     }
 }
 #[derive(Clone, Serialize, Deserialize)]
@@ -206,16 +210,26 @@ impl Cnn {
         Ok(())
     }
     pub fn infer(&self, g: &Game) -> (f32, Vec<f32>) {
-        let mut x = self.stem.run(&planes(g));
+        self.infer_cancellable(g, &|| false).unwrap()
+    }
+    pub fn infer_cancellable(
+        &self,
+        g: &Game,
+        cancelled: &impl Fn() -> bool,
+    ) -> Option<(f32, Vec<f32>)> {
+        if cancelled() {
+            return None;
+        }
+        let mut x = self.stem.run(&planes(g), cancelled)?;
         for v in &mut x {
             *v = v.max(0.0);
         }
         for block in &self.blocks {
-            let mut y = block[0].run(&x);
+            let mut y = block[0].run(&x, cancelled)?;
             for v in &mut y {
                 *v = v.max(0.0);
             }
-            let y = block[1].run(&y);
+            let y = block[1].run(&y, cancelled)?;
             for (a, b) in x.iter_mut().zip(y) {
                 *a = (*a + b).max(0.0);
             }
@@ -224,7 +238,14 @@ impl Cnn {
             + (0..self.channels)
                 .map(|c| x[c * SQ..(c + 1) * SQ].iter().sum::<f32>() / SQ as f32 * self.value[c])
                 .sum::<f32>();
-        (v.tanh(), self.policy.run(&x))
+        let value = v.tanh();
+        let mut policy = self.policy.run(&x, cancelled)?;
+        for logit in &mut policy {
+            if !logit.is_finite() {
+                *logit = 0.0;
+            }
+        }
+        Some((if value.is_finite() { value } else { 0.0 }, policy))
     }
 }
 pub fn policy_index(m: crate::game::Move) -> usize {

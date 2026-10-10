@@ -11,20 +11,37 @@ FEATURES = 364
 
 def encode(fen, history=None):
     board, side = fen.split()
+    if side not in {"a", "d"} or len(board.split("/")) != 11:
+        raise ValueError("FEN requires eleven ranks and a/d side")
     x = torch.zeros(6, 11, 11)
+    kings = 0
     for y, row in enumerate(board.split("/")):
+        if not row or any(c not in "0123456789adk" for c in row):
+            raise ValueError("invalid FEN piece or empty run")
         col, digits = 0, ""
         for char in row + "!":
             if char.isdigit():
                 digits += char
                 continue
             if digits:
-                col += int(digits)
+                count = int(digits)
+                if not 1 <= count <= 11:
+                    raise ValueError("invalid FEN empty count")
+                col += count
                 digits = ""
             if char == "!":
                 break
+            if col >= 11:
+                raise ValueError("FEN rank too long")
+            if char != "k" and (y, col) in {(0, 0), (0, 10), (10, 0), (10, 10), (5, 5)}:
+                raise ValueError("non-king on restricted square")
+            kings += char == "k"
             x["adk".index(char), y, col] = 1
             col += 1
+        if col != 11:
+            raise ValueError("FEN rank must contain eleven squares")
+    if kings != 1:
+        raise ValueError("FEN requires exactly one king")
     x[3].fill_(float(side == "a"))
     for y, col in [(0, 0), (0, 10), (10, 0), (10, 10), (5, 5)]:
         x[4, y, col] = 1
@@ -34,13 +51,26 @@ def encode(fen, history=None):
 
 
 def square(s):
+    if (
+        len(s) not in {2, 3}
+        or s[0] not in "abcdefghijk"
+        or not s[1:].isascii()
+        or not s[1:].isdigit()
+        or s[1] == "0"
+        or not 1 <= int(s[1:]) <= 11
+    ):
+        raise ValueError("invalid square")
     return (int(s[1:]) - 1) * 11 + ord(s[0]) - ord("a")
 
 
 def policy_index(move):
-    split = next(i for i in range(1, len(move)) if move[i].isalpha())
+    split = next((i for i in range(1, len(move)) if move[i].isalpha()), None)
+    if split is None:
+        raise ValueError("invalid move")
     a, b = square(move[:split]), square(move[split:])
     dx, dy = b % 11 - a % 11, b // 11 - a // 11
+    if (dx == 0) == (dy == 0):
+        raise ValueError("policy move must be a nonzero rook move")
     direction, distance = (
         (0, dx) if dx > 0 else (1, -dx) if dx < 0 else (2, dy) if dy > 0 else (3, -dy)
     )

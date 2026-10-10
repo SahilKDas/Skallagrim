@@ -1,4 +1,11 @@
+pub mod fort;
 pub mod game;
 pub mod neural;
+pub mod presence;
+pub mod proof;
+pub mod referee;
+pub mod referee_audit;
+pub mod referee_client;
 pub mod render;
+pub mod replay;
 pub mod search;

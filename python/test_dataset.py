@@ -13,7 +13,7 @@ from pathlib import Path
 from dataset import DatasetIndex, open_data, archive_data, make_replay
 from transport import ROOT
 from resources import StorageBudget
-from pipeline import run
+from pipeline import run, validate_checkpoint
 
 FEN = "3aaaaa3/5a5/11/a4d4a/a3ddd3a/aa1ddkdd1aa/a3ddd3a/a4d4a/11/5a5/3aaaaa3 a"
 
@@ -23,6 +23,45 @@ def write_rows(path, rows):
 
 
 class DatasetTests(unittest.TestCase):
+    def test_neural_encoding_rejects_malformed_positions_and_moves(self):
+        from models import encode, policy_index, square
+
+        for fen in [
+            "11 a",
+            FEN.replace("3aaaaa3", "11!junk", 1),
+            FEN[:-1] + "x",
+            "11/11/11/11/11/11/11/11/11/11/11 a",
+        ]:
+            with self.assertRaises(ValueError):
+                encode(fen)
+        for text in ["a0", "a01", "a+1", "é1", "a12"]:
+            with self.assertRaises(ValueError):
+                square(text)
+        for text in ["a1a1", "a1b2", "a1", "a0a2"]:
+            with self.assertRaises(ValueError):
+                policy_index(text)
+
+    def test_resume_rejects_tampered_checkpoint(self):
+        with tempfile.TemporaryDirectory() as folder:
+            model = Path(folder) / "nnue.json"
+            model.write_text("original")
+            model.with_suffix(".pt").write_bytes(b"checkpoint")
+            model.with_suffix(".meta.json").write_text(
+                json.dumps(
+                    dict(
+                        training_games=1000,
+                        smoke=False,
+                        model_artifacts={
+                            model.name: hashlib.sha256(model.read_bytes()).hexdigest()
+                        },
+                    )
+                )
+            )
+            validate_checkpoint(model)
+            model.write_text("modified")
+            with self.assertRaisesRegex(ValueError, "artifact changed"):
+                validate_checkpoint(model)
+
     def test_storage_limit_stops_owned_producer_and_child(self):
         with tempfile.TemporaryDirectory() as folder:
             root = Path(folder)

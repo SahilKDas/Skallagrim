@@ -28,7 +28,7 @@ fn position(parts: &[&str]) -> Result<Game, String> {
         .position(|&s| s == "moves")
         .unwrap_or(parts.len());
     let mut g = match parts.first() {
-        Some(&"startpos") => Game::default(),
+        Some(&"startpos") if split == 1 => Game::default(),
         Some(&"fen") if split == 3 => Game::from_fen(&parts[1..3].join(" "))?,
         _ => return Err("position startpos|fen <board> <side> [moves ...]".into()),
     };
@@ -52,7 +52,7 @@ fn main() {
         if p.is_empty() {
             continue;
         }
-        if !matches!(p[0], "isready" | "uci" | "stop") {
+        if !matches!(p[0], "isready" | "uci" | "hti" | "stop") {
             stop_worker(&mut worker);
         }
         let result: Result<(), String> = (|| {
@@ -66,9 +66,10 @@ fn main() {
                     emit("option name Variant type combo default Copenhagen var Copenhagen");
                     emit("option name NNUEFile type string default <empty>");
                     emit("option name CNNFile type string default <empty>");
-                    emit(
-                        "info string rules copenhagen-static-v2; conservative exit-fort detector; see docs/RULES.md",
-                    );
+                    emit(&format!(
+                        "info string rules {}; conservative exit-fort detector; see docs/RULES.md",
+                        skallagrim::game::RULES_VERSION
+                    ));
                     emit("uciok");
                 }
                 "isready" => emit("readyok"),
@@ -96,6 +97,45 @@ fn main() {
                 "position" => game = position(&p[1..])?,
                 "play" if p.len() == 2 => game.play(p[1].parse()?)?,
                 "adjudicate" if p.len() == 2 => game.referee_decision(p[1])?,
+                "prove" if p.get(1) == Some(&"draw") => {
+                    let mut nodes = 10_000usize;
+                    let mut milliseconds = 1_000u64;
+                    if !(p.len() - 2).is_multiple_of(2) {
+                        return Err("prove draw [nodes N] [movetime MS]".into());
+                    }
+                    for pair in p[2..].chunks(2) {
+                        match pair[0] {
+                            "nodes" => {
+                                nodes = pair[1]
+                                    .parse::<usize>()
+                                    .map_err(|_| "invalid proof limit")?
+                                    .min(100_000)
+                            }
+                            "movetime" => {
+                                milliseconds = pair[1]
+                                    .parse::<u64>()
+                                    .map_err(|_| "invalid proof limit")?
+                                    .min(60_000)
+                            }
+                            _ => return Err("unsupported proof limit".into()),
+                        }
+                    }
+                    let g = game.clone();
+                    let flag = Arc::new(AtomicBool::new(false));
+                    let stop = flag.clone();
+                    worker = Some((
+                        flag,
+                        thread::spawn(move || {
+                            let proof = skallagrim::proof::prove_draw(
+                                &g,
+                                nodes,
+                                Duration::from_millis(milliseconds),
+                                &stop,
+                            );
+                            emit(&format!("proof {}", serde_json::to_string(&proof).unwrap()));
+                        }),
+                    ));
+                }
                 "snapshot" => emit(&format!("snapshot {}", game.snapshot())),
                 "legal" => emit(&format!(
                     "legal {}",
@@ -141,7 +181,12 @@ fn main() {
                                             limits.time = Duration::from_secs(86400);
                                         }
                                     }
-                                    _ => limits.depth = n.min(64) as u32,
+                                    _ => {
+                                        limits.depth = n.min(64) as u32;
+                                        if !p.contains(&"movetime") {
+                                            limits.time = Duration::from_secs(86400);
+                                        }
+                                    }
                                 };
                                 i += 2;
                             }

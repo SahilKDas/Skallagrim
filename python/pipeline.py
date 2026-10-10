@@ -10,11 +10,29 @@ import subprocess
 import sys
 import os
 import signal
+import hashlib
 from pathlib import Path
 from records import save
 from transport import ROOT
 from dataset import make_replay, archive_data
 from resources import StorageBudget
+
+
+def validate_checkpoint(path):
+    path = Path(path)
+    for artifact in [path, path.with_suffix(".pt"), path.with_suffix(".meta.json")]:
+        if not artifact.is_file():
+            raise FileNotFoundError(f"Checkpoint artifact is missing: {artifact}")
+    metadata = json.loads(path.with_suffix(".meta.json").read_text())
+    if metadata.get("smoke") or metadata.get("training_games", 0) < 1000:
+        raise ValueError("Checkpoint requires at least 1,000 completed training games")
+    for name, expected in metadata.get("model_artifacts", {}).items():
+        artifact = path.parent / name
+        if artifact.parent.resolve() != path.parent.resolve():
+            raise ValueError("Checkpoint artifact path escapes its directory")
+        if hashlib.sha256(artifact.read_bytes()).hexdigest() != expected:
+            raise ValueError(f"Checkpoint artifact changed: {artifact}")
+    return metadata
 
 
 def run(*args, budget=None):
@@ -54,8 +72,22 @@ def run(*args, budget=None):
 
 
 def main():
+    from league import (
+        checkpoint as league_checkpoint,
+        manifest as league_manifest,
+        load_positions,
+        pin,
+        verify_manifest,
+        run_gates,
+    )
+
     p = argparse.ArgumentParser()
     p.add_argument("--kind", choices=["cnn", "nnue"], required=True)
+    p.add_argument(
+        "--league-positions",
+        type=Path,
+        default=ROOT / "benchmarks/league-positions.json",
+    )
     p.add_argument("--generations", type=int, default=50)
     p.add_argument("--games", type=int, default=1250)
     p.add_argument("--movetime", type=int, default=100)
@@ -71,6 +103,8 @@ def main():
     p.add_argument("--run", type=Path, required=True)
     p.add_argument("--device", default="auto")
     args = p.parse_args()
+    if args.generations <= 0 or args.movetime <= 0 or args.epochs <= 0:
+        raise SystemExit("generations, movetime and epochs must be positive")
     if args.games < 1250 or args.window_games < 1250:
         raise SystemExit("Use >=1,250 games: at least 1,000 training plus validation.")
     if args.replay_max_gib <= 0:
@@ -80,8 +114,41 @@ def main():
     args.run = args.run.resolve()
     args.run.mkdir(parents=True, exist_ok=True)
     budget = StorageBudget(args.run, int(args.max_storage_gib * 1024**3))
-    save(args.run / "config.json", vars(args) | {"run": str(args.run)})
+    if args.games % 2:
+        raise SystemExit("Use an even game count for role-balanced pairs")
+    if not args.league_positions.is_file():
+        run(
+            "python/make_league_positions.py",
+            "--output",
+            args.league_positions,
+            budget=budget,
+        )
+    position_suite = load_positions(args.league_positions)
+    config_path = args.run / "config.json"
+    config = vars(args) | {
+        "run": str(args.run),
+        "league_positions": pin(args.league_positions),
+        "league_version": "skallagrim-league-v1",
+    }
+    if config_path.exists():
+        previous = json.loads(config_path.read_text())
+        for key in [
+            "kind",
+            "games",
+            "movetime",
+            "epochs",
+            "window_games",
+            "device",
+            "league_positions",
+            "league_version",
+        ]:
+            if previous.get(key) != config[key]:
+                raise SystemExit(
+                    f"Resume rejected: changed {key}; use a fresh --run directory"
+                )
+    save(config_path, config)
     checkpoint = None
+    promoted_history = []
     for generation in range(args.generations):
         folder = args.run / f"generation-{generation:04d}"
         folder.mkdir(exist_ok=True)
@@ -89,9 +156,13 @@ def main():
         model = folder / f"{args.kind}.json"
         # Validated completed generations can be resumed without retraining.
         if (folder / "complete.json").exists():
-            checkpoint = Path(
-                json.loads((folder / "complete.json").read_text())["promoted_model"]
-            )
+            complete = json.loads((folder / "complete.json").read_text())
+            verify_manifest(json.loads((folder / "league.json").read_text()))
+            validate_checkpoint(Path(complete["model"]))
+            checkpoint = Path(complete["promoted_model"])
+            validate_checkpoint(checkpoint)
+            if complete["accepted"]:
+                promoted_history.append(checkpoint)
             if not args.retain_raw:
                 archive_data(samples, budget.check)
                 archive_data(folder / "replay.jsonl", budget.check)
@@ -119,6 +190,27 @@ def main():
             ]
             if checkpoint:
                 cmd += ["--cnn" if args.kind == "cnn" else "--nnue", checkpoint]
+            current = (
+                league_checkpoint(checkpoint, bot)
+                if checkpoint
+                else dict(bot="Baseline", model=None)
+            )
+            history = [
+                league_checkpoint(path, bot) for path in promoted_history[:-1][-8:]
+            ]
+            league_manifest(
+                folder / "league.json",
+                current,
+                current if checkpoint else None,
+                history,
+                args.league_positions,
+                args.games,
+                args.games * 10,
+                10000 + generation,
+                args.movetime,
+                600,
+            )
+            cmd += ["--league", folder / "league.json"]
             run(*cmd, budget=budget)
             replay = folder / "replay.jsonl"
             sources = [
@@ -134,6 +226,7 @@ def main():
                 args.window_games,
                 min(int(args.replay_max_gib * 1024**3), budget.available_bytes()),
                 check=budget.check,
+                excluded_fens={row["fen"] for row in position_suite["evaluation"]},
             )
             save(folder / "replay-selection.json", selection)
             cmd = [
@@ -152,53 +245,20 @@ def main():
             if checkpoint:
                 cmd += ["--resume", checkpoint.with_suffix(".pt")]
             run(*cmd, budget=budget)
+        verify_manifest(json.loads((folder / "league.json").read_text()))
         accepted = True
+        validate_checkpoint(model)
         summary = None
         if checkpoint is not None:
-            config = json.loads((ROOT / "benchmarks/engines.json").read_text())
-            template = config["engines"]["rho" if args.kind == "cnn" else "beta"]
-            engines = {}
-            for name, path in [("candidate", model), ("champion", checkpoint)]:
-                entry = json.loads(json.dumps(template))
-                option = "CNNFile" if args.kind == "cnn" else "NNUEFile"
-                entry["options"][option] = str(path.resolve())
-                meta = str(path.with_suffix(".meta.json").resolve())
-                entry["artifacts"] = [
-                    "target/release/skallagrim.exe",
-                    str(path.resolve()),
-                    meta,
-                ]
-                entry["training_metadata"] = [meta]
-                engines[name] = entry
-            gate_config = folder / "gate-config.json"
-            save(gate_config, dict(engines=engines))
-            run(
-                "python/benchmark.py",
-                "--config",
-                gate_config,
-                "--candidate",
-                "candidate",
-                "--opponents",
-                "champion",
-                "--output",
-                folder / "gate",
-                "--resume",
-                budget=budget,
-            )
-            summary = json.loads((folder / "gate/champion-summary.json").read_text())
-            failures = sum(
-                summary["termination_counts"].get(key, 0)
-                for key in [
-                    "timeout",
-                    "engine-failure",
-                    "illegal-move",
-                    "rules-incompatibility",
-                ]
-            )
-            accepted = (
-                summary["paired_bootstrap_95"][0] > 0.5
-                and all(v["score_rate"] >= 0.5 for v in summary["by_side"].values())
-                and failures == 0
+            accepted, summary = run_gates(
+                folder,
+                args.kind,
+                model,
+                checkpoint,
+                promoted_history[:-1],
+                args.league_positions,
+                run,
+                budget,
             )
         promoted = model if accepted else checkpoint
         save(
@@ -212,12 +272,14 @@ def main():
                 accepted=accepted,
                 promoted_model=str(promoted),
                 gate=summary,
-                promotion="50-game/300-ms internal gate"
+                promotion="role-balanced league: 50-game/300-ms gauntlets per opponent and held-out suite"
                 if checkpoint
                 else "initial bootstrap; external strength unproven",
             ),
         )
         checkpoint = promoted
+        if accepted:
+            promoted_history.append(model)
         if not args.retain_raw:
             archive_data(samples, budget.check)
             archive_data(folder / "replay.jsonl", budget.check)
