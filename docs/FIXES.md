@@ -19,7 +19,7 @@ Current rule identity: `copenhagen-static-v3`. Original benchmark results and th
 
 The federation's current prose does not prescribe a numerical repetition threshold or its precedence over qualitative draws. Three full-position occurrences remain the documented operational policy. The historical designer discussions and current rules should not be silently combined into a new mandatory variant.
 
-Static fort certificates do not solve every fort requiring a sequence of defensive responses. A bounded draw proof can return unknown; a cooperative finishing witness does not decide minimax strength. Those positions retain explicit referee support. No universal classifier or federation certification is claimed.
+Static proofs are supplemented by bounded, independently verified defensive strategy certificates. Neither mechanism solves every fort formation. A bounded draw proof can return unknown; a cooperative finishing witness does not decide minimax strength. Those positions retain explicit referee support. No universal classifier or federation certification is claimed.
 
 Upstream opponents still have their own rules and timing failures. Repairing their native rules would create modified opponents requiring new provenance and fresh matches. Historical forfeit-heavy charts cannot establish that the fixed engines are stronger.
 
@@ -35,4 +35,6 @@ Fresh matches obtain their rule identity from the current referee snapshot. `pyt
 
 ## Verification
 
-40 Rust tests and 17 Python tests pass. Formatting, Clippy and Python undefined-name checks pass. Rust/Python neural parity passes across 80 legal positions, including all policy logits. All 60 timed searches return below 300 ms on the two recorded fixtures. The 1,250-game initial training corpus replays under v3 with no rejected games; the original 750 matches and 35,361 plies verify under their archived v2 binary.
+62 Rust tests and 34 Python tests passed for the league/presence/fort implementation; the beta release report records fresh checks. Formatting, Clippy and Python undefined-name checks pass. Rust/Python neural parity passes across 80 legal positions, including all policy logits. All 60 timed searches return below 300 ms on the two recorded fixtures. The 1,250-game initial training corpus replays under v3 with no rejected games; the original 750 matches and 35,361 plies verify under their archived v2 binary.
+
+For 0.5.0-beta.1, all 62 Rust and 34 Python tests passed again, with 40-position neural parity (maximum error 6.68e-6). The fresh long soak failed at about 114 minutes on a search-response timeout; a separate 60-search probe included one Beta response above 325 ms. The earlier timing results above are historical, not a guarantee for the beta. Native interactive GUI testing remains untested. See RELEASE.md and benchmarks/release-validation.json.

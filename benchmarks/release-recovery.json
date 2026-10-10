@@ -1,0 +1,156 @@
+{
+  "version": "0.5.0-beta.1",
+  "status": "pass",
+  "payloads_verified": 130,
+  "archive_sha256": "ef1178fadf7ef35ec0894afe095206f04d6081ca745e31b0e52760f9ccd3d27f",
+  "requested_seconds": 420.0,
+  "batches": 294,
+  "plies": 3528,
+  "cancellations": 294,
+  "replay_audits": 294,
+  "render_checks": 45,
+  "memory_samples": [
+    {
+      "seconds": 1,
+      "engine_bytes": [
+        5619712,
+        6746112,
+        5398528
+      ],
+      "referee_bytes": 5419008
+    },
+    {
+      "seconds": 33,
+      "engine_bytes": [
+        5562368,
+        6873088,
+        5672960
+      ],
+      "referee_bytes": 5713920
+    },
+    {
+      "seconds": 64,
+      "engine_bytes": [
+        5623808,
+        6647808,
+        5861376
+      ],
+      "referee_bytes": 5795840
+    },
+    {
+      "seconds": 94,
+      "engine_bytes": [
+        5799936,
+        12443648,
+        5836800
+      ],
+      "referee_bytes": 5767168
+    },
+    {
+      "seconds": 124,
+      "engine_bytes": [
+        5607424,
+        12648448,
+        5804032
+      ],
+      "referee_bytes": 5832704
+    },
+    {
+      "seconds": 152,
+      "engine_bytes": [
+        5595136,
+        10391552,
+        5652480
+      ],
+      "referee_bytes": 5812224
+    },
+    {
+      "seconds": 180,
+      "engine_bytes": [
+        5578752,
+        14245888,
+        5873664
+      ],
+      "referee_bytes": 5877760
+    },
+    {
+      "seconds": 207,
+      "engine_bytes": [
+        5607424,
+        12238848,
+        5926912
+      ],
+      "referee_bytes": 5775360
+    },
+    {
+      "seconds": 235,
+      "engine_bytes": [
+        5554176,
+        6705152,
+        5795840
+      ],
+      "referee_bytes": 5922816
+    },
+    {
+      "seconds": 262,
+      "engine_bytes": [
+        5566464,
+        6139904,
+        6037504
+      ],
+      "referee_bytes": 5931008
+    },
+    {
+      "seconds": 290,
+      "engine_bytes": [
+        5615616,
+        14004224,
+        6029312
+      ],
+      "referee_bytes": 5824512
+    },
+    {
+      "seconds": 318,
+      "engine_bytes": [
+        5935104,
+        15245312,
+        6004736
+      ],
+      "referee_bytes": 6021120
+    },
+    {
+      "seconds": 346,
+      "engine_bytes": [
+        5701632,
+        15245312,
+        6152192
+      ],
+      "referee_bytes": 6012928
+    },
+    {
+      "seconds": 374,
+      "engine_bytes": [
+        5722112,
+        13037568,
+        6139904
+      ],
+      "referee_bytes": 5984256
+    },
+    {
+      "seconds": 402,
+      "engine_bytes": [
+        5955584,
+        15642624,
+        6234112
+      ],
+      "referee_bytes": 6123520
+    }
+  ],
+  "failures": [],
+  "native_gui_checks": "untested: native control unavailable",
+  "full_training": "not run",
+  "strength_gauntlets": "not run",
+  "live_discord": "not run: no application ID",
+  "elapsed_seconds": 420.5,
+  "owned_processes_exited": true
+}

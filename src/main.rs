@@ -58,7 +58,7 @@ fn main() {
         let result: Result<(), String> = (|| {
             match p[0] {
                 "uci" | "hti" => {
-                    emit("id name Skallagrim 0.1.0");
+                    emit(&format!("id name Skallagrim {}", env!("CARGO_PKG_VERSION")));
                     emit("id author Sahil K Das");
                     emit(
                         "option name Bot type combo default Baseline var Baseline var Rho var Iota var Beta",

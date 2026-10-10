@@ -1,0 +1,25 @@
+{
+  "version": "0.5.0-beta.1",
+  "rust_tests": {
+    "status": "pass",
+    "count": 62
+  },
+  "python_tests": {
+    "status": "pass",
+    "count": 34,
+    "note": "Normal temporary-file and owned-process cleanup permissions required; sandbox run failed with access-denied errors."
+  },
+  "clippy": "pass",
+  "rust_format": "pass",
+  "python_ruff_F": "pass (project virtual environment)",
+  "neural_parity": {
+    "status": "pass",
+    "positions": 40,
+    "policy_logits_per_position": 4840,
+    "max_error": 6.68e-06
+  },
+  "proof_panel_visual_inspection": "pass: certificate status, 85 nodes, region, branch references and controls visible",
+  "manual_gui": "untested: native controls unavailable",
+  "stale_and_forged_proofs": "pass: Rust and Python tests",
+  "process_inventory_during_soak": "pass: three engines and one referee, no render leftovers"
+}

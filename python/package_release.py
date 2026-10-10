@@ -20,13 +20,14 @@ def main():
         files[ROOT / "target/release" / name] = name
     for name in [
         "README.md",
+        "CHANGELOG.md",
         "PROJECT_NOTES.md",
         "LICENSE",
         "Cargo.toml",
         "Cargo.lock",
     ]:
         files[ROOT / name] = name
-    for folder in ["models", "docs", "src", "tests", "python", "benchmarks"]:
+    for folder in ["models", "docs", "src", "tests", "python", "benchmarks", ".github"]:
         for path in (ROOT / folder).rglob("*"):
             if (
                 path.is_file()

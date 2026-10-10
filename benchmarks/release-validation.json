@@ -1,0 +1,2126 @@
+{
+  "version": "0.5.0-beta.1",
+  "status": "fail",
+  "payloads_verified": 130,
+  "archive_sha256": "ef1178fadf7ef35ec0894afe095206f04d6081ca745e31b0e52760f9ccd3d27f",
+  "requested_seconds": 7200.0,
+  "batches": 4219,
+  "plies": 50629,
+  "cancellations": 4220,
+  "replay_audits": 4219,
+  "render_checks": 633,
+  "memory_samples": [
+    {
+      "seconds": 4,
+      "engine_bytes": [
+        5435392,
+        5947392,
+        5390336
+      ],
+      "referee_bytes": 5599232
+    },
+    {
+      "seconds": 40,
+      "engine_bytes": [
+        5545984,
+        6287360,
+        5505024
+      ],
+      "referee_bytes": 5693440
+    },
+    {
+      "seconds": 77,
+      "engine_bytes": [
+        5550080,
+        6598656,
+        5574656
+      ],
+      "referee_bytes": 5730304
+    },
+    {
+      "seconds": 113,
+      "engine_bytes": [
+        5541888,
+        8155136,
+        5636096
+      ],
+      "referee_bytes": 5816320
+    },
+    {
+      "seconds": 148,
+      "engine_bytes": [
+        5619712,
+        7938048,
+        5685248
+      ],
+      "referee_bytes": 5853184
+    },
+    {
+      "seconds": 182,
+      "engine_bytes": [
+        5562368,
+        9158656,
+        5677056
+      ],
+      "referee_bytes": 5902336
+    },
+    {
+      "seconds": 217,
+      "engine_bytes": [
+        5545984,
+        9228288,
+        5685248
+      ],
+      "referee_bytes": 5926912
+    },
+    {
+      "seconds": 249,
+      "engine_bytes": [
+        5611520,
+        9519104,
+        5726208
+      ],
+      "referee_bytes": 5963776
+    },
+    {
+      "seconds": 281,
+      "engine_bytes": [
+        5615616,
+        9338880,
+        5877760
+      ],
+      "referee_bytes": 5996544
+    },
+    {
+      "seconds": 313,
+      "engine_bytes": [
+        5877760,
+        8810496,
+        5840896
+      ],
+      "referee_bytes": 6000640
+    },
+    {
+      "seconds": 345,
+      "engine_bytes": [
+        5730304,
+        10207232,
+        5984256
+      ],
+      "referee_bytes": 6049792
+    },
+    {
+      "seconds": 377,
+      "engine_bytes": [
+        5722112,
+        9371648,
+        5816320
+      ],
+      "referee_bytes": 6029312
+    },
+    {
+      "seconds": 408,
+      "engine_bytes": [
+        5828608,
+        9154560,
+        5992448
+      ],
+      "referee_bytes": 5976064
+    },
+    {
+      "seconds": 439,
+      "engine_bytes": [
+        5853184,
+        9695232,
+        5804032
+      ],
+      "referee_bytes": 5988352
+    },
+    {
+      "seconds": 471,
+      "engine_bytes": [
+        5664768,
+        9887744,
+        5849088
+      ],
+      "referee_bytes": 5951488
+    },
+    {
+      "seconds": 505,
+      "engine_bytes": [
+        5648384,
+        9658368,
+        6000640
+      ],
+      "referee_bytes": 6025216
+    },
+    {
+      "seconds": 538,
+      "engine_bytes": [
+        5672960,
+        9793536,
+        5984256
+      ],
+      "referee_bytes": 6008832
+    },
+    {
+      "seconds": 570,
+      "engine_bytes": [
+        5668864,
+        9015296,
+        5861376
+      ],
+      "referee_bytes": 6004736
+    },
+    {
+      "seconds": 602,
+      "engine_bytes": [
+        5931008,
+        10559488,
+        5906432
+      ],
+      "referee_bytes": 5959680
+    },
+    {
+      "seconds": 633,
+      "engine_bytes": [
+        5668864,
+        9932800,
+        5742592
+      ],
+      "referee_bytes": 5935104
+    },
+    {
+      "seconds": 665,
+      "engine_bytes": [
+        5595136,
+        8503296,
+        5820416
+      ],
+      "referee_bytes": 5947392
+    },
+    {
+      "seconds": 696,
+      "engine_bytes": [
+        5799936,
+        9637888,
+        6053888
+      ],
+      "referee_bytes": 5926912
+    },
+    {
+      "seconds": 727,
+      "engine_bytes": [
+        5578752,
+        9351168,
+        6045696
+      ],
+      "referee_bytes": 5869568
+    },
+    {
+      "seconds": 757,
+      "engine_bytes": [
+        5578752,
+        10387456,
+        6037504
+      ],
+      "referee_bytes": 5939200
+    },
+    {
+      "seconds": 791,
+      "engine_bytes": [
+        5865472,
+        9220096,
+        6090752
+      ],
+      "referee_bytes": 5898240
+    },
+    {
+      "seconds": 822,
+      "engine_bytes": [
+        5844992,
+        9105408,
+        6082560
+      ],
+      "referee_bytes": 5971968
+    },
+    {
+      "seconds": 854,
+      "engine_bytes": [
+        5627904,
+        10584064,
+        5971968
+      ],
+      "referee_bytes": 5959680
+    },
+    {
+      "seconds": 884,
+      "engine_bytes": [
+        5865472,
+        6451200,
+        6025216
+      ],
+      "referee_bytes": 5885952
+    },
+    {
+      "seconds": 915,
+      "engine_bytes": [
+        5844992,
+        9842688,
+        6033408
+      ],
+      "referee_bytes": 5951488
+    },
+    {
+      "seconds": 947,
+      "engine_bytes": [
+        5890048,
+        9715712,
+        5947392
+      ],
+      "referee_bytes": 5988352
+    },
+    {
+      "seconds": 978,
+      "engine_bytes": [
+        5935104,
+        10555392,
+        5914624
+      ],
+      "referee_bytes": 5840896
+    },
+    {
+      "seconds": 1009,
+      "engine_bytes": [
+        5898240,
+        10584064,
+        5988352
+      ],
+      "referee_bytes": 5894144
+    },
+    {
+      "seconds": 1039,
+      "engine_bytes": [
+        5898240,
+        11292672,
+        6062080
+      ],
+      "referee_bytes": 5906432
+    },
+    {
+      "seconds": 1068,
+      "engine_bytes": [
+        5935104,
+        11055104,
+        6094848
+      ],
+      "referee_bytes": 5836800
+    },
+    {
+      "seconds": 1098,
+      "engine_bytes": [
+        5713920,
+        11698176,
+        6029312
+      ],
+      "referee_bytes": 6029312
+    },
+    {
+      "seconds": 1128,
+      "engine_bytes": [
+        5963776,
+        8613888,
+        6066176
+      ],
+      "referee_bytes": 5873664
+    },
+    {
+      "seconds": 1158,
+      "engine_bytes": [
+        5754880,
+        9916416,
+        5820416
+      ],
+      "referee_bytes": 5902336
+    },
+    {
+      "seconds": 1189,
+      "engine_bytes": [
+        5865472,
+        11116544,
+        5988352
+      ],
+      "referee_bytes": 5955584
+    },
+    {
+      "seconds": 1219,
+      "engine_bytes": [
+        5779456,
+        10690560,
+        5976064
+      ],
+      "referee_bytes": 5939200
+    },
+    {
+      "seconds": 1249,
+      "engine_bytes": [
+        5750784,
+        10170368,
+        6078464
+      ],
+      "referee_bytes": 6021120
+    },
+    {
+      "seconds": 1278,
+      "engine_bytes": [
+        5812224,
+        9490432,
+        5865472
+      ],
+      "referee_bytes": 5865472
+    },
+    {
+      "seconds": 1307,
+      "engine_bytes": [
+        5836800,
+        9039872,
+        5951488
+      ],
+      "referee_bytes": 5963776
+    },
+    {
+      "seconds": 1338,
+      "engine_bytes": [
+        5808128,
+        10833920,
+        6017024
+      ],
+      "referee_bytes": 5824512
+    },
+    {
+      "seconds": 1368,
+      "engine_bytes": [
+        5652480,
+        11530240,
+        5812224
+      ],
+      "referee_bytes": 5890048
+    },
+    {
+      "seconds": 1402,
+      "engine_bytes": [
+        5873664,
+        9682944,
+        5931008
+      ],
+      "referee_bytes": 5943296
+    },
+    {
+      "seconds": 1432,
+      "engine_bytes": [
+        5595136,
+        10186752,
+        6025216
+      ],
+      "referee_bytes": 5853184
+    },
+    {
+      "seconds": 1463,
+      "engine_bytes": [
+        5758976,
+        10727424,
+        5996544
+      ],
+      "referee_bytes": 5857280
+    },
+    {
+      "seconds": 1493,
+      "engine_bytes": [
+        5832704,
+        10141696,
+        5869568
+      ],
+      "referee_bytes": 5971968
+    },
+    {
+      "seconds": 1524,
+      "engine_bytes": [
+        5890048,
+        10948608,
+        6049792
+      ],
+      "referee_bytes": 5869568
+    },
+    {
+      "seconds": 1554,
+      "engine_bytes": [
+        5832704,
+        11010048,
+        5984256
+      ],
+      "referee_bytes": 5832704
+    },
+    {
+      "seconds": 1585,
+      "engine_bytes": [
+        5873664,
+        8347648,
+        5943296
+      ],
+      "referee_bytes": 5992448
+    },
+    {
+      "seconds": 1614,
+      "engine_bytes": [
+        5853184,
+        11681792,
+        6017024
+      ],
+      "referee_bytes": 5910528
+    },
+    {
+      "seconds": 1644,
+      "engine_bytes": [
+        5853184,
+        11415552,
+        5877760
+      ],
+      "referee_bytes": 5947392
+    },
+    {
+      "seconds": 1674,
+      "engine_bytes": [
+        5623808,
+        11575296,
+        6029312
+      ],
+      "referee_bytes": 5996544
+    },
+    {
+      "seconds": 1704,
+      "engine_bytes": [
+        5898240,
+        11669504,
+        5828608
+      ],
+      "referee_bytes": 5898240
+    },
+    {
+      "seconds": 1734,
+      "engine_bytes": [
+        5668864,
+        9457664,
+        6082560
+      ],
+      "referee_bytes": 6000640
+    },
+    {
+      "seconds": 1764,
+      "engine_bytes": [
+        5869568,
+        11698176,
+        6045696
+      ],
+      "referee_bytes": 5959680
+    },
+    {
+      "seconds": 1795,
+      "engine_bytes": [
+        5828608,
+        9252864,
+        6078464
+      ],
+      "referee_bytes": 5963776
+    },
+    {
+      "seconds": 1825,
+      "engine_bytes": [
+        5816320,
+        6909952,
+        6066176
+      ],
+      "referee_bytes": 5836800
+    },
+    {
+      "seconds": 1855,
+      "engine_bytes": [
+        5808128,
+        11411456,
+        5947392
+      ],
+      "referee_bytes": 5890048
+    },
+    {
+      "seconds": 1884,
+      "engine_bytes": [
+        5570560,
+        11108352,
+        6008832
+      ],
+      "referee_bytes": 5890048
+    },
+    {
+      "seconds": 1914,
+      "engine_bytes": [
+        5730304,
+        9793536,
+        6008832
+      ],
+      "referee_bytes": 5832704
+    },
+    {
+      "seconds": 1943,
+      "engine_bytes": [
+        5746688,
+        11677696,
+        6119424
+      ],
+      "referee_bytes": 5865472
+    },
+    {
+      "seconds": 1972,
+      "engine_bytes": [
+        5795840,
+        11673600,
+        5746688
+      ],
+      "referee_bytes": 5799936
+    },
+    {
+      "seconds": 2002,
+      "engine_bytes": [
+        5726208,
+        11436032,
+        5853184
+      ],
+      "referee_bytes": 5804032
+    },
+    {
+      "seconds": 2031,
+      "engine_bytes": [
+        5804032,
+        10522624,
+        5947392
+      ],
+      "referee_bytes": 5943296
+    },
+    {
+      "seconds": 2067,
+      "engine_bytes": [
+        5877760,
+        8785920,
+        5992448
+      ],
+      "referee_bytes": 5853184
+    },
+    {
+      "seconds": 2102,
+      "engine_bytes": [
+        5840896,
+        8798208,
+        5853184
+      ],
+      "referee_bytes": 6012928
+    },
+    {
+      "seconds": 2141,
+      "engine_bytes": [
+        5820416,
+        9441280,
+        5910528
+      ],
+      "referee_bytes": 5939200
+    },
+    {
+      "seconds": 2174,
+      "engine_bytes": [
+        5906432,
+        10715136,
+        6057984
+      ],
+      "referee_bytes": 5828608
+    },
+    {
+      "seconds": 2204,
+      "engine_bytes": [
+        5824512,
+        6479872,
+        5783552
+      ],
+      "referee_bytes": 5881856
+    },
+    {
+      "seconds": 2232,
+      "engine_bytes": [
+        5591040,
+        16736256,
+        5914624
+      ],
+      "referee_bytes": 5914624
+    },
+    {
+      "seconds": 2262,
+      "engine_bytes": [
+        5738496,
+        13070336,
+        5890048
+      ],
+      "referee_bytes": 5922816
+    },
+    {
+      "seconds": 2291,
+      "engine_bytes": [
+        5812224,
+        16347136,
+        6217728
+      ],
+      "referee_bytes": 5787648
+    },
+    {
+      "seconds": 2320,
+      "engine_bytes": [
+        5586944,
+        10108928,
+        5971968
+      ],
+      "referee_bytes": 5926912
+    },
+    {
+      "seconds": 2348,
+      "engine_bytes": [
+        5591040,
+        6467584,
+        5984256
+      ],
+      "referee_bytes": 5980160
+    },
+    {
+      "seconds": 2377,
+      "engine_bytes": [
+        5644288,
+        13959168,
+        6328320
+      ],
+      "referee_bytes": 5951488
+    },
+    {
+      "seconds": 2405,
+      "engine_bytes": [
+        5959680,
+        15642624,
+        6279168
+      ],
+      "referee_bytes": 5951488
+    },
+    {
+      "seconds": 2433,
+      "engine_bytes": [
+        5664768,
+        14364672,
+        6078464
+      ],
+      "referee_bytes": 5853184
+    },
+    {
+      "seconds": 2462,
+      "engine_bytes": [
+        5926912,
+        11894784,
+        6348800
+      ],
+      "referee_bytes": 6017024
+    },
+    {
+      "seconds": 2491,
+      "engine_bytes": [
+        5988352,
+        6705152,
+        6205440
+      ],
+      "referee_bytes": 5959680
+    },
+    {
+      "seconds": 2519,
+      "engine_bytes": [
+        5652480,
+        16224256,
+        6029312
+      ],
+      "referee_bytes": 5935104
+    },
+    {
+      "seconds": 2546,
+      "engine_bytes": [
+        5627904,
+        16236544,
+        6377472
+      ],
+      "referee_bytes": 6057984
+    },
+    {
+      "seconds": 2575,
+      "engine_bytes": [
+        5951488,
+        15745024,
+        6250496
+      ],
+      "referee_bytes": 5906432
+    },
+    {
+      "seconds": 2603,
+      "engine_bytes": [
+        6008832,
+        16011264,
+        6152192
+      ],
+      "referee_bytes": 5935104
+    },
+    {
+      "seconds": 2631,
+      "engine_bytes": [
+        6086656,
+        14954496,
+        6496256
+      ],
+      "referee_bytes": 6025216
+    },
+    {
+      "seconds": 2660,
+      "engine_bytes": [
+        6123520,
+        14741504,
+        6062080
+      ],
+      "referee_bytes": 5890048
+    },
+    {
+      "seconds": 2688,
+      "engine_bytes": [
+        5804032,
+        15515648,
+        6340608
+      ],
+      "referee_bytes": 5976064
+    },
+    {
+      "seconds": 2716,
+      "engine_bytes": [
+        6094848,
+        6868992,
+        6238208
+      ],
+      "referee_bytes": 5832704
+    },
+    {
+      "seconds": 2744,
+      "engine_bytes": [
+        6062080,
+        15548416,
+        6336512
+      ],
+      "referee_bytes": 6017024
+    },
+    {
+      "seconds": 2775,
+      "engine_bytes": [
+        5996544,
+        15585280,
+        6225920
+      ],
+      "referee_bytes": 5922816
+    },
+    {
+      "seconds": 2809,
+      "engine_bytes": [
+        6053888,
+        15589376,
+        6295552
+      ],
+      "referee_bytes": 5971968
+    },
+    {
+      "seconds": 2851,
+      "engine_bytes": [
+        2052096,
+        6234112,
+        2424832
+      ],
+      "referee_bytes": 1912832
+    },
+    {
+      "seconds": 2880,
+      "engine_bytes": [
+        2048000,
+        7352320,
+        2412544
+      ],
+      "referee_bytes": 1884160
+    },
+    {
+      "seconds": 2910,
+      "engine_bytes": [
+        2281472,
+        8794112,
+        2338816
+      ],
+      "referee_bytes": 1966080
+    },
+    {
+      "seconds": 2939,
+      "engine_bytes": [
+        2097152,
+        8794112,
+        2220032
+      ],
+      "referee_bytes": 2019328
+    },
+    {
+      "seconds": 2970,
+      "engine_bytes": [
+        2134016,
+        6430720,
+        2351104
+      ],
+      "referee_bytes": 1728512
+    },
+    {
+      "seconds": 3003,
+      "engine_bytes": [
+        1847296,
+        5459968,
+        2412544
+      ],
+      "referee_bytes": 1802240
+    },
+    {
+      "seconds": 3033,
+      "engine_bytes": [
+        1912832,
+        7360512,
+        2281472
+      ],
+      "referee_bytes": 1830912
+    },
+    {
+      "seconds": 3069,
+      "engine_bytes": [
+        2273280,
+        7360512,
+        2486272
+      ],
+      "referee_bytes": 1953792
+    },
+    {
+      "seconds": 3099,
+      "engine_bytes": [
+        2093056,
+        7921664,
+        2469888
+      ],
+      "referee_bytes": 1982464
+    },
+    {
+      "seconds": 3129,
+      "engine_bytes": [
+        2326528,
+        8183808,
+        2498560
+      ],
+      "referee_bytes": 1916928
+    },
+    {
+      "seconds": 3160,
+      "engine_bytes": [
+        2174976,
+        8183808,
+        2519040
+      ],
+      "referee_bytes": 1900544
+    },
+    {
+      "seconds": 3194,
+      "engine_bytes": [
+        2068480,
+        5713920,
+        2396160
+      ],
+      "referee_bytes": 2056192
+    },
+    {
+      "seconds": 3226,
+      "engine_bytes": [
+        2191360,
+        7053312,
+        2531328
+      ],
+      "referee_bytes": 1982464
+    },
+    {
+      "seconds": 3258,
+      "engine_bytes": [
+        2076672,
+        7294976,
+        2326528
+      ],
+      "referee_bytes": 1937408
+    },
+    {
+      "seconds": 3291,
+      "engine_bytes": [
+        2260992,
+        7294976,
+        2506752
+      ],
+      "referee_bytes": 1896448
+    },
+    {
+      "seconds": 3325,
+      "engine_bytes": [
+        2269184,
+        7294976,
+        2531328
+      ],
+      "referee_bytes": 2007040
+    },
+    {
+      "seconds": 3359,
+      "engine_bytes": [
+        2199552,
+        7020544,
+        2334720
+      ],
+      "referee_bytes": 1888256
+    },
+    {
+      "seconds": 3396,
+      "engine_bytes": [
+        2183168,
+        7032832,
+        2244608
+      ],
+      "referee_bytes": 2080768
+    },
+    {
+      "seconds": 3432,
+      "engine_bytes": [
+        2334720,
+        5439488,
+        2265088
+      ],
+      "referee_bytes": 2056192
+    },
+    {
+      "seconds": 3467,
+      "engine_bytes": [
+        2195456,
+        5451776,
+        2351104
+      ],
+      "referee_bytes": 1921024
+    },
+    {
+      "seconds": 3499,
+      "engine_bytes": [
+        2273280,
+        6918144,
+        2449408
+      ],
+      "referee_bytes": 2011136
+    },
+    {
+      "seconds": 3536,
+      "engine_bytes": [
+        2375680,
+        7008256,
+        2473984
+      ],
+      "referee_bytes": 1974272
+    },
+    {
+      "seconds": 3569,
+      "engine_bytes": [
+        2191360,
+        7659520,
+        2482176
+      ],
+      "referee_bytes": 2064384
+    },
+    {
+      "seconds": 3601,
+      "engine_bytes": [
+        2117632,
+        10121216,
+        2453504
+      ],
+      "referee_bytes": 2019328
+    },
+    {
+      "seconds": 3632,
+      "engine_bytes": [
+        2248704,
+        10121216,
+        2449408
+      ],
+      "referee_bytes": 2015232
+    },
+    {
+      "seconds": 3664,
+      "engine_bytes": [
+        2527232,
+        7933952,
+        2387968
+      ],
+      "referee_bytes": 1974272
+    },
+    {
+      "seconds": 3698,
+      "engine_bytes": [
+        1945600,
+        8400896,
+        2461696
+      ],
+      "referee_bytes": 2093056
+    },
+    {
+      "seconds": 3734,
+      "engine_bytes": [
+        2023424,
+        8400896,
+        2502656
+      ],
+      "referee_bytes": 1961984
+    },
+    {
+      "seconds": 3768,
+      "engine_bytes": [
+        2129920,
+        8400896,
+        2588672
+      ],
+      "referee_bytes": 2056192
+    },
+    {
+      "seconds": 3797,
+      "engine_bytes": [
+        2224128,
+        3358720,
+        2654208
+      ],
+      "referee_bytes": 1908736
+    },
+    {
+      "seconds": 3825,
+      "engine_bytes": [
+        1966080,
+        15220736,
+        2617344
+      ],
+      "referee_bytes": 2072576
+    },
+    {
+      "seconds": 3853,
+      "engine_bytes": [
+        1884160,
+        13828096,
+        2740224
+      ],
+      "referee_bytes": 1925120
+    },
+    {
+      "seconds": 3882,
+      "engine_bytes": [
+        1835008,
+        12414976,
+        2576384
+      ],
+      "referee_bytes": 1880064
+    },
+    {
+      "seconds": 3911,
+      "engine_bytes": [
+        2273280,
+        12726272,
+        2580480
+      ],
+      "referee_bytes": 1855488
+    },
+    {
+      "seconds": 3940,
+      "engine_bytes": [
+        2269184,
+        12726272,
+        2666496
+      ],
+      "referee_bytes": 1966080
+    },
+    {
+      "seconds": 3968,
+      "engine_bytes": [
+        2166784,
+        11427840,
+        2596864
+      ],
+      "referee_bytes": 2101248
+    },
+    {
+      "seconds": 3997,
+      "engine_bytes": [
+        2285568,
+        11427840,
+        2682880
+      ],
+      "referee_bytes": 2138112
+    },
+    {
+      "seconds": 4025,
+      "engine_bytes": [
+        2293760,
+        11292672,
+        2580480
+      ],
+      "referee_bytes": 2048000
+    },
+    {
+      "seconds": 4054,
+      "engine_bytes": [
+        2158592,
+        11300864,
+        2600960
+      ],
+      "referee_bytes": 1986560
+    },
+    {
+      "seconds": 4085,
+      "engine_bytes": [
+        2252800,
+        11300864,
+        2465792
+      ],
+      "referee_bytes": 1957888
+    },
+    {
+      "seconds": 4115,
+      "engine_bytes": [
+        2236416,
+        11300864,
+        2600960
+      ],
+      "referee_bytes": 1789952
+    },
+    {
+      "seconds": 4145,
+      "engine_bytes": [
+        2138112,
+        8974336,
+        2637824
+      ],
+      "referee_bytes": 1961984
+    },
+    {
+      "seconds": 4174,
+      "engine_bytes": [
+        2150400,
+        10555392,
+        2654208
+      ],
+      "referee_bytes": 2027520
+    },
+    {
+      "seconds": 4204,
+      "engine_bytes": [
+        2252800,
+        10674176,
+        2682880
+      ],
+      "referee_bytes": 1921024
+    },
+    {
+      "seconds": 4234,
+      "engine_bytes": [
+        2039808,
+        10674176,
+        2277376
+      ],
+      "referee_bytes": 1937408
+    },
+    {
+      "seconds": 4262,
+      "engine_bytes": [
+        2002944,
+        9355264,
+        2330624
+      ],
+      "referee_bytes": 2031616
+    },
+    {
+      "seconds": 4292,
+      "engine_bytes": [
+        1929216,
+        13045760,
+        2547712
+      ],
+      "referee_bytes": 2109440
+    },
+    {
+      "seconds": 4322,
+      "engine_bytes": [
+        2150400,
+        13045760,
+        2486272
+      ],
+      "referee_bytes": 1990656
+    },
+    {
+      "seconds": 4351,
+      "engine_bytes": [
+        1978368,
+        13045760,
+        2625536
+      ],
+      "referee_bytes": 1986560
+    },
+    {
+      "seconds": 4387,
+      "engine_bytes": [
+        2375680,
+        13045760,
+        2650112
+      ],
+      "referee_bytes": 1929216
+    },
+    {
+      "seconds": 4421,
+      "engine_bytes": [
+        2146304,
+        13045760,
+        2588672
+      ],
+      "referee_bytes": 2121728
+    },
+    {
+      "seconds": 4456,
+      "engine_bytes": [
+        2023424,
+        8200192,
+        2568192
+      ],
+      "referee_bytes": 1941504
+    },
+    {
+      "seconds": 4490,
+      "engine_bytes": [
+        2322432,
+        8400896,
+        2535424
+      ],
+      "referee_bytes": 1908736
+    },
+    {
+      "seconds": 4521,
+      "engine_bytes": [
+        2215936,
+        9293824,
+        2494464
+      ],
+      "referee_bytes": 1941504
+    },
+    {
+      "seconds": 4552,
+      "engine_bytes": [
+        2121728,
+        9891840,
+        2596864
+      ],
+      "referee_bytes": 1916928
+    },
+    {
+      "seconds": 4581,
+      "engine_bytes": [
+        2129920,
+        9338880,
+        2547712
+      ],
+      "referee_bytes": 2043904
+    },
+    {
+      "seconds": 4609,
+      "engine_bytes": [
+        2289664,
+        9490432,
+        2576384
+      ],
+      "referee_bytes": 2072576
+    },
+    {
+      "seconds": 4638,
+      "engine_bytes": [
+        2342912,
+        9973760,
+        2498560
+      ],
+      "referee_bytes": 1957888
+    },
+    {
+      "seconds": 4667,
+      "engine_bytes": [
+        2187264,
+        10989568,
+        2613248
+      ],
+      "referee_bytes": 2002944
+    },
+    {
+      "seconds": 4697,
+      "engine_bytes": [
+        2125824,
+        10989568,
+        2617344
+      ],
+      "referee_bytes": 2060288
+    },
+    {
+      "seconds": 4726,
+      "engine_bytes": [
+        2138112,
+        10989568,
+        2813952
+      ],
+      "referee_bytes": 2088960
+    },
+    {
+      "seconds": 4756,
+      "engine_bytes": [
+        2359296,
+        10989568,
+        2551808
+      ],
+      "referee_bytes": 2088960
+    },
+    {
+      "seconds": 4784,
+      "engine_bytes": [
+        1929216,
+        10989568,
+        2666496
+      ],
+      "referee_bytes": 1966080
+    },
+    {
+      "seconds": 4813,
+      "engine_bytes": [
+        2174976,
+        10989568,
+        2625536
+      ],
+      "referee_bytes": 1982464
+    },
+    {
+      "seconds": 4841,
+      "engine_bytes": [
+        1880064,
+        9420800,
+        2592768
+      ],
+      "referee_bytes": 2043904
+    },
+    {
+      "seconds": 4872,
+      "engine_bytes": [
+        2248704,
+        9117696,
+        2625536
+      ],
+      "referee_bytes": 1966080
+    },
+    {
+      "seconds": 4903,
+      "engine_bytes": [
+        1949696,
+        9502720,
+        2625536
+      ],
+      "referee_bytes": 1908736
+    },
+    {
+      "seconds": 4934,
+      "engine_bytes": [
+        2281472,
+        9502720,
+        2306048
+      ],
+      "referee_bytes": 1937408
+    },
+    {
+      "seconds": 4966,
+      "engine_bytes": [
+        1757184,
+        8953856,
+        2514944
+      ],
+      "referee_bytes": 2220032
+    },
+    {
+      "seconds": 5001,
+      "engine_bytes": [
+        2088960,
+        8306688,
+        2674688
+      ],
+      "referee_bytes": 2035712
+    },
+    {
+      "seconds": 5039,
+      "engine_bytes": [
+        2215936,
+        9052160,
+        2686976
+      ],
+      "referee_bytes": 2052096
+    },
+    {
+      "seconds": 5074,
+      "engine_bytes": [
+        2301952,
+        9367552,
+        2519040
+      ],
+      "referee_bytes": 2093056
+    },
+    {
+      "seconds": 5108,
+      "engine_bytes": [
+        2187264,
+        9052160,
+        2498560
+      ],
+      "referee_bytes": 1961984
+    },
+    {
+      "seconds": 5142,
+      "engine_bytes": [
+        2433024,
+        9048064,
+        2457600
+      ],
+      "referee_bytes": 1978368
+    },
+    {
+      "seconds": 5181,
+      "engine_bytes": [
+        2289664,
+        6549504,
+        2609152
+      ],
+      "referee_bytes": 2080768
+    },
+    {
+      "seconds": 5220,
+      "engine_bytes": [
+        2068480,
+        7667712,
+        2560000
+      ],
+      "referee_bytes": 1982464
+    },
+    {
+      "seconds": 5254,
+      "engine_bytes": [
+        2121728,
+        8691712,
+        2633728
+      ],
+      "referee_bytes": 1896448
+    },
+    {
+      "seconds": 5292,
+      "engine_bytes": [
+        2285568,
+        8691712,
+        2646016
+      ],
+      "referee_bytes": 2088960
+    },
+    {
+      "seconds": 5327,
+      "engine_bytes": [
+        2273280,
+        8691712,
+        2506752
+      ],
+      "referee_bytes": 2109440
+    },
+    {
+      "seconds": 5359,
+      "engine_bytes": [
+        2269184,
+        8691712,
+        2625536
+      ],
+      "referee_bytes": 2138112
+    },
+    {
+      "seconds": 5391,
+      "engine_bytes": [
+        2285568,
+        6156288,
+        2580480
+      ],
+      "referee_bytes": 1945600
+    },
+    {
+      "seconds": 5425,
+      "engine_bytes": [
+        2359296,
+        9048064,
+        2396160
+      ],
+      "referee_bytes": 1830912
+    },
+    {
+      "seconds": 5461,
+      "engine_bytes": [
+        2387968,
+        9043968,
+        2568192
+      ],
+      "referee_bytes": 1884160
+    },
+    {
+      "seconds": 5495,
+      "engine_bytes": [
+        2023424,
+        10932224,
+        2674688
+      ],
+      "referee_bytes": 2187264
+    },
+    {
+      "seconds": 5523,
+      "engine_bytes": [
+        2121728,
+        10739712,
+        2768896
+      ],
+      "referee_bytes": 2134016
+    },
+    {
+      "seconds": 5552,
+      "engine_bytes": [
+        2416640,
+        10448896,
+        2617344
+      ],
+      "referee_bytes": 2396160
+    },
+    {
+      "seconds": 5587,
+      "engine_bytes": [
+        2301952,
+        11460608,
+        2732032
+      ],
+      "referee_bytes": 2338816
+    },
+    {
+      "seconds": 5618,
+      "engine_bytes": [
+        2269184,
+        11460608,
+        2703360
+      ],
+      "referee_bytes": 2396160
+    },
+    {
+      "seconds": 5652,
+      "engine_bytes": [
+        2138112,
+        7708672,
+        2564096
+      ],
+      "referee_bytes": 1855488
+    },
+    {
+      "seconds": 5711,
+      "engine_bytes": [
+        2367488,
+        7708672,
+        2572288
+      ],
+      "referee_bytes": 2011136
+    },
+    {
+      "seconds": 5765,
+      "engine_bytes": [
+        2273280,
+        6676480,
+        2629632
+      ],
+      "referee_bytes": 1982464
+    },
+    {
+      "seconds": 5796,
+      "engine_bytes": [
+        2310144,
+        8036352,
+        2564096
+      ],
+      "referee_bytes": 1855488
+    },
+    {
+      "seconds": 5838,
+      "engine_bytes": [
+        2605056,
+        8040448,
+        2572288
+      ],
+      "referee_bytes": 1961984
+    },
+    {
+      "seconds": 5900,
+      "engine_bytes": [
+        1748992,
+        8040448,
+        2596864
+      ],
+      "referee_bytes": 2076672
+    },
+    {
+      "seconds": 5964,
+      "engine_bytes": [
+        2478080,
+        8044544,
+        2506752
+      ],
+      "referee_bytes": 1921024
+    },
+    {
+      "seconds": 6039,
+      "engine_bytes": [
+        2084864,
+        8044544,
+        2580480
+      ],
+      "referee_bytes": 2011136
+    },
+    {
+      "seconds": 6093,
+      "engine_bytes": [
+        2359296,
+        8044544,
+        2523136
+      ],
+      "referee_bytes": 1871872
+    },
+    {
+      "seconds": 6128,
+      "engine_bytes": [
+        2093056,
+        2777088,
+        2572288
+      ],
+      "referee_bytes": 2195456
+    },
+    {
+      "seconds": 6159,
+      "engine_bytes": [
+        2150400,
+        5566464,
+        2641920
+      ],
+      "referee_bytes": 1945600
+    },
+    {
+      "seconds": 6188,
+      "engine_bytes": [
+        2289664,
+        10014720,
+        2695168
+      ],
+      "referee_bytes": 2015232
+    },
+    {
+      "seconds": 6218,
+      "engine_bytes": [
+        2306048,
+        10031104,
+        2514944
+      ],
+      "referee_bytes": 1941504
+    },
+    {
+      "seconds": 6248,
+      "engine_bytes": [
+        2203648,
+        10031104,
+        2576384
+      ],
+      "referee_bytes": 1912832
+    },
+    {
+      "seconds": 6282,
+      "engine_bytes": [
+        2347008,
+        10031104,
+        2547712
+      ],
+      "referee_bytes": 2011136
+    },
+    {
+      "seconds": 6314,
+      "engine_bytes": [
+        2461696,
+        10035200,
+        2400256
+      ],
+      "referee_bytes": 2088960
+    },
+    {
+      "seconds": 6345,
+      "engine_bytes": [
+        2146304,
+        10035200,
+        2633728
+      ],
+      "referee_bytes": 2056192
+    },
+    {
+      "seconds": 6375,
+      "engine_bytes": [
+        2236416,
+        10035200,
+        2564096
+      ],
+      "referee_bytes": 2056192
+    },
+    {
+      "seconds": 6407,
+      "engine_bytes": [
+        2265088,
+        10035200,
+        2629632
+      ],
+      "referee_bytes": 2093056
+    },
+    {
+      "seconds": 6437,
+      "engine_bytes": [
+        2240512,
+        10035200,
+        2543616
+      ],
+      "referee_bytes": 2039808
+    },
+    {
+      "seconds": 6468,
+      "engine_bytes": [
+        2195456,
+        8318976,
+        2404352
+      ],
+      "referee_bytes": 2043904
+    },
+    {
+      "seconds": 6497,
+      "engine_bytes": [
+        2256896,
+        8499200,
+        2207744
+      ],
+      "referee_bytes": 2134016
+    },
+    {
+      "seconds": 6527,
+      "engine_bytes": [
+        2224128,
+        8499200,
+        2560000
+      ],
+      "referee_bytes": 1945600
+    },
+    {
+      "seconds": 6559,
+      "engine_bytes": [
+        2179072,
+        10031104,
+        2588672
+      ],
+      "referee_bytes": 2002944
+    },
+    {
+      "seconds": 6604,
+      "engine_bytes": [
+        2433024,
+        10031104,
+        2457600
+      ],
+      "referee_bytes": 1908736
+    },
+    {
+      "seconds": 6642,
+      "engine_bytes": [
+        1941504,
+        10031104,
+        2527232
+      ],
+      "referee_bytes": 1990656
+    },
+    {
+      "seconds": 6673,
+      "engine_bytes": [
+        2347008,
+        10039296,
+        2641920
+      ],
+      "referee_bytes": 2084864
+    },
+    {
+      "seconds": 6702,
+      "engine_bytes": [
+        2236416,
+        10039296,
+        2535424
+      ],
+      "referee_bytes": 2129920
+    },
+    {
+      "seconds": 6740,
+      "engine_bytes": [
+        2424832,
+        10039296,
+        2699264
+      ],
+      "referee_bytes": 1970176
+    },
+    {
+      "seconds": 6773,
+      "engine_bytes": [
+        2330624,
+        10039296,
+        2592768
+      ],
+      "referee_bytes": 2023424
+    },
+    {
+      "seconds": 6805,
+      "engine_bytes": [
+        2355200,
+        10039296,
+        2580480
+      ],
+      "referee_bytes": 1921024
+    }
+  ],
+  "failures": [
+    "TimeoutError('waiting for bestmove')"
+  ],
+  "native_gui_checks": "untested: native control unavailable",
+  "full_training": "not run",
+  "strength_gauntlets": "not run",
+  "live_discord": "not run: no application ID",
+  "elapsed_seconds": 6838.531,
+  "owned_processes_exited": true,
+  "automated_checks": {
+    "version": "0.5.0-beta.1",
+    "rust_tests": {
+      "status": "pass",
+      "count": 62
+    },
+    "python_tests": {
+      "status": "pass",
+      "count": 34,
+      "note": "Normal temporary-file and owned-process cleanup permissions required; sandbox run failed with access-denied errors."
+    },
+    "clippy": "pass",
+    "rust_format": "pass",
+    "python_ruff_F": "pass (project virtual environment)",
+    "neural_parity": {
+      "status": "pass",
+      "positions": 40,
+      "policy_logits_per_position": 4840,
+      "max_error": 6.68e-06
+    },
+    "proof_panel_visual_inspection": "pass: certificate status, 85 nodes, region, branch references and controls visible",
+    "manual_gui": "untested: native controls unavailable",
+    "stale_and_forged_proofs": "pass: Rust and Python tests",
+    "process_inventory_during_soak": "pass: three engines and one referee, no render leftovers"
+  },
+  "release_readiness": "qualification incomplete: soak timeout and untested native GUI",
+  "process_inventory_after_failure": "pass: no Skallagrim processes remained",
+  "timing_probe": {
+    "engine_sha256": "e679d93e34359df1b482de6c7e93dc0293f8285fc41ee92c40a30123d5a885b4",
+    "fixture_sha256": "6a83c7bc55a8c798ea60e13a611bfb04029a7cbf0278b99598cccbc24ecead39",
+    "cpu": 6,
+    "movetime_ms": 300,
+    "diagnostic_allowance_ms": 2000,
+    "strength_evidence": false,
+    "results": [
+      {
+        "bot": "Rho",
+        "position": "start",
+        "trials": 10,
+        "mean_ms": 292.0265200024005,
+        "max_ms": 293.66289998870343,
+        "over_300": 0,
+        "over_325": 0,
+        "elapsed_ms": [
+          291.303500009235,
+          291.93429998122156,
+          293.66289998870343,
+          291.5420000208542,
+          292.37370000919327,
+          293.2802999857813,
+          290.9646999905817,
+          291.42020002473146,
+          291.3882000138983,
+          292.3953999998048
+        ]
+      },
+      {
+        "bot": "Rho",
+        "position": "315-ply history",
+        "trials": 10,
+        "mean_ms": 294.61917000007816,
+        "max_ms": 322.17910001054406,
+        "over_300": 1,
+        "over_325": 0,
+        "elapsed_ms": [
+          322.17910001054406,
+          291.36000003200024,
+          291.329899977427,
+          291.829299996607,
+          291.6992999962531,
+          291.547900007572,
+          291.62589996121824,
+          291.5725000202656,
+          291.55580000951886,
+          291.4919999893755
+        ]
+      },
+      {
+        "bot": "Iota",
+        "position": "start",
+        "trials": 10,
+        "mean_ms": 294.47479000664316,
+        "max_ms": 301.80910002673045,
+        "over_300": 2,
+        "over_325": 0,
+        "elapsed_ms": [
+          291.12030001124367,
+          290.63719999976456,
+          295.47090001869947,
+          295.40370003087446,
+          301.54790001688525,
+          301.80910002673045,
+          290.753900015261,
+          291.020100004971,
+          294.0258999587968,
+          292.9588999832049
+        ]
+      },
+      {
+        "bot": "Iota",
+        "position": "315-ply history",
+        "trials": 10,
+        "mean_ms": 293.0440000083763,
+        "max_ms": 304.5292000169866,
+        "over_300": 1,
+        "over_325": 0,
+        "elapsed_ms": [
+          304.5292000169866,
+          293.2300000102259,
+          293.9868000103161,
+          291.18040000321344,
+          291.1756000248715,
+          291.47290001856163,
+          291.2124000140466,
+          291.1240999819711,
+          291.31599998800084,
+          291.2126000155695
+        ]
+      },
+      {
+        "bot": "Beta",
+        "position": "start",
+        "trials": 10,
+        "mean_ms": 293.93017000402324,
+        "max_ms": 345.43770004529506,
+        "over_300": 2,
+        "over_325": 1,
+        "elapsed_ms": [
+          281.2153999693692,
+          291.234300006181,
+          279.9210000084713,
+          288.43440004857257,
+          282.821899978444,
+          277.43289998034015,
+          293.1317999609746,
+          293.9367000362836,
+          305.73560000630096,
+          345.43770004529506
+        ]
+      },
+      {
+        "bot": "Beta",
+        "position": "315-ply history",
+        "trials": 10,
+        "mean_ms": 284.8825099936221,
+        "max_ms": 299.677699978929,
+        "over_300": 0,
+        "over_325": 0,
+        "elapsed_ms": [
+          284.43679999327287,
+          299.677699978929,
+          280.21360002458096,
+          282.6597999664955,
+          282.2832000092603,
+          295.89030001079664,
+          279.0761000360362,
+          279.2106999550015,
+          283.02829997846857,
+          282.34859998337924
+        ]
+      }
+    ]
+  },
+  "runtime_sha256": {
+    "skallagrim.exe": "e679d93e34359df1b482de6c7e93dc0293f8285fc41ee92c40a30123d5a885b4",
+    "skallagrim-gui.exe": "2ff4c4c7a1f2ce213fb539987e6039be93caab22aa7842358d23a067743f3c7a",
+    "skallagrim-referee.exe": "5ad168079d373b201b79d39a835fc64ea3bb55e8e15aeb204904b7bc2bef3269",
+    "models/nnue.json": "e52b7555465cda3cb59129e94b2710e645186be7b1b3f1a1af81f6323340f24d",
+    "models/cnn.json": "560afe89f16b03a89a77cdb109500b4be49aad306afc0468c7d723a1d4b3b9b2"
+  },
+  "working_set_summary_mib": {
+    "Iota": {
+      "initial": 5.18,
+      "final": 2.25,
+      "peak": 5.84
+    },
+    "Beta": {
+      "initial": 5.67,
+      "final": 9.57,
+      "peak": 15.96
+    },
+    "Rho": {
+      "initial": 5.14,
+      "final": 2.46,
+      "peak": 6.2
+    },
+    "referee": {
+      "initial": 5.34,
+      "final": 1.83,
+      "peak": 5.78
+    }
+  },
+  "memory_measurement_note": "Working set only; Windows paging means this does not establish absence of heap leaks.",
+  "recovery_run": {
+    "status": "pass",
+    "elapsed_seconds": 420.5,
+    "plies": 3528,
+    "replay_audits": 294,
+    "render_checks": 45,
+    "failures": [],
+    "owned_processes_exited": true
+  },
+  "combined_observation_seconds": 7259.031,
+  "continuous_two_hour_pass": false
+}

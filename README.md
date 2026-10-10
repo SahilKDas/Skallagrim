@@ -1,4 +1,8 @@
-# Skallagrim
+# Skallagrim 0.5.0-beta.1
+
+Experimental Windows beta. See [installation and release qualification](docs/RELEASE.md) and [changelog](CHANGELOG.md). Native manual GUI testing, full league training, live Discord validation and fresh strength qualification remain separately recorded checks.
+
+**Release qualification:** the long soak found a search-response timeout at approximately 114 minutes. Stability qualification remains incomplete; see the release report before treating this candidate as ready.
 
 Skallagrim is a Copenhagen Hnefatafl engine and research platform in Rust and Python, with a polished desktop GUI rendered using tiny-skia. Its goal is strong play as both attackers and defenders, backed by reproducible matches against existing open-source engines.
 
@@ -88,8 +92,7 @@ Training rejects fewer than **1,000 completed training games**, excluding valida
 cargo fmt --check
 cargo clippy --all-targets -- -D warnings
 cargo test
-python python/test_system.py
-python python/test_dataset.py
+python -m unittest discover -s python -p 'test_*.py'
 python python/verify_models.py --positions 40
 python python/gauntlet_suite.py --output runs/gauntlets --allow-unaudited
 python python/report.py --root runs/gauntlets --output benchmarks/RESULTS.md --require-complete
@@ -97,7 +100,7 @@ python python/audit_matches.py --root runs/gauntlets --output runs/replay-audit.
 python python/package_release.py --with-data --with-matches --matches-root runs/gauntlets
 ```
 
-The [results report](benchmarks/RESULTS.md) tracks completed pairings and separates protocol forfeits from played games. Exploratory comparisons require `--allow-unaudited` because the upstream rules and timing limitations are documented in [BENCHMARKS.md](docs/BENCHMARKS.md). Release archives contain runnable Windows executables, trained models, source, documentation and per-file checksums; the optional evidence includes the training corpus and final gauntlet logs.
+The [release validation report](benchmarks/release-validation.json) records clean-install process, rendering, replay and soak checks separately from untested native interactions. The [results report](benchmarks/RESULTS.md) tracks completed pairings and separates protocol forfeits from played games. Exploratory comparisons require `--allow-unaudited` because the upstream rules and timing limitations are documented in [BENCHMARKS.md](docs/BENCHMARKS.md). Release archives contain runnable Windows executables, trained models, source, documentation and per-file checksums; the optional evidence includes the training corpus and final gauntlet logs.
 
 ## License
 
