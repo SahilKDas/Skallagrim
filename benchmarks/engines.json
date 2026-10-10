@@ -1,0 +1,161 @@
+{
+  "engines": {
+    "rho": {
+      "command": [
+        "./target/release/skallagrim.exe"
+      ],
+      "options": {
+        "Bot": "Rho",
+        "CNNFile": "./models/cnn.json"
+      },
+      "artifacts": [
+        "target/release/skallagrim.exe",
+        "models/cnn.json",
+        "models/cnn.meta.json"
+      ],
+      "rules_audited": true,
+      "resources": "single-thread CPU scalar CNN",
+      "training_metadata": [
+        "models/cnn.meta.json"
+      ]
+    },
+    "iota": {
+      "command": [
+        "./target/release/skallagrim.exe"
+      ],
+      "options": {
+        "Bot": "Iota",
+        "NNUEFile": "./models/nnue.json"
+      },
+      "artifacts": [
+        "target/release/skallagrim.exe",
+        "models/nnue.json",
+        "models/nnue.meta.json"
+      ],
+      "rules_audited": true,
+      "resources": "single-thread CPU NNUE",
+      "training_metadata": [
+        "models/nnue.meta.json"
+      ]
+    },
+    "beta": {
+      "command": [
+        "./target/release/skallagrim.exe"
+      ],
+      "options": {
+        "Bot": "Beta",
+        "NNUEFile": "./models/nnue.json"
+      },
+      "artifacts": [
+        "target/release/skallagrim.exe",
+        "models/nnue.json",
+        "models/nnue.meta.json"
+      ],
+      "rules_audited": true,
+      "resources": "single-thread CPU NNUE; uniform PUCT priors",
+      "training_metadata": [
+        "models/nnue.meta.json"
+      ]
+    },
+    "baseline": {
+      "command": [
+        "./target/release/skallagrim.exe"
+      ],
+      "options": {
+        "Bot": "Baseline"
+      },
+      "artifacts": [
+        "target/release/skallagrim.exe"
+      ],
+      "rules_audited": true,
+      "resources": "single-thread CPU"
+    },
+    "taflzero": {
+      "command": [
+        "./external/taflzero/target/release/taflzero.exe",
+        "--net",
+        "./external/taflzero/default_nn.onnx"
+      ],
+      "options": {
+        "Variant": "copenhagen11x11"
+      },
+      "artifacts": [
+        "external/taflzero/target/release/taflzero.exe",
+        "external/taflzero/default_nn.onnx",
+        "benchmarks/opponents.lock.json"
+      ],
+      "warmup": true,
+      "rules_audited": false,
+      "resources": "single-thread ONNX CPU; batch 8; overruns are timeouts",
+      "warmup_ms": 1000
+    },
+    "nicholas": {
+      "command": [
+        "./.venv/Scripts/python.exe",
+        "./python/adapters/neural_opponent.py",
+        "--kind",
+        "nicholas",
+        "--repo",
+        "./external/nicholas",
+        "--weights",
+        "./external/nicholas/model.ckpt"
+      ],
+      "artifacts": [
+        "external/nicholas/model.ckpt",
+        "external/nicholas/model.meta.json",
+        "python/adapters/neural_opponent.py",
+        "benchmarks/nicholas-rules-audit.json",
+        "benchmarks/opponents.lock.json"
+      ],
+      "rules_audited": false,
+      "resources": "single-thread PyTorch CPU; timed upstream MCTS; transition JIT warmed; 30-ms reserve",
+      "training_metadata": [
+        "external/nicholas/model.meta.json"
+      ]
+    },
+    "luizz": {
+      "command": [
+        "./.venv/Scripts/python.exe",
+        "./python/adapters/neural_opponent.py",
+        "--kind",
+        "luizz",
+        "--repo",
+        "./external/luizz",
+        "--weights",
+        "./external/luizz/model.pt"
+      ],
+      "artifacts": [
+        "external/luizz/model.pt",
+        "external/luizz/model.meta.json",
+        "python/adapters/neural_opponent.py",
+        "python/adapters/luizz_lazy.py",
+        "benchmarks/luizz-rules-audit.json",
+        "benchmarks/opponents.lock.json"
+      ],
+      "rules_audited": false,
+      "resources": "single-thread CPU PyTorch; upstream PUCT with lazy state materialization verified at fixed 10 simulations; 30-ms reserve",
+      "training_metadata": [
+        "external/luizz/model.meta.json"
+      ]
+    },
+    "opentafl": {
+      "command": [
+        "python",
+        "./python/adapters/opentafl.py",
+        "--classpath",
+        "./external/opentafl/build/classes/java/main;./external/opentafl/lib/*"
+      ],
+      "artifacts": [
+        "external/opentafl/bridge/OpenTaflBridge.class",
+        "benchmarks/opentafl-build.json",
+        "python/adapters/opentafl.py",
+        "python/adapters/OpenTaflBridge.java",
+        "benchmarks/opponents.lock.json"
+      ],
+      "warmup": true,
+      "rules_audited": false,
+      "resources": "Java CPU, 256-MiB heap; native alpha-beta/TT/order; public continuation/horizon off for short clocks; volatile cancellation visibility patch; 150-ms reserve for native cancellation drain; ZGC one concurrent/parallel collector thread",
+      "warmup_ms": 1500
+    }
+  }
+}

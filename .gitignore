@@ -1,0 +1,9 @@
+/target/
+/.venv/
+__pycache__/
+*.pyc
+/runs/
+/external/
+
+/dist/
+*.tmp

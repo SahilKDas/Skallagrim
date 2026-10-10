@@ -2,6 +2,12 @@
 
 Recorded October 9, 2026. These notes capture the agreed project direction. Implementation choices explicitly marked as proposals remain open.
 
+The Rust engine, three neural candidates, protocol, tiny-skia GUI, Python training/promotion pipeline, and four upstream adapters are implemented. The initial audited corpus has 1,000 training games plus 250 validation games. All fifteen initial gauntlets are complete (750 games, 300-ms search requests plus a common documented 25-ms IPC allowance); every game and 35,361 plies replay-verified. See README.md, benchmarks/RESULTS.md and docs/ for commands, provenance and limitations. Superiority and full federation compatibility are not established.
+
+Selected implementation choices: TaflZero-compatible UCI with documented extensions; minifb windowing and fontdue text over tiny-skia; shared NNUE checkpoint for Iota/Beta; uniform Beta priors; learned CNN priors for Rho. The original proposal language below preserves the planning record.
+
+Additional requirement from the user: **at least 1,000 completed training games**, with a separate held-out validation set. Smoke-test checkpoints must not be represented as competitive candidates.
+
 ## Required scope
 
 - Implement Copenhagen Hnefatafl on an 11×11 board using the World Tafl Federation's rules.
@@ -108,4 +114,4 @@ Proposed interpretation: run a 50-game match for each candidate/opponent pairing
 
 ## Current status
 
-Only project documentation exists. No implementation, trained candidates, completed gauntlets, or demonstrated superiority is claimed.
+Rust rules, search, protocol, and tiny-skia GUI plus Python training/export, self-play, iterative replay tooling, and match infrastructure are implemented. Full federation-rule certification, sustained neural self-play, checkpoint-backed Python-opponent validation, and final external strength proof remain outstanding. Consult docs/RULES.md, docs/TRAINING.md, and docs/BENCHMARKS.md before interpreting results.
