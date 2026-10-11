@@ -1944,7 +1944,7 @@
     "stale_and_forged_proofs": "pass: Rust and Python tests",
     "process_inventory_during_soak": "pass: three engines and one referee, no render leftovers"
   },
-  "release_readiness": "qualification incomplete: soak timeout and untested native GUI",
+  "release_readiness": "User accepted replay loading, proof navigation and continuous soak by override; observed failures and untested checks remain recorded. Separate deadline-probe failure remains unresolved.",
   "process_inventory_after_failure": "pass: no Skallagrim processes remained",
   "timing_probe": {
     "engine_sha256": "e679d93e34359df1b482de6c7e93dc0293f8285fc41ee92c40a30123d5a885b4",
@@ -2122,5 +2122,42 @@
     "owned_processes_exited": true
   },
   "combined_observation_seconds": 7259.031,
-  "continuous_two_hour_pass": false
+  "continuous_two_hour_pass": false,
+  "manual_gui_results": {
+    "source": "user-reported GUI walkthrough, 2026-10-10",
+    "passed": [
+      "window resizing",
+      "new game",
+      "legal destination highlights",
+      "human move and bot reply",
+      "undo"
+    ],
+    "save": "success message observed; file reload not verified"
+  },
+  "user_overrides": {
+    "replay_loading": {
+      "disposition": "override_pass",
+      "verified": false,
+      "observed_result": "untested",
+      "authority": "user",
+      "date": "2026-10-10",
+      "reason": "I'm too lazy and im accepting that shit"
+    },
+    "proof_navigation": {
+      "disposition": "override_pass",
+      "verified": false,
+      "observed_result": "untested",
+      "authority": "user",
+      "date": "2026-10-10",
+      "reason": "I'm too lazy and im accepting that shit"
+    },
+    "continuous_two_hour_soak": {
+      "disposition": "override_pass",
+      "verified": false,
+      "observed_result": "failed: search watchdog timeout at 114 minutes",
+      "authority": "user",
+      "date": "2026-10-10",
+      "reason": "I'm too lazy and im accepting that shit"
+    }
+  }
 }

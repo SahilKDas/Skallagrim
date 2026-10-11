@@ -19,7 +19,44 @@
     "max_error": 6.68e-06
   },
   "proof_panel_visual_inspection": "pass: certificate status, 85 nodes, region, branch references and controls visible",
-  "manual_gui": "untested: native controls unavailable",
+  "manual_gui": "partial pass: user walkthrough; remaining checks not verified",
   "stale_and_forged_proofs": "pass: Rust and Python tests",
-  "process_inventory_during_soak": "pass: three engines and one referee, no render leftovers"
+  "process_inventory_during_soak": "pass: three engines and one referee, no render leftovers",
+  "manual_gui_results": {
+    "source": "user-reported GUI walkthrough, 2026-10-10",
+    "passed": [
+      "window resizing",
+      "new game",
+      "legal destination highlights",
+      "human move and bot reply",
+      "undo"
+    ],
+    "save": "success message observed; file reload not verified"
+  },
+  "user_overrides": {
+    "replay_loading": {
+      "disposition": "override_pass",
+      "verified": false,
+      "observed_result": "untested",
+      "authority": "user",
+      "date": "2026-10-10",
+      "reason": "I'm too lazy and im accepting that shit"
+    },
+    "proof_navigation": {
+      "disposition": "override_pass",
+      "verified": false,
+      "observed_result": "untested",
+      "authority": "user",
+      "date": "2026-10-10",
+      "reason": "I'm too lazy and im accepting that shit"
+    },
+    "continuous_two_hour_soak": {
+      "disposition": "override_pass",
+      "verified": false,
+      "observed_result": "failed: search watchdog timeout at 114 minutes",
+      "authority": "user",
+      "date": "2026-10-10",
+      "reason": "I'm too lazy and im accepting that shit"
+    }
+  }
 }
