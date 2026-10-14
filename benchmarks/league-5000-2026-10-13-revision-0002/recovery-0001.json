@@ -16,6 +16,7 @@
   "checked": 1791948760.2632005,
   "resume": "original frozen controller, original source and four-worker layout",
   "controller_launch_pid": 31712,
-  "current_completed": 791,
-  "current_progress_age_seconds": 1702.9203488826752
+  "current_completed": 803,
+  "current_progress_age_seconds": 5.649691820144653,
+  "resume_verified": true
 }
