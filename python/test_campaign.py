@@ -51,6 +51,65 @@ def checkpoint(path):
 
 
 class CampaignTests(unittest.TestCase):
+    def test_manifest_hash_is_cached_before_live_referee_clocks(self):
+        import selfplay
+        from league import checkpoint as league_checkpoint, manifest, digest
+
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            current = league_checkpoint(ROOT / "models/nnue.json", "Beta")
+            manifest(
+                root / "league.json",
+                current,
+                current,
+                [],
+                ROOT / "benchmarks/league-positions.json",
+                2,
+                20,
+                257,
+                20,
+                600,
+            )
+            calls = []
+
+            def checked_digest(value):
+                if isinstance(value, dict) and "schedule" in value:
+                    calls.append(True)
+                    if len(calls) > 1:
+                        raise AssertionError(
+                            "Full manifest rehashed during game collection"
+                        )
+                return digest(value)
+
+            with (
+                patch.object(
+                    sys,
+                    "argv",
+                    [
+                        "selfplay",
+                        "--games",
+                        "2",
+                        "--movetime",
+                        "20",
+                        "--seed",
+                        "257",
+                        "--bot",
+                        "Beta",
+                        "--league",
+                        str(root / "league.json"),
+                        "--output",
+                        str(root / "selfplay.jsonl"),
+                        "--resume-collection",
+                        "--cpu",
+                        "6",
+                    ],
+                ),
+                patch.object(selfplay, "digest", side_effect=checked_digest),
+            ):
+                selfplay.main()
+            self.assertEqual(len(calls), 1)
+            self.assertEqual(len(DatasetIndex(root / "selfplay.jsonl.gz").groups), 2)
+
     def test_compressed_replay_preserves_every_row_and_random_access(self):
         with tempfile.TemporaryDirectory() as temp:
             root = Path(temp)

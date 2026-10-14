@@ -52,6 +52,7 @@ def main():
     rng = random.Random(args.seed)
     league = json.loads(args.league.read_text()) if args.league else None
     suite = verify_manifest(league) if league else None
+    league_identity = digest(league) if league else None
     if league and any(
         league[key] != value
         for key, value in dict(
@@ -116,7 +117,7 @@ def main():
             collection = Collection(
                 args.output.parent / "transactions",
                 dict(
-                    manifest=digest(league),
+                    manifest=league_identity,
                     games=args.games,
                     exploration=args.exploration,
                     cpu=args.cpu,
@@ -228,7 +229,7 @@ def main():
                             rules=state["rules"],
                             ply=ply,
                             league=dict(
-                                manifest=digest(league),
+                                manifest=league_identity,
                                 pair=plan["pair"],
                                 candidate_side=plan["candidate_side"],
                                 opponent=plan["opponent"],
@@ -240,7 +241,19 @@ def main():
                             else None,
                         )
                     )
-                state = referee.play(move)
+                try:
+                    state = referee.play(move)
+                except (TimeoutError, RuntimeError, ValueError, OSError) as exc:
+                    if not league:
+                        raise
+                    failure = (
+                        "timeout" if isinstance(exc, TimeoutError) else "engine-failure"
+                    )
+                    state = referee.snapshot()
+                    if not state["outcome"]:
+                        referee.call("forfeit", reason=failure, evidence=str(exc))
+                        state = referee.snapshot()
+                    break
                 history.append(move)
                 contaminated |= state["fen"] in held_out
                 for player in set(players.values()):

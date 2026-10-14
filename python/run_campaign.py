@@ -41,7 +41,7 @@ def normalized_engines(value, workspace):
     return value
 
 
-def freeze(run, workspace):
+def freeze(run, workspace, storage_root=None):
     runtime = run / "runtime"
     manifest_path = run / "campaign.json"
     if not manifest_path.exists():
@@ -85,6 +85,7 @@ def freeze(run, workspace):
             movetime=100,
             cpu=6,
             max_storage_gib=16,
+            storage_root=str(storage_root or run),
             replay_max_gib=8,
             files={
                 path.relative_to(runtime).as_posix(): pin(path)["sha256"]
@@ -120,6 +121,8 @@ def freeze(run, workspace):
         }
         save(manifest_path, manifest)
     manifest = json.loads(manifest_path.read_text())
+    if manifest.get("storage_root", str(run)) != str(storage_root or run):
+        raise ValueError("Campaign storage scope changed")
     for name, digest in manifest["files"].items():
         if pin(runtime / name)["sha256"] != digest:
             raise ValueError(f"Frozen campaign input changed: {name}")
@@ -134,7 +137,12 @@ def freeze(run, workspace):
 class Publisher:
     def __init__(self, run, workspace, enabled):
         self.run, self.workspace, self.enabled = run, workspace, enabled
-        self.output = workspace / "benchmarks" / run.name
+        publication_name = (
+            run.parent.name + "-" + run.name
+            if run.name.startswith("revision-")
+            else run.name
+        )
+        self.output = workspace / "benchmarks" / publication_name
         self.journal = run / "published.json"
         self.published = (
             set(json.loads(self.journal.read_text()))
@@ -353,6 +361,7 @@ def main():
     p.add_argument("--run", type=Path, default=ROOT / "runs/league-5000-2026-10-13")
     p.add_argument("--workspace", type=Path, default=ROOT)
     p.add_argument("--publish", action="store_true")
+    p.add_argument("--storage-root", type=Path)
     args = p.parse_args()
     run, workspace = args.run.resolve(), args.workspace.resolve()
     run.mkdir(parents=True, exist_ok=True)
@@ -408,9 +417,12 @@ def main():
             handle, 0x40
         ) or not kernel.SetProcessAffinityMask(handle, 1 << 6):
             raise ctypes.WinError()
-    budget = StorageBudget(run, 16 * 1024**3)
+    storage_root = args.storage_root.resolve() if args.storage_root else run
+    if not run.is_relative_to(storage_root):
+        raise ValueError("Storage budget must include the campaign directory")
+    budget = StorageBudget(storage_root, 16 * 1024**3)
     budget.check()
-    runtime, configuration = freeze(run, workspace)
+    runtime, configuration = freeze(run, workspace, storage_root)
     publisher = Publisher(run, workspace, args.publish)
     done_path = run / "completed-stages.json"
     done = set(json.loads(done_path.read_text())) if done_path.exists() else set()
@@ -468,7 +480,7 @@ def main():
                         "--run",
                         str(run / kind),
                         "--storage-root",
-                        str(run),
+                        str(budget.root),
                         "--max-storage-gib",
                         "16",
                         "--replay-max-gib",
