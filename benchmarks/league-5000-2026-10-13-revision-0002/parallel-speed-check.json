@@ -1,0 +1,29 @@
+{
+  "status": "running",
+  "imported_games": 131,
+  "fresh_measured_games": 50,
+  "roles": {
+    "Attacker": 26,
+    "Defender": 24
+  },
+  "first_50_parallel_wall_seconds": 171.83045148849487,
+  "parallel_games_per_hour": 1047.5442416680849,
+  "old_single_worker_games_per_hour": 264.6317628818706,
+  "measured_throughput_ratio": 3.958497764063567,
+  "remaining_nnue_collection_hours_estimate": 5.798098740741053,
+  "exclusions": {},
+  "cpus": [
+    4,
+    6,
+    8,
+    10
+  ],
+  "counts_unchanged": {
+    "per_evaluator": 6250,
+    "training": 5000,
+    "validation": 1250
+  },
+  "promotion_gates": "unchanged; not yet run",
+  "training_and_gauntlet_runtime": "not included",
+  "timing_note": "Approximate collector start from progress wall/monotonic times; fifty completion times from durable transaction modification times. Separate samples, not a controlled strength comparison."
+}
