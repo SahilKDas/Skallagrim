@@ -1,0 +1,22 @@
+{
+  "stage": "nnue-collection",
+  "first_completed_games": 50,
+  "roles": {
+    "Attacker": 25,
+    "Defender": 25
+  },
+  "seconds": 701.8379999999597,
+  "games_per_hour": 256.4694416660402,
+  "remaining_collection_hours_estimate": 24.174419999998612,
+  "exclusions": 0,
+  "watchdog_fallbacks": 751,
+  "campaign_bytes": 117240562,
+  "storage_cap_bytes": 17179869184,
+  "free_bytes": 21485494272,
+  "free_reserve_bytes": 2147483648,
+  "nnue_training": "pending",
+  "cnn_round": "pending",
+  "promotion_and_gauntlets": "pending",
+  "stronger_claim": false,
+  "updated": 1791942696.1541507
+}

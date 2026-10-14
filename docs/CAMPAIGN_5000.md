@@ -18,6 +18,6 @@ Iota and Beta must both pass for a shared NNUE promotion. Rho is gated separatel
 
 The fresh external/mutual suite contains 750 games: fifteen 50-game pairings. It uses new candidate weights even if a candidate failed internal promotion, with that status disclosed. Upstream mismatches, timing failures, and local warm-start provenance remain visible and cannot establish superiority. Full replay audits precede deployment.
 
-Progress, charts, candidate artifacts, hashes and compressed match logs are published under benchmarks/league-5000-2026-10-13. Bulk training samples remain under runs. Deployment changes only evaluators which passed their gates, verifies that the current models have not changed externally, and keeps rejected candidates available for inspection. Actual runs and results are separate from the unit and small integration tests.
+Progress, charts, candidate artifacts, hashes and compressed match logs are published under benchmarks/league-5000-2026-10-13-revision-0001. Bulk training samples remain under runs. Deployment changes only evaluators which passed their gates, verifies that the current models have not changed externally, and keeps rejected candidates available for inspection. Actual runs and results are separate from the unit and small integration tests.
 
 The initial launch committed zero games: per-move manifest hashing exhausted a referee clock. Revision 0001 caches that immutable hash and preserves the failed launch alongside the active run under the shared storage cap.
