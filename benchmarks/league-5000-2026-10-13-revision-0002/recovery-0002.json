@@ -1,0 +1,19 @@
+{
+  "failure": "Repeated Windows PermissionError replacing collection-progress.json",
+  "completed_committed_games": 1211,
+  "workers": {
+    "0": 329,
+    "1": 217,
+    "2": 337,
+    "3": 328
+  },
+  "roles": {
+    "Attacker": 606,
+    "Defender": 605
+  },
+  "frozen_runtime_changes": false,
+  "metadata_retry_prepared": true,
+  "metadata_retry_enabled": false,
+  "approval": "pending",
+  "checked": 1791952511.7265081
+}

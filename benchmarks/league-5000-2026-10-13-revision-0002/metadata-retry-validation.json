@@ -1,0 +1,1 @@
+{"status": "pass", "checks": ["transient_metadata_lock_retry", "not_intercepted:models/nnue.json", "not_intercepted:runtime/config.json"], "shim_sha256": "a570a9876e3f02118e7e9228e6238c05f6c19bccde92cee0277d168f6096ab97", "live_campaign_enabled": false}

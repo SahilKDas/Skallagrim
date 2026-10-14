@@ -3,6 +3,7 @@
 import json
 import os
 import tempfile
+import time
 from pathlib import Path
 
 
@@ -24,7 +25,16 @@ def save(path, value):
             out.write(text)
             out.flush()
             os.fsync(out.fileno())
-        os.replace(temporary, path)
+        # Windows readers/scanners can briefly deny delete-sharing. Retry the
+        # atomic replacement, never fall back to truncating the committed file.
+        for attempt in range(9):
+            try:
+                os.replace(temporary, path)
+                break
+            except PermissionError as exc:
+                if getattr(exc, "winerror", None) not in {5, 32, 33} or attempt == 8:
+                    raise
+                time.sleep(min(0.01 * 2**attempt, 0.2))
     finally:
         if temporary is not None and temporary.exists():
             temporary.unlink()
