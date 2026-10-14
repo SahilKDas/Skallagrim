@@ -19,7 +19,7 @@
   "implementation_changes": false,
   "approved_metadata_layer_retained": true,
   "checked": 1792013554.8430152,
-  "state": "resuming-replay-validation",
+  "state": "collecting",
   "free_physical_memory_kib": 1212824,
   "observed_host_cpu_percent": [
     79,
@@ -41,7 +41,17 @@
     "shim_verified": true,
     "started": 1792018617.3672056
   },
-  "updated": 1792018713.5783327,
+  "updated": 1792019232.3492103,
   "controller_actual_pid": 38556,
-  "current_errors": ""
+  "current_errors": "",
+  "resume_verified": true,
+  "new_committed_progress_confirmed": true,
+  "current_completed": 2079,
+  "current_roles": {
+    "Attacker": 1037,
+    "Defender": 1042
+  },
+  "current_exclusions": {
+    "timeout": 54
+  }
 }
