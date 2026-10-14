@@ -112,6 +112,8 @@ def main():
     p.add_argument("--batch", type=int, default=64)
     p.add_argument("--cpu", type=int)
     p.add_argument("--storage-root", type=Path)
+    p.add_argument("--collection-cpus", type=int, nargs="+")
+    p.add_argument("--collection-source", type=Path)
     args = p.parse_args()
     if args.generations <= 0 or args.movetime <= 0 or args.epochs <= 0:
         raise SystemExit("generations, movetime and epochs must be positive")
@@ -159,6 +161,9 @@ def main():
         if args.initial_champion
         else None,
         "storage_root": str(args.storage_root) if args.storage_root else None,
+        "collection_source": str(args.collection_source.resolve())
+        if args.collection_source
+        else None,
     }
     if config_path.exists():
         previous = json.loads(config_path.read_text())
@@ -176,6 +181,8 @@ def main():
             "validation_games",
             "batch",
             "cpu",
+            "collection_cpus",
+            "collection_source",
         ]:
             if previous.get(key) != config[key]:
                 raise SystemExit(
@@ -233,18 +240,74 @@ def main():
             history = [
                 league_checkpoint(path, bot) for path in promoted_history[:-1][-8:]
             ]
-            league_manifest(
-                folder / "league.json",
-                current,
-                current if checkpoint else None,
-                history,
-                args.league_positions,
-                args.games,
-                args.games * 10,
-                10000 + generation,
-                args.movetime,
-                600,
-            )
+            if args.collection_source:
+                if (
+                    generation != 0
+                    or not args.collection_cpus
+                    or len(args.collection_cpus) < 2
+                ):
+                    raise ValueError(
+                        "Migration requires a first-generation parallel collection"
+                    )
+                original = json.loads(
+                    (args.collection_source / "league.json").read_text()
+                )
+                verify_manifest(original)
+                from transport import ENGINE
+                from referee import REFEREE_NAME
+
+                referee_binary = Path(
+                    os.environ.get("SKALLAGRIM_REFEREE", ROOT / REFEREE_NAME)
+                )
+                identities = [
+                    (
+                        original["current"]["model"]["sha256"],
+                        current["model"]["sha256"],
+                    ),
+                    (
+                        original["current"]["metadata"]["sha256"],
+                        current["metadata"]["sha256"],
+                    ),
+                    (original["engine"]["sha256"], pin(ENGINE)["sha256"]),
+                    (original["referee"]["sha256"], pin(referee_binary)["sha256"]),
+                    (
+                        original["positions"]["sha256"],
+                        pin(args.league_positions)["sha256"],
+                    ),
+                ]
+                if any(a != b for a, b in identities) or any(
+                    original[key] != value
+                    for key, value in dict(
+                        games=args.games,
+                        max_attempts=args.games * 10,
+                        seed=10000 + generation,
+                        movetime=args.movetime,
+                        max_plies=600,
+                    ).items()
+                ):
+                    raise ValueError(
+                        "Migration rejected: changed checkpoints, binaries, rules, positions or searches"
+                    )
+                league_path = folder / "league.json"
+                if (
+                    league_path.exists()
+                    and json.loads(league_path.read_text()) != original
+                ):
+                    raise ValueError("Migrated schedule changed on resume")
+                save(league_path, original)
+            else:
+                league_manifest(
+                    folder / "league.json",
+                    current,
+                    current if checkpoint else None,
+                    history,
+                    args.league_positions,
+                    args.games,
+                    args.games * 10,
+                    10000 + generation,
+                    args.movetime,
+                    600,
+                )
             cmd += ["--league", folder / "league.json"]
             if args.initial_champion:
                 cmd += [
@@ -256,6 +319,22 @@ def main():
                 ]
             if args.cpu is not None:
                 cmd += ["--cpu", args.cpu]
+            if args.collection_cpus and len(args.collection_cpus) > 1:
+                cmd = [
+                    "python/parallel_collection.py",
+                    "--league",
+                    folder / "league.json",
+                    "--output",
+                    samples,
+                    "--cpus",
+                    *args.collection_cpus,
+                    "--storage-root",
+                    budget.root,
+                    "--max-storage-gib",
+                    args.max_storage_gib,
+                ]
+                if args.collection_source:
+                    cmd += ["--source", args.collection_source]
             run(*cmd, budget=budget)
             replay = folder / (
                 "replay.sqlite" if args.initial_champion else "replay.jsonl"

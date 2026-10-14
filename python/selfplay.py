@@ -37,9 +37,24 @@ def main():
     )
     p.add_argument("--resume-collection", action="store_true")
     p.add_argument("--cpu", type=int)
+    p.add_argument("--worker-index", type=int, default=0)
+    p.add_argument("--worker-count", type=int, default=1)
     p.add_argument("--storage-root", type=Path)
     p.add_argument("--max-storage-gib", type=float, default=16)
     args = p.parse_args()
+    if not 0 <= args.worker_index < args.worker_count:
+        raise ValueError("Invalid collection worker index/count")
+    if args.worker_count > 1 and not args.resume_collection:
+        raise ValueError("Parallel workers require durable collection")
+    if args.cpu is not None and args.worker_count > 1:
+        from parallel_collection import set_worker_resources
+
+        set_worker_resources(args.cpu)
+    role_target = args.games // 2
+    role_target = role_target // args.worker_count + (
+        args.worker_index < role_target % args.worker_count
+    )
+    local_target = args.games if args.worker_count == 1 else role_target * 2
     if args.games <= 0 or args.movetime <= 0 or args.max_plies <= 0:
         raise SystemExit("games, movetime and max-plies must be positive")
     if not 0 <= args.exploration <= 1:
@@ -118,10 +133,18 @@ def main():
                 args.output.parent / "transactions",
                 dict(
                     manifest=league_identity,
-                    games=args.games,
+                    games=local_target,
                     exploration=args.exploration,
                     cpu=args.cpu,
                     version="skallagrim-collection-v1",
+                    **(
+                        {
+                            "worker_index": args.worker_index,
+                            "worker_count": args.worker_count,
+                        }
+                        if args.worker_count > 1
+                        else {}
+                    ),
                 ),
                 validate=lambda audit: referee.call("validate", replay=audit),
             )
@@ -149,7 +172,7 @@ def main():
 
         if not league:
             engine = processes.enter_context(Engine(options=options))
-        while completed < args.games:
+        while completed < local_target:
             if budget:
                 budget.check()
             attempt_started = time.monotonic()
@@ -161,7 +184,10 @@ def main():
                     f"Only {completed}/{args.games} completed after {max_attempts} attempts; partial corpus preserved. Increase --max-attempts or --max-plies."
                 )
             plan = league["schedule"][game] if league else None
-            if plan and completed_by_side[plan["candidate_side"]] >= args.games // 2:
+            if plan and plan["pair"] % args.worker_count != args.worker_index:
+                game += 1
+                continue
+            if plan and completed_by_side[plan["candidate_side"]] >= role_target:
                 game += 1
                 continue
             if plan:
@@ -330,7 +356,7 @@ def main():
                 flush=True,
             )
             game += 1
-        if collection:
+        if collection and args.worker_count == 1:
             collection.assemble(
                 args.output.with_suffix(".jsonl.gz"),
                 args.output.with_suffix(".referee.jsonl.gz"),

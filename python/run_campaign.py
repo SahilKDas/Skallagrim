@@ -41,7 +41,10 @@ def normalized_engines(value, workspace):
     return value
 
 
-def freeze(run, workspace, storage_root=None):
+def freeze(
+    run, workspace, storage_root=None, collection_cpus=None, collection_source=None
+):
+    collection_cpus = collection_cpus or [6]
     runtime = run / "runtime"
     manifest_path = run / "campaign.json"
     if not manifest_path.exists():
@@ -74,7 +77,9 @@ def freeze(run, workspace, storage_root=None):
                 runtime / "models" / f"{kind}.json", minimum_validation=1
             )
         manifest = dict(
-            format="skallagrim-campaign-v1",
+            format="skallagrim-campaign-v2"
+            if len(collection_cpus) > 1
+            else "skallagrim-campaign-v1",
             workspace=str(workspace),
             games=6250,
             training_games=5000,
@@ -84,6 +89,8 @@ def freeze(run, workspace, storage_root=None):
             batch=64,
             movetime=100,
             cpu=6,
+            collection_cpus=collection_cpus,
+            collection_source=str(collection_source) if collection_source else None,
             max_storage_gib=16,
             storage_root=str(storage_root or run),
             replay_max_gib=8,
@@ -119,16 +126,49 @@ def freeze(run, workspace, storage_root=None):
             for path in entry.get("artifacts", [])
             if Path(path).is_file()
         }
+        manifest["migration_inputs"] = {}
+        if collection_source:
+            source_manifest = json.loads(
+                (collection_source / "campaign.json").read_text()
+            )
+            for kind in ("nnue", "cnn"):
+                for suffix in (".json", ".pt", ".meta.json"):
+                    name = f"models/{kind}{suffix}"
+                    if pin(runtime / name)["sha256"] != source_manifest["files"][name]:
+                        raise ValueError(
+                            "Migration cannot change warm-start weights or metadata"
+                        )
+            for name, sha in source_manifest["files"].items():
+                path = collection_source / "runtime" / name
+                if pin(path)["sha256"] != sha:
+                    raise ValueError("Migration source runtime changed")
+                manifest["migration_inputs"][str(path)] = sha
+            for path in [
+                collection_source / "campaign.json",
+                *collection_source.glob("*/generation-0000/league.json"),
+                *collection_source.glob("*/generation-0000/transactions/config.json"),
+                *collection_source.glob(
+                    "*/generation-0000/transactions/attempt-*.json.gz"
+                ),
+            ]:
+                manifest["migration_inputs"][str(path)] = pin(path)["sha256"]
         save(manifest_path, manifest)
     manifest = json.loads(manifest_path.read_text())
     if manifest.get("storage_root", str(run)) != str(storage_root or run):
         raise ValueError("Campaign storage scope changed")
+    if manifest.get("collection_cpus", [6]) != collection_cpus or manifest.get(
+        "collection_source"
+    ) != (str(collection_source) if collection_source else None):
+        raise ValueError("Campaign worker layout or migration source changed")
     for name, digest in manifest["files"].items():
         if pin(runtime / name)["sha256"] != digest:
             raise ValueError(f"Frozen campaign input changed: {name}")
     for path, digest in manifest["external_artifacts"].items():
         if pin(path)["sha256"] != digest:
             raise ValueError(f"External artifact changed: {path}")
+    for path, digest in manifest.get("migration_inputs", {}).items():
+        if pin(path)["sha256"] != digest:
+            raise ValueError(f"Migration source changed: {path}")
     if pin(Path(__file__))["sha256"] != manifest["files"]["python/run_campaign.py"]:
         raise ValueError("Controller changed; resume with the frozen controller")
     return runtime, manifest
@@ -201,6 +241,10 @@ class Publisher:
             ):
                 if (folder / filename).exists():
                     shutil.copy2(folder / filename, dest / filename)
+            for filename in ("migration.json", "config.json", "assembly-audit.json"):
+                source = folder / "parallel" / filename
+                if source.exists():
+                    shutil.copy2(source, dest / f"parallel-{filename}")
             checkpoint = folder / f"{kind}.json"
             metadata = checkpoint.with_suffix(".progress.json")
             if metadata.exists():
@@ -288,8 +332,10 @@ class Publisher:
                 for percent in (25, 50, 75, 100):
                     if progress["completed"] >= (6250 * percent + 99) // 100:
                         self.event(f"{kind}-collection-{percent}%")
-                if progress["completed"] >= 50:
-                    self.event(f"{kind}-first-50-and-ETA")
+                if progress.get("parallel_completed", progress["completed"]) >= 50:
+                    self.event(
+                        f"{kind}-{'parallel-' if 'parallel_completed' in progress else ''}first-50-and-ETA"
+                    )
             path = folder / f"{kind}.progress.json"
             if path.exists():
                 progress = json.loads(path.read_text())
@@ -308,6 +354,9 @@ def invoke(command, runtime, budget, publisher, status, name, run):
     for path, expected in configuration["files"].items():
         if pin(runtime / path)["sha256"] != expected:
             raise ValueError("Frozen stage input changed")
+    for path, expected in configuration.get("migration_inputs", {}).items():
+        if pin(path)["sha256"] != expected:
+            raise ValueError("Pinned migration input changed")
     if name == "external-gauntlets":
         for path, expected in configuration["external_artifacts"].items():
             if pin(path)["sha256"] != expected:
@@ -362,7 +411,13 @@ def main():
     p.add_argument("--workspace", type=Path, default=ROOT)
     p.add_argument("--publish", action="store_true")
     p.add_argument("--storage-root", type=Path)
+    p.add_argument("--collection-cpus", type=int, nargs="+", default=[6])
+    p.add_argument("--collection-source", type=Path)
     args = p.parse_args()
+    if len(set(args.collection_cpus)) != len(args.collection_cpus):
+        raise ValueError("Collection workers must use distinct CPUs")
+    if args.collection_source:
+        args.collection_source = args.collection_source.resolve()
     run, workspace = args.run.resolve(), args.workspace.resolve()
     run.mkdir(parents=True, exist_ok=True)
     lock_file = (run / "campaign.lock").open("a+b")
@@ -422,7 +477,9 @@ def main():
         raise ValueError("Storage budget must include the campaign directory")
     budget = StorageBudget(storage_root, 16 * 1024**3)
     budget.check()
-    runtime, configuration = freeze(run, workspace, storage_root)
+    runtime, configuration = freeze(
+        run, workspace, storage_root, args.collection_cpus, args.collection_source
+    )
     publisher = Publisher(run, workspace, args.publish)
     done_path = run / "completed-stages.json"
     done = set(json.loads(done_path.read_text())) if done_path.exists() else set()
@@ -487,6 +544,21 @@ def main():
                         "8",
                         "--cpu",
                         "6",
+                        "--collection-cpus",
+                        *map(str, args.collection_cpus),
+                        *(
+                            [
+                                "--collection-source",
+                                str(args.collection_source / kind / "generation-0000"),
+                            ]
+                            if args.collection_source
+                            and (
+                                args.collection_source
+                                / kind
+                                / "generation-0000/transactions/config.json"
+                            ).exists()
+                            else []
+                        ),
                     ],
                     runtime,
                     budget,

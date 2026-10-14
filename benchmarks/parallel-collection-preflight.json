@@ -1,0 +1,33 @@
+{
+  "status": "pass",
+  "smoke": true,
+  "included_in_training_campaign": false,
+  "games": 8,
+  "roles": {
+    "Attacker": 4,
+    "Defender": 4
+  },
+  "exclusions": {},
+  "cpus": [
+    4,
+    6,
+    8,
+    10
+  ],
+  "assembly": {
+    "games": 8,
+    "roles": {
+      "Attacker": 4,
+      "Defender": 4
+    },
+    "attempts": 8,
+    "corpus": {
+      "path": "C:\\SahilAppProjects\\Skallagrim\\runs\\league-5000-2026-10-13\\preflight-parallel\\selfplay.jsonl.gz",
+      "sha256": "12fefb55c78c326f1bdfe029c1dc161c57646e4bef4652fd1485e215666951eb"
+    },
+    "replays": {
+      "path": "C:\\SahilAppProjects\\Skallagrim\\runs\\league-5000-2026-10-13\\preflight-parallel\\selfplay.referee.jsonl.gz",
+      "sha256": "745595b72760da45a2c9af4010aecd36164b6f0af3b9c26eec1d3a39c3777ba1"
+    }
+  }
+}

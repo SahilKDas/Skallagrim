@@ -38,6 +38,7 @@ class Collection:
         self.elapsed = 0.0
         self.fallbacks = 0
         self.exclusions = {}
+        self.outcomes = {}
         for path in sorted(self.directory.glob("attempt-*.json.gz")):
             with gzip.open(path, "rt", encoding="utf8") as stream:
                 record = json.load(stream)
@@ -62,6 +63,9 @@ class Collection:
         if record["accepted"]:
             self.completed += 1
             self.roles[record["role"]] += 1
+            outcome = record["audit"].get("outcome") or {}
+            key = outcome.get("winner") or "Draw"
+            self.outcomes[key] = self.outcomes.get(key, 0) + 1
         else:
             reason = record["exclusion"]
             self.exclusions[reason] = self.exclusions.get(reason, 0) + 1
@@ -99,6 +103,7 @@ class Collection:
             attempts=len(self.records),
             next_attempt=self.next_attempt,
             exclusions=self.exclusions,
+            outcomes=self.outcomes,
             seconds=self.elapsed,
             deadline_fallbacks=self.fallbacks,
             games_per_hour=self.completed * 3600 / self.elapsed
