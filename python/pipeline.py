@@ -11,21 +11,25 @@ import sys
 import os
 import signal
 import hashlib
+import shutil
+import time
 from pathlib import Path
 from records import save
 from transport import ROOT
-from dataset import make_replay, archive_data
+from dataset import make_replay, make_replay_sqlite, archive_data, DatasetIndex
 from resources import StorageBudget
 
 
-def validate_checkpoint(path):
+def validate_checkpoint(path, minimum_training=1000, minimum_validation=0):
     path = Path(path)
     for artifact in [path, path.with_suffix(".pt"), path.with_suffix(".meta.json")]:
         if not artifact.is_file():
             raise FileNotFoundError(f"Checkpoint artifact is missing: {artifact}")
     metadata = json.loads(path.with_suffix(".meta.json").read_text())
-    if metadata.get("smoke") or metadata.get("training_games", 0) < 1000:
+    if metadata.get("smoke") or metadata.get("training_games", 0) < minimum_training:
         raise ValueError("Checkpoint requires at least 1,000 completed training games")
+    if metadata.get("validation_games", 0) < minimum_validation:
+        raise ValueError("Checkpoint validation game requirement not met")
     for name, expected in metadata.get("model_artifacts", {}).items():
         artifact = path.parent / name
         if artifact.parent.resolve() != path.parent.resolve():
@@ -43,7 +47,7 @@ def run(*args, budget=None):
     try:
         while True:
             try:
-                code = process.wait(timeout=0.5)
+                code = process.wait(timeout=5)
                 if code:
                     raise subprocess.CalledProcessError(code, command)
                 if budget:
@@ -102,6 +106,12 @@ def main():
     )
     p.add_argument("--run", type=Path, required=True)
     p.add_argument("--device", default="auto")
+    p.add_argument("--initial-champion", type=Path)
+    p.add_argument("--training-games", type=int, default=1000)
+    p.add_argument("--validation-games", type=int, default=250)
+    p.add_argument("--batch", type=int, default=64)
+    p.add_argument("--cpu", type=int)
+    p.add_argument("--storage-root", type=Path)
     args = p.parse_args()
     if args.generations <= 0 or args.movetime <= 0 or args.epochs <= 0:
         raise SystemExit("generations, movetime and epochs must be positive")
@@ -113,7 +123,21 @@ def main():
         raise SystemExit("--max-storage-gib must be positive")
     args.run = args.run.resolve()
     args.run.mkdir(parents=True, exist_ok=True)
-    budget = StorageBudget(args.run, int(args.max_storage_gib * 1024**3))
+    if (
+        args.training_games < 1000
+        or args.validation_games <= 0
+        or args.games != args.training_games + args.validation_games
+        and args.initial_champion
+    ):
+        raise SystemExit(
+            "Seeded campaign counts must match training plus validation requirements"
+        )
+    if args.initial_champion:
+        args.initial_champion = args.initial_champion.resolve()
+        validate_checkpoint(args.initial_champion, minimum_validation=1)
+    budget = StorageBudget(
+        args.storage_root or args.run, int(args.max_storage_gib * 1024**3)
+    )
     if args.games % 2:
         raise SystemExit("Use an even game count for role-balanced pairs")
     if not args.league_positions.is_file():
@@ -129,6 +153,12 @@ def main():
         "run": str(args.run),
         "league_positions": pin(args.league_positions),
         "league_version": "skallagrim-league-v1",
+        "initial_champion": league_checkpoint(
+            args.initial_champion, "Rho" if args.kind == "cnn" else "Beta"
+        )
+        if args.initial_champion
+        else None,
+        "storage_root": str(args.storage_root) if args.storage_root else None,
     }
     if config_path.exists():
         previous = json.loads(config_path.read_text())
@@ -141,13 +171,18 @@ def main():
             "device",
             "league_positions",
             "league_version",
+            "initial_champion",
+            "training_games",
+            "validation_games",
+            "batch",
+            "cpu",
         ]:
             if previous.get(key) != config[key]:
                 raise SystemExit(
                     f"Resume rejected: changed {key}; use a fresh --run directory"
                 )
     save(config_path, config)
-    checkpoint = None
+    checkpoint = args.initial_champion
     promoted_history = []
     for generation in range(args.generations):
         folder = args.run / f"generation-{generation:04d}"
@@ -211,8 +246,20 @@ def main():
                 600,
             )
             cmd += ["--league", folder / "league.json"]
+            if args.initial_champion:
+                cmd += [
+                    "--resume-collection",
+                    "--storage-root",
+                    budget.root,
+                    "--max-storage-gib",
+                    args.max_storage_gib,
+                ]
+            if args.cpu is not None:
+                cmd += ["--cpu", args.cpu]
             run(*cmd, budget=budget)
-            replay = folder / "replay.jsonl"
+            replay = folder / (
+                "replay.sqlite" if args.initial_champion else "replay.jsonl"
+            )
             sources = [
                 s
                 for s in sorted(args.run.glob("generation-*/selfplay.jsonl*"))
@@ -220,15 +267,31 @@ def main():
                 and s.parent.name <= folder.name
                 and not (s.suffix == ".gz" and s.with_suffix("").exists())
             ]
-            selection = make_replay(
+            selection = (make_replay_sqlite if args.initial_champion else make_replay)(
                 sources,
                 replay,
                 args.window_games,
                 min(int(args.replay_max_gib * 1024**3), budget.available_bytes()),
                 check=budget.check,
                 excluded_fens={row["fen"] for row in position_suite["evaluation"]},
+                minimum_games=args.games if args.initial_champion else 1250,
             )
             save(folder / "replay-selection.json", selection)
+            split_path = folder / "split.json"
+            if args.initial_champion:
+                from campaign_state import role_split
+
+                role_split(
+                    DatasetIndex(replay),
+                    split_path,
+                    args.training_games,
+                    args.validation_games,
+                    42,
+                )
+                if selection["games"] != args.games:
+                    raise ValueError(
+                        "Seeded collection must preserve exact requested game count"
+                    )
             cmd = [
                 "python/train.py",
                 "--data",
@@ -239,16 +302,64 @@ def main():
                 model,
                 "--epochs",
                 args.epochs,
+                "--batch",
+                args.batch,
+                "--training-games",
+                args.training_games,
+                "--validation-games",
+                args.validation_games,
                 "--device",
                 args.device,
             ]
             if checkpoint:
                 cmd += ["--resume", checkpoint.with_suffix(".pt")]
+            if args.initial_champion:
+                cmd += [
+                    "--split",
+                    split_path,
+                    "--epoch-state",
+                    folder / "epoch-state.pt",
+                ]
             run(*cmd, budget=budget)
         verify_manifest(json.loads((folder / "league.json").read_text()))
         accepted = True
-        validate_checkpoint(model)
+        candidate_metadata = validate_checkpoint(
+            model, args.training_games, args.validation_games
+        )
+        if args.initial_champion and not candidate_metadata.get("training_complete"):
+            raise ValueError("Candidate training is incomplete")
         summary = None
+        if args.initial_champion:
+            parity_dir = folder / "parity-models"
+            parity_dir.mkdir(exist_ok=True)
+            for kind in ["nnue", "cnn"]:
+                source = (
+                    model if kind == args.kind else ROOT / "models" / f"{kind}.json"
+                )
+                for suffix in [".json", ".pt", ".meta.json"]:
+                    shutil.copy2(
+                        source.with_suffix(suffix), parity_dir / f"{kind}{suffix}"
+                    )
+            run(
+                "python/verify_models.py",
+                "--models",
+                parity_dir,
+                "--positions",
+                80,
+                budget=budget,
+            )
+        if os.environ.get("SKALLAGRIM_CAMPAIGN_BARRIER") == "1":
+            identity = pin(model.with_suffix(".meta.json"))["sha256"]
+            save(folder / "evaluation-ready.json", dict(identity=identity))
+            while (
+                not (folder / "evaluation-ack.json").exists()
+                or json.loads((folder / "evaluation-ack.json").read_text()).get(
+                    "identity"
+                )
+                != identity
+            ):
+                budget.check()
+                time.sleep(1)
         if checkpoint is not None:
             accepted, summary = run_gates(
                 folder,

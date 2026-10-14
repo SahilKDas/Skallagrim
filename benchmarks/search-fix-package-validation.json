@@ -1,0 +1,35 @@
+{
+  "version": "0.5.0-beta.1",
+  "status": "pass",
+  "payloads_verified": 145,
+  "archive_sha256": "7e8334c4e0d42faf8419ac7c45423c94fa1551d3da336477c40230dd58d3054b",
+  "requested_seconds": 5.0,
+  "batches": 4,
+  "plies": 48,
+  "cancellations": 4,
+  "replay_audits": 4,
+  "render_checks": 3,
+  "memory_samples": [
+    {
+      "seconds": 1,
+      "engine_bytes": [
+        5435392,
+        5853184,
+        4874240
+      ],
+      "referee_bytes": 5341184
+    }
+  ],
+  "failures": [],
+  "deadline_fallbacks": {
+    "Iota": 0,
+    "Beta": 0,
+    "Rho": 0
+  },
+  "native_gui_checks": "untested: native control unavailable",
+  "full_training": "not run",
+  "strength_gauntlets": "not run",
+  "live_discord": "not run: no application ID",
+  "elapsed_seconds": 6.11,
+  "owned_processes_exited": true
+}

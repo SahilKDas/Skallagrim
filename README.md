@@ -4,6 +4,8 @@ Experimental Windows beta. See [installation and release qualification](docs/REL
 
 **Release qualification:** the long soak found a search-response timeout at approximately 114 minutes. Stability qualification remains incomplete; see the release report before treating this candidate as ready.
 
+**Post-beta working-tree fix:** [search deadline supervision](docs/SEARCH_TIMING.md) passes a fresh two-hour soak and 300 timing probes with no responses over 325 ms. This unreleased correction is recorded separately from the published beta's original qualification results.
+
 Skallagrim is a Copenhagen Hnefatafl engine and research platform in Rust and Python, with a polished desktop GUI rendered using tiny-skia. Its goal is strong play as both attackers and defenders, backed by reproducible matches against existing open-source engines.
 
 **Status:** Working Rust rules/search engine, three neural candidates, UCI-style protocol, tiny-skia desktop GUI, streamed Python training and benchmark tooling, and a dedicated authoritative Rust referee process. The audited initial corpus contains 1,250 completed games: 1,000 for training and 250 for validation.
@@ -35,6 +37,8 @@ Skallagrim exposes a [documented UCI-style text protocol](docs/PROTOCOL.md) for 
 The separate Rust referee owns moves, captures, repetition and clocks in the GUI, benchmarks and self-play. Press **J** for its evidence panel; **D/F** select a human draw/fort claim that requires a recorded reason before confirmation. Unknown analyses stay unresolved. Every ruling is saved in an audited replay with its rules version, proof or human decision. See [referee controls and protocol](docs/REFEREE.md).
 
 ## Training league and Discord presence
+
+The [5,000-game campaign](docs/CAMPAIGN_5000.md) runs seeded NNUE and CNN rounds with separate validation, durable collection/epoch recovery, role-specific promotion and fresh gauntlets. Live campaign evidence is published separately from historical benchmark charts.
 
 The [role-balanced league](docs/LEAGUE.md) trains against champions and historical checkpoints with difficult starts, held-out positions, and separate attacker/defender promotion gates. Shared NNUE candidates must pass as both Iota and Beta. The minimum remains 1,000 training games plus validation.
 

@@ -1,5 +1,7 @@
 # October 9, 2026 bug-fix pass
 
+Post-beta October 11 timing correction: [search deadline handling](SEARCH_TIMING.md) now publishes before MCTS cleanup, supervises the caller's absolute deadline and records watchdog fallbacks. Fresh evidence includes 66 Rust/35 Python tests, 300 timing trials with no responses over 325 ms, and a passing two-hour soak. The original release results below remain historical.
+
 Current rule identity: `copenhagen-static-v3`. Original benchmark results and their archived binary remain unchanged.
 
 ## Fixed

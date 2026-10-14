@@ -48,6 +48,7 @@ fn main() {
         let Ok(line) = line else {
             break;
         };
+        let received = std::time::Instant::now();
         let p: Vec<_> = line.split_whitespace().collect();
         if p.is_empty() {
             continue;
@@ -194,6 +195,7 @@ fn main() {
                             _ => return Err("unsupported go argument".into()),
                         }
                     }
+                    let deadline = search::response_deadline(received, limits.time);
                     let g = game.clone();
                     let models = models.clone();
                     let stop = Arc::new(AtomicBool::new(false));
@@ -201,38 +203,50 @@ fn main() {
                     worker = Some((
                         stop,
                         thread::spawn(move || {
-                            match search::search(&g, bot, &models, limits, flag) {
-                                Ok(r) => {
-                                    emit(&format!(
-                                        "info depth {} score cp {} nodes {} time {} pv {}",
-                                        r.depth,
-                                        (r.value * g.side.sign() * 1000.0) as i32,
-                                        r.nodes,
-                                        r.elapsed.as_millis(),
-                                        r.best.map(|m| m.to_string()).unwrap_or_default()
-                                    ));
-                                    emit(&format!(
-                                        "info string policy {}",
-                                        serde_json::to_string(
-                                            &r.policy
-                                                .iter()
-                                                .map(|(m, p)| (m.to_string(), *p))
-                                                .collect::<Vec<_>>()
-                                        )
-                                        .unwrap()
-                                    ));
-                                    emit(&format!(
-                                        "bestmove {}",
-                                        r.best
-                                            .map(|m| m.to_string())
-                                            .unwrap_or_else(|| "0000".into())
-                                    ));
-                                }
-                                Err(e) => {
-                                    emit(&format!("info string error {e}"));
-                                    emit("bestmove 0000");
-                                }
-                            }
+                            let side_sign = g.side.sign();
+                            search::search_with_deadline(
+                                g,
+                                bot,
+                                models,
+                                limits,
+                                flag,
+                                deadline,
+                                |result| match result {
+                                    Ok(r) => {
+                                        if r.deadline_fallback {
+                                            emit("info string deadline-fallback");
+                                        }
+                                        emit(&format!(
+                                            "info depth {} score cp {} nodes {} time {} pv {}",
+                                            r.depth,
+                                            (r.value * side_sign * 1000.0) as i32,
+                                            r.nodes,
+                                            r.elapsed.as_millis(),
+                                            r.best.map(|m| m.to_string()).unwrap_or_default()
+                                        ));
+                                        emit(&format!(
+                                            "info string policy {}",
+                                            serde_json::to_string(
+                                                &r.policy
+                                                    .iter()
+                                                    .map(|(m, p)| (m.to_string(), *p))
+                                                    .collect::<Vec<_>>()
+                                            )
+                                            .unwrap()
+                                        ));
+                                        emit(&format!(
+                                            "bestmove {}",
+                                            r.best
+                                                .map(|m| m.to_string())
+                                                .unwrap_or_else(|| "0000".into())
+                                        ));
+                                    }
+                                    Err(e) => {
+                                        emit(&format!("info string error {e}"));
+                                        emit("bestmove 0000");
+                                    }
+                                },
+                            );
                         }),
                     ));
                 }

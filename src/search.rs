@@ -50,6 +50,7 @@ pub struct SearchResult {
     pub depth: u32,
     pub elapsed: Duration,
     pub policy: Vec<(Move, f32)>,
+    pub deadline_fallback: bool,
 }
 pub fn terminal(g: &Game) -> Option<f32> {
     g.outcome.as_ref().map(|o| match o.winner {
@@ -175,6 +176,130 @@ struct Node {
     children: Vec<(Move, f32, Option<usize>)>,
     expanded: bool,
 }
+/// Includes command handling and worker startup in the response budget.
+pub fn response_deadline(start: Instant, budget: Duration) -> Instant {
+    start + budget.saturating_sub(Duration::from_millis(10).min(budget / 5))
+}
+
+fn supervise(
+    mut fallback: SearchResult,
+    deadline: Instant,
+    stop: Arc<AtomicBool>,
+    compute: impl FnOnce(std::sync::mpsc::Sender<Result<SearchResult, String>>) + Send + 'static,
+    publish: impl FnOnce(Result<SearchResult, String>),
+) {
+    let start = Instant::now();
+    let (tx, rx) = std::sync::mpsc::channel();
+    let worker = std::thread::spawn(move || compute(tx));
+    let response_priority = ResponsePriority::new();
+    let result = match rx.recv_timeout(deadline.saturating_duration_since(Instant::now())) {
+        Ok(result) => result,
+        Err(std::sync::mpsc::RecvTimeoutError::Timeout) => {
+            stop.store(true, Ordering::Relaxed);
+            fallback.elapsed = start.elapsed();
+            Ok(fallback)
+        }
+        Err(std::sync::mpsc::RecvTimeoutError::Disconnected) => {
+            Err("search worker ended without a result".into())
+        }
+    };
+    // Exactly one publication, then reap the worker. Cleanup never precedes reply.
+    publish(result);
+    drop(response_priority);
+    let _ = worker.join();
+}
+
+// The sleeping response thread must preempt compute/cleanup on a pinned Windows
+// core. Only the brief publication runs above normal; search keeps normal priority.
+struct ResponsePriority {
+    #[cfg(windows)]
+    previous: Option<i32>,
+}
+#[cfg(windows)]
+#[link(name = "kernel32")]
+unsafe extern "system" {
+    fn GetCurrentThread() -> *mut std::ffi::c_void;
+    fn GetThreadPriority(thread: *mut std::ffi::c_void) -> i32;
+    fn SetThreadPriority(thread: *mut std::ffi::c_void, priority: i32) -> i32;
+}
+impl ResponsePriority {
+    fn new() -> Self {
+        Self {
+            #[cfg(windows)]
+            previous: unsafe {
+                let thread = GetCurrentThread();
+                let old = GetThreadPriority(thread);
+                if old != i32::MAX && SetThreadPriority(thread, old.max(1)) != 0 {
+                    Some(old)
+                } else {
+                    None
+                }
+            },
+        }
+    }
+}
+impl Drop for ResponsePriority {
+    fn drop(&mut self) {
+        #[cfg(windows)]
+        if let Some(old) = self.previous {
+            unsafe {
+                SetThreadPriority(GetCurrentThread(), old);
+            }
+        }
+    }
+}
+
+pub fn search_with_deadline(
+    g: Game,
+    bot: Bot,
+    models: Models,
+    limits: Limits,
+    stop: Arc<AtomicBool>,
+    deadline: Instant,
+    publish: impl FnOnce(Result<SearchResult, String>),
+) {
+    if let Err(error) = ready(bot, &models) {
+        publish(Err(error));
+        return;
+    }
+    let best = g.legal_moves().first().copied();
+    let fallback = SearchResult {
+        best,
+        value: terminal(&g).unwrap_or_else(|| handcrafted(&g)),
+        nodes: 0,
+        depth: 0,
+        elapsed: Duration::ZERO,
+        policy: best.map(|mv| vec![(mv, 1.0)]).unwrap_or_default(),
+        deadline_fallback: true,
+    };
+    let flag = stop.clone();
+    supervise(
+        fallback,
+        deadline,
+        stop,
+        move |tx| {
+            let finish_by = deadline
+                .checked_sub(Duration::from_millis(5).min(limits.time / 10))
+                .unwrap_or(deadline);
+            let result = search_publishing(
+                &g,
+                bot,
+                &models,
+                limits,
+                flag,
+                Some(finish_by),
+                &mut |result| {
+                    let _ = tx.send(Ok(result.clone()));
+                    std::thread::yield_now();
+                },
+            );
+            if let Err(error) = result {
+                let _ = tx.send(Err(error));
+            }
+        },
+        publish,
+    );
+}
 pub fn search(
     g: &Game,
     bot: Bot,
@@ -182,26 +307,41 @@ pub fn search(
     limits: Limits,
     stop: Arc<AtomicBool>,
 ) -> Result<SearchResult, String> {
+    search_publishing(g, bot, models, limits, stop, None, &mut |_| {})
+}
+fn search_publishing(
+    g: &Game,
+    bot: Bot,
+    models: &Models,
+    limits: Limits,
+    stop: Arc<AtomicBool>,
+    finish_by: Option<Instant>,
+    publish: &mut dyn FnMut(&SearchResult),
+) -> Result<SearchResult, String> {
     ready(bot, models)?;
     let start = Instant::now();
     let moves = g.legal_moves();
     if moves.is_empty() {
-        return Ok(SearchResult {
+        let result = SearchResult {
             best: None,
             value: terminal(g).unwrap_or(0.0),
             nodes: 0,
             depth: 0,
             elapsed: start.elapsed(),
             policy: vec![],
-        });
+            deadline_fallback: false,
+        };
+        publish(&result);
+        return Ok(result);
     }
     let mut ctx = Context {
         models,
         bot,
-        deadline: start
+        deadline: (start
             + limits.time.saturating_sub(
                 Duration::from_millis(if bot == Bot::Beta { 35 } else { 10 }).min(limits.time / 5),
-            ),
+            ))
+        .min(finish_by.unwrap_or(start + limits.time)),
         stop,
         nodes: 0,
         max_nodes: limits.nodes,
@@ -215,6 +355,7 @@ pub fn search(
     let mut value = ctx.value(g, acc.as_ref());
     let mut completed = 0;
     let mut policy = vec![];
+    let mut arena = Vec::new();
     if matches!(bot, Bot::Iota | Bot::Baseline) {
         let mut ordered = moves.clone();
         for depth in 1..=limits.depth {
@@ -250,14 +391,14 @@ pub fn search(
         }
         policy = vec![(best, 1.0)];
     } else {
-        let mut arena = vec![Node {
+        arena.push(Node {
             g: g.clone(),
             acc,
             visits: 0,
             sum: 0.0,
             children: vec![],
             expanded: false,
-        }];
+        });
         'simulations: while !ctx.expired() {
             let mut path = vec![0];
             let mut at = 0;
@@ -406,12 +547,145 @@ pub fn search(
             policy.push((best, 1.0));
         }
     }
-    Ok(SearchResult {
+    let result = SearchResult {
         best: Some(best),
         value,
         nodes: ctx.nodes,
         depth: completed,
         elapsed: start.elapsed(),
         policy,
-    })
+        deadline_fallback: false,
+    };
+    // Publish while the arena is still alive: deallocation is not move latency.
+    publish(&result);
+    Ok(result)
+}
+
+#[cfg(test)]
+mod deadline_tests {
+    use super::*;
+
+    fn fallback() -> SearchResult {
+        let mv = Game::default().legal_moves()[0];
+        SearchResult {
+            best: Some(mv),
+            value: 0.0,
+            nodes: 0,
+            depth: 0,
+            elapsed: Duration::ZERO,
+            policy: vec![(mv, 1.0)],
+            deadline_fallback: true,
+        }
+    }
+
+    #[test]
+    fn stalled_worker_publishes_once_cancels_and_reaps_late_worker() {
+        let stop = Arc::new(AtomicBool::new(false));
+        let flag = stop.clone();
+        let completed = Arc::new(AtomicBool::new(false));
+        let done = completed.clone();
+        let mut publications = 0;
+        supervise(
+            fallback(),
+            Instant::now() + Duration::from_millis(20),
+            stop.clone(),
+            move |tx| {
+                while !flag.load(Ordering::Relaxed) {
+                    std::thread::yield_now();
+                }
+                let _ = tx.send(Ok(fallback()));
+                done.store(true, Ordering::Relaxed);
+            },
+            |result| {
+                publications += 1;
+                let result = result.unwrap();
+                assert!(
+                    Game::default()
+                        .legal_moves()
+                        .contains(&result.best.unwrap())
+                );
+                assert_eq!(result.policy, vec![(result.best.unwrap(), 1.0)]);
+            },
+        );
+        assert_eq!(publications, 1);
+        assert!(stop.load(Ordering::Relaxed));
+        assert!(completed.load(Ordering::Relaxed));
+    }
+
+    #[test]
+    fn completed_result_is_published_before_cleanup_and_keeps_policy() {
+        let published = Arc::new(AtomicBool::new(false));
+        let signal = published.clone();
+        let cleaned = Arc::new(AtomicBool::new(false));
+        let done = cleaned.clone();
+        supervise(
+            fallback(),
+            Instant::now() + Duration::from_secs(2),
+            Arc::new(AtomicBool::new(false)),
+            move |tx| {
+                let mut result = fallback();
+                result.nodes = 42;
+                tx.send(Ok(result)).unwrap();
+                let watchdog = Instant::now() + Duration::from_secs(3);
+                while !signal.load(Ordering::Relaxed) {
+                    assert!(Instant::now() < watchdog);
+                    std::thread::yield_now();
+                }
+                done.store(true, Ordering::Relaxed);
+            },
+            |result| {
+                assert_eq!(result.unwrap().nodes, 42);
+                assert!(!cleaned.load(Ordering::Relaxed));
+                published.store(true, Ordering::Relaxed);
+            },
+        );
+        assert!(cleaned.load(Ordering::Relaxed));
+    }
+
+    #[test]
+    fn terminal_deadline_result_has_no_move() {
+        let g = Game {
+            outcome: Some(crate::game::Outcome {
+                winner: Some(Side::Defender),
+                reason: "test".into(),
+            }),
+            ..Game::default()
+        };
+        search_with_deadline(
+            g,
+            Bot::Baseline,
+            Models::default(),
+            Limits::default(),
+            Arc::new(AtomicBool::new(false)),
+            Instant::now(),
+            |result| {
+                let result = result.unwrap();
+                assert!(result.best.is_none());
+                assert!(result.policy.is_empty());
+            },
+        );
+    }
+
+    #[cfg(windows)]
+    #[test]
+    fn response_priority_is_scoped_and_compute_stays_normal() {
+        let before = unsafe { GetThreadPriority(GetCurrentThread()) };
+        supervise(
+            fallback(),
+            Instant::now() + Duration::from_secs(2),
+            Arc::new(AtomicBool::new(false)),
+            |tx| {
+                assert_eq!(unsafe { GetThreadPriority(GetCurrentThread()) }, 0);
+                tx.send(Ok(fallback())).unwrap();
+            },
+            |result| {
+                assert!(result.is_ok());
+                assert_eq!(
+                    unsafe { GetThreadPriority(GetCurrentThread()) },
+                    before.max(1)
+                );
+            },
+        );
+        assert_eq!(unsafe { GetThreadPriority(GetCurrentThread()) }, before);
+    }
 }

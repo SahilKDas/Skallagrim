@@ -1,5 +1,12 @@
 # Changelog
 
+## Unreleased
+
+- Publish MCTS results before arena cleanup; include prior-worker joining and startup in the caller deadline.
+- Shared CLI/GUI response watchdog with exactly one move, cancellation, worker reaping and explicit fallback telemetry.
+- Scoped Windows response-thread priority; computation priority and transport limits remain unchanged.
+- Add deadline, cleanup-ordering, priority-restoration and neural cancellation regression tests.
+
 ## 0.5.0-beta.1
 
 - Dedicated authoritative Rust referee owns moves, repetition, clocks and replay-audited rulings.

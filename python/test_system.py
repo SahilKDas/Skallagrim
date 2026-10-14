@@ -181,6 +181,27 @@ class SystemTests(unittest.TestCase):
             with self.assertRaises(RuntimeError):
                 e.go(10)
 
+    def test_neural_cancellation_has_one_reply_and_reuses_worker(self):
+        for bot in ("Iota", "Beta", "Rho"):
+            with self.subTest(bot=bot), Engine(options={
+                "Bot": bot, "NNUEFile": str(ROOT / "models/nnue.json"),
+                "CNNFile": str(ROOT / "models/cnn.json"),
+            }) as engine:
+                legal = engine.snapshot()["moves"]
+                for _ in range(3):
+                    engine.send("go infinite")
+                    engine.send("stop")
+                    move, _ = engine.until("bestmove", 2)
+                    self.assertIn(move, legal)
+                    engine.ready()
+                    move, _, _, lines = engine.go(30, 500)
+                    self.assertIn(move, legal)
+                    self.assertEqual(sum(line.startswith("bestmove ") for line in lines), 1)
+                    engine.position([])
+                move, _, _, lines = engine.go(300, 2000)
+                self.assertIn(move, legal)
+                self.assertNotIn("info string deadline-fallback", lines)
+
     def test_summary_handles_incomplete_pairs(self):
         games = [dict(score=1, candidate_side="Attacker", reason="corner-escape")]
         result = summarize(games, 42)

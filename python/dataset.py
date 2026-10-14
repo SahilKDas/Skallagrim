@@ -3,12 +3,123 @@
 import gzip
 import hashlib
 import json
+import sqlite3
+import zlib
 from pathlib import Path
 
 
 def open_data(path):
     path = Path(path)
+    if path.suffix == ".sqlite":
+        return SqliteStream(path)
     return gzip.open(path, "rb") if path.suffix == ".gz" else path.open("rb")
+
+
+class SqliteStream:
+    """Opaque offsets are row IDs; preserves read_batch's seek/read contract."""
+
+    def __init__(self, path):
+        self.connection = sqlite3.connect(
+            Path(path).resolve().as_uri() + "?mode=ro", uri=True
+        )
+        version = self.connection.execute("PRAGMA user_version").fetchone()[0]
+        if version != 1:
+            self.connection.close()
+            raise ValueError("Unsupported compressed replay version")
+        self.position = 1
+
+    def tell(self):
+        return self.position
+
+    def seek(self, position):
+        self.position = position
+
+    def readline(self):
+        value = self.connection.execute(
+            "SELECT body FROM sample WHERE id=?", (self.position,)
+        ).fetchone()
+        if value is None:
+            return b""
+        self.position += 1
+        return zlib.decompress(value[0])
+
+    def close(self):
+        self.connection.close()
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *args):
+        self.close()
+
+
+def make_replay_sqlite(
+    sources, output, max_games, max_bytes, minimum_games, check=None, excluded_fens=()
+):
+    selected, seen = [], set()
+    for source in reversed(sources):
+        index = DatasetIndex(source, excluded_fens)
+        games = []
+        for game in reversed(list(index.groups)):
+            if game not in seen and len(seen) < max_games:
+                seen.add(game)
+                games.append(game)
+        if games:
+            selected.append((Path(source), set(games)))
+        if len(seen) >= max_games:
+            break
+    if len(seen) < minimum_games:
+        raise ValueError("Compressed replay has insufficient completed games")
+    output = Path(output)
+    temporary = output.with_suffix(output.suffix + ".tmp")
+    if temporary.exists():
+        temporary.unlink()
+    raw_bytes, count = 0, 0
+    connection = sqlite3.connect(temporary)
+    try:
+        connection.execute("PRAGMA user_version=1")
+        connection.execute(
+            "CREATE TABLE sample(id INTEGER PRIMARY KEY, body BLOB NOT NULL)"
+        )
+        for source, games in reversed(selected):
+            with open_data(source) as stream:
+                while line := stream.readline():
+                    if not line.strip():
+                        continue
+                    row = json.loads(line)
+                    if row["game"] not in games or row.get("target") is None:
+                        continue
+                    connection.execute(
+                        "INSERT INTO sample(body) VALUES (?)", (zlib.compress(line, 6),)
+                    )
+                    count += 1
+                    raw_bytes += len(line)
+                    if count % 1000 == 0:
+                        connection.commit()
+                        if temporary.stat().st_size > max_bytes:
+                            raise ValueError(
+                                "Compressed replay exceeds disk cap; completed data retained"
+                            )
+                        if check:
+                            check()
+        connection.commit()
+        if temporary.stat().st_size > max_bytes:
+            raise ValueError("Compressed replay exceeds disk cap")
+        if check:
+            check()
+    finally:
+        connection.close()
+    temporary.replace(output)
+    return dict(
+        format="skallagrim-replay-sqlite-v1",
+        games=len(seen),
+        samples=count,
+        raw_bytes=raw_bytes,
+        bytes=output.stat().st_size,
+        sources=[
+            dict(path=str(source), games=sorted(games)) for source, games in selected
+        ],
+    )
 
 
 class DatasetIndex:
@@ -17,6 +128,7 @@ class DatasetIndex:
         self.groups = {}
         self.sides = {}
         self.sizes = {}
+        self.roles = {}
         digest = hashlib.sha256()
         excluded_fens = set(excluded_fens)
         contaminated = set()
@@ -35,6 +147,11 @@ class DatasetIndex:
                 if row.get("target") is None:
                     continue
                 game = row["game"]
+                role = (row.get("league") or {}).get("candidate_side")
+                if role:
+                    if game in self.roles and self.roles[game] != role:
+                        raise ValueError("Candidate role changed within a game")
+                    self.roles[game] = role
                 self.groups.setdefault(game, []).append(offset)
                 self.sizes[game] = self.sizes.get(game, 0) + len(line)
                 counts = self.sides.setdefault(game, {"a": 0, "d": 0})
@@ -46,6 +163,7 @@ class DatasetIndex:
             self.groups.pop(game, None)
             self.sides.pop(game, None)
             self.sizes.pop(game, None)
+            self.roles.pop(game, None)
 
     @staticmethod
     def read_batch(stream, offsets):
@@ -56,7 +174,15 @@ class DatasetIndex:
         return rows
 
 
-def make_replay(sources, output, max_games, max_bytes, minimum_games=1250, check=None, excluded_fens=()):
+def make_replay(
+    sources,
+    output,
+    max_games,
+    max_bytes,
+    minimum_games=1250,
+    check=None,
+    excluded_fens=(),
+):
     selected = []
     seen = set()
     total = 0

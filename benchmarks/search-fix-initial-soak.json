@@ -1,0 +1,94 @@
+{
+  "version": "0.5.0-beta.1",
+  "status": "aborted: superseded by command-receipt and response-thread scheduling fix",
+  "payloads_verified": 137,
+  "archive_sha256": "4d0876348f62989546e54d3fdf7a05b6b7c5a91566e633e36f791c3b05818048",
+  "requested_seconds": 7200.0,
+  "batches": 140,
+  "plies": 1680,
+  "cancellations": 141,
+  "replay_audits": 140,
+  "render_checks": 21,
+  "memory_samples": [
+    {
+      "seconds": 1,
+      "engine_bytes": [
+        5324800,
+        5234688,
+        4800512
+      ],
+      "referee_bytes": 5267456
+    },
+    {
+      "seconds": 29,
+      "engine_bytes": [
+        5390336,
+        5836800,
+        5386240
+      ],
+      "referee_bytes": 5554176
+    },
+    {
+      "seconds": 58,
+      "engine_bytes": [
+        5386240,
+        10186752,
+        5427200
+      ],
+      "referee_bytes": 5513216
+    },
+    {
+      "seconds": 88,
+      "engine_bytes": [
+        5554176,
+        10219520,
+        5419008
+      ],
+      "referee_bytes": 5537792
+    },
+    {
+      "seconds": 132,
+      "engine_bytes": [
+        5562368,
+        10932224,
+        5439488
+      ],
+      "referee_bytes": 5533696
+    },
+    {
+      "seconds": 162,
+      "engine_bytes": [
+        5455872,
+        13983744,
+        5619712
+      ],
+      "referee_bytes": 5615616
+    },
+    {
+      "seconds": 190,
+      "engine_bytes": [
+        5427200,
+        14602240,
+        5648384
+      ],
+      "referee_bytes": 5607424
+    }
+  ],
+  "failures": [
+    "RuntimeError('referee exited')"
+  ],
+  "native_gui_checks": "untested: native control unavailable",
+  "full_training": "not run",
+  "strength_gauntlets": "not run",
+  "live_discord": "not run: no application ID",
+  "elapsed_seconds": 219.609,
+  "failure_context": {
+    "operation": "search",
+    "batch": 140,
+    "ply": 0,
+    "bot": "Rho",
+    "fen": "3aaaaa3/5a5/11/a4d4a/a3ddd3a/aa1ddkdd1aa/a3ddd3a/a4d4a/11/5a5/3aaaaa3 a",
+    "moves": []
+  },
+  "owned_processes_exited": true
+}

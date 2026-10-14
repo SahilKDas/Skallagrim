@@ -629,6 +629,10 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             match search::ready(bot, &models) {
                 Err(e) => status = e,
                 Ok(()) => {
+                    let deadline = search::response_deadline(
+                        std::time::Instant::now(),
+                        Duration::from_millis(300),
+                    );
                     referee.call(serde_json::json!({"command":"clock","milliseconds":325}))?;
                     let flag = Arc::new(AtomicBool::new(false));
                     let stop = flag.clone();
@@ -638,19 +642,20 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                     let id = generation;
                     running = Some((flag, id));
                     std::thread::spawn(move || {
-                        let _ = tx.send((
-                            id,
-                            search::search(
-                                &g,
-                                bot,
-                                &m,
-                                Limits {
-                                    time: Duration::from_millis(300),
-                                    ..Limits::default()
-                                },
-                                stop,
-                            ),
-                        ));
+                        search::search_with_deadline(
+                            g,
+                            bot,
+                            m,
+                            Limits {
+                                time: Duration::from_millis(300),
+                                ..Limits::default()
+                            },
+                            stop,
+                            deadline,
+                            |result| {
+                                let _ = tx.send((id, result));
+                            },
+                        );
                     });
                 }
             }

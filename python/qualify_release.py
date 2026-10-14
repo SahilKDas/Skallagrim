@@ -57,6 +57,7 @@ def main():
                   archive_sha256=hashlib.sha256(args.archive.read_bytes()).hexdigest(),
                   requested_seconds=args.seconds, batches=0, plies=0, cancellations=0,
                   replay_audits=0, render_checks=0, memory_samples=[], failures=[],
+                  deadline_fallbacks={bot: 0 for bot in ("Iota", "Beta", "Rho")},
                   native_gui_checks="untested: native control unavailable",
                   full_training="not run", strength_gauntlets="not run", live_discord="not run: no application ID")
     args.report.parent.mkdir(parents=True, exist_ok=True)
@@ -96,7 +97,8 @@ def main():
                     engine.ready()
                     report["cancellations"] += 1
                 context["operation"] = "search"
-                move, _, _, _ = engine.go(30, allowance_ms=2000)
+                move, _, _, lines = engine.go(30, allowance_ms=2000)
+                report["deadline_fallbacks"][context["bot"]] += "info string deadline-fallback" in lines
                 assert move in state["moves"], move
                 state = ref.play(move)
                 moves.append(move)

@@ -5,6 +5,7 @@ import gzip
 import json
 import random
 import contextlib
+import time
 from pathlib import Path
 from transport import Engine
 from referee import Referee
@@ -34,6 +35,10 @@ def main():
         type=int,
         help="Stop rather than endlessly retrying truncated games; default 10 times --games",
     )
+    p.add_argument("--resume-collection", action="store_true")
+    p.add_argument("--cpu", type=int)
+    p.add_argument("--storage-root", type=Path)
+    p.add_argument("--max-storage-gib", type=float, default=16)
     args = p.parse_args()
     if args.games <= 0 or args.movetime <= 0 or args.max_plies <= 0:
         raise SystemExit("games, movetime and max-plies must be positive")
@@ -65,20 +70,66 @@ def main():
         options["NNUEFile"] = str(args.nnue.resolve())
     if args.cnn:
         options["CNNFile"] = str(args.cnn.resolve())
+    from campaign_state import Collection
+    from resources import StorageBudget
+
+    budget = (
+        StorageBudget(args.storage_root, int(args.max_storage_gib * 1024**3))
+        if args.storage_root
+        else None
+    )
+    if args.resume_collection and not league:
+        raise ValueError("Resumable collection requires a pinned league")
+
+    class Sink:
+        def write(self, text):
+            return len(text)
+
+        def flush(self):
+            pass
+
     with (
         contextlib.ExitStack() as processes,
         Referee(
-            log_dir=args.output.parent / (args.output.stem + "-referee")
+            executable=league["referee"]["path"] if league else None,
+            log_dir=args.output.parent / (args.output.stem + "-referee"),
         ) as referee,
-        gzip.open(
-            args.output.with_suffix(".referee.jsonl.gz"), "wt", encoding="utf8"
+        (
+            contextlib.nullcontext(Sink())
+            if args.resume_collection
+            else gzip.open(
+                args.output.with_suffix(".referee.jsonl.gz"), "wt", encoding="utf8"
+            )
         ) as rulings,
-        args.output.open("w", encoding="utf8") as out,
+        (
+            contextlib.nullcontext(Sink())
+            if args.resume_collection
+            else args.output.open("w", encoding="utf8")
+        ) as out,
     ):
         completed = 0
         completed_by_side = {"Attacker": 0, "Defender": 0}
         game = 0
         pool = {}
+        collection = None
+        if args.resume_collection:
+            collection = Collection(
+                args.output.parent / "transactions",
+                dict(
+                    manifest=digest(league),
+                    games=args.games,
+                    exploration=args.exploration,
+                    cpu=args.cpu,
+                    version="skallagrim-collection-v1",
+                ),
+                validate=lambda audit: referee.call("validate", replay=audit),
+            )
+            completed, completed_by_side, game = (
+                collection.completed,
+                collection.roles.copy(),
+                collection.next_attempt,
+            )
+            collection.progress()
 
         def get_engine(entry, role):
             key = (digest(entry), role)
@@ -88,12 +139,22 @@ def main():
                     opts["CNNFile" if entry["bot"] == "Rho" else "NNUEFile"] = entry[
                         "model"
                     ]["path"]
-                pool[key] = processes.enter_context(Engine(options=opts))
+                pool[key] = processes.enter_context(
+                    Engine(
+                        command=[league["engine"]["path"]], options=opts, cpu=args.cpu
+                    )
+                )
             return pool[key]
 
         if not league:
             engine = processes.enter_context(Engine(options=options))
         while completed < args.games:
+            if budget:
+                budget.check()
+            attempt_started = time.monotonic()
+            fallbacks = 0
+            if collection:
+                rng = random.Random(f"{args.seed}:{game}")
             if game >= max_attempts:
                 raise RuntimeError(
                     f"Only {completed}/{args.games} completed after {max_attempts} attempts; partial corpus preserved. Increase --max-attempts or --max-plies."
@@ -130,7 +191,8 @@ def main():
                 referee.start_clock(args.movetime + 1000)
                 engine = players[state["side"]]
                 try:
-                    best, elapsed, policy, _ = engine.go(args.movetime)
+                    best, elapsed, policy, lines = engine.go(args.movetime)
+                    fallbacks += "info string deadline-fallback" in lines
                     if best not in state["moves"]:
                         raise ValueError("self-play returned illegal move")
                 except (TimeoutError, RuntimeError, ValueError, OSError) as exc:
@@ -190,12 +252,10 @@ def main():
                         raise RuntimeError(
                             "search engine disagrees with authoritative referee"
                         )
-            rulings.write(
-                json.dumps(
-                    {"game": f"{args.seed}:{game}", "league": plan, **referee.export()}
-                )
-                + "\n"
-            )
+            audit = {"game": f"{args.seed}:{game}", "league": plan, **referee.export()}
+            if collection:
+                assert referee.call("validate", replay=audit)["valid"]
+            rulings.write(json.dumps(audit) + "\n")
             rulings.flush()
             outcome = state["outcome"]
             target = (
@@ -223,6 +283,20 @@ def main():
                     else "truncated",
                 )
                 out.write(json.dumps(row) + "\n")
+            if collection:
+                if budget:
+                    budget.check()
+                collection.commit(
+                    game,
+                    plan["candidate_side"],
+                    samples,
+                    audit,
+                    time.monotonic() - attempt_started,
+                    fallbacks,
+                    "held-out-contamination"
+                    if contaminated
+                    else failure or ("truncated" if outcome is None else "no-samples"),
+                )
             completed += target is not None and bool(samples)
             if plan and target is not None and samples:
                 completed_by_side[plan["candidate_side"]] += 1
@@ -243,6 +317,12 @@ def main():
                 flush=True,
             )
             game += 1
+        if collection:
+            collection.assemble(
+                args.output.with_suffix(".jsonl.gz"),
+                args.output.with_suffix(".referee.jsonl.gz"),
+                budget,
+            )
 
 
 if __name__ == "__main__":

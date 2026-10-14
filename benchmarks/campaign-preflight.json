@@ -1,0 +1,22 @@
+{
+  "rust_tests": 66,
+  "python_tests": 43,
+  "ruff_F": "pass",
+  "rust_format": "pass",
+  "collection_integration": {
+    "completed_games": 2,
+    "roles": {
+      "Attacker": 1,
+      "Defender": 1
+    },
+    "resume_no_duplicates": true,
+    "referee_verified": true,
+    "strength_evidence": false
+  },
+  "cuda_cnn_smoke": {
+    "epochs": 2,
+    "resume_verified": true,
+    "strength_evidence": false
+  },
+  "campaign_status": "preflight passed; full campaign not yet started"
+}

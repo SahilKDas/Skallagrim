@@ -1,0 +1,44 @@
+{
+  "date": "2026-10-11",
+  "status": "pass",
+  "rust_tests": 66,
+  "python_tests": 35,
+  "clippy": "pass",
+  "rust_format": "pass",
+  "ruff_F": "pass",
+  "engine_sha256": "ffb217d53e9ae38680c5802cb15eaaad84bef00f77b7c26204d2a149bc06aca4",
+  "timing_trials": 300,
+  "responses_over_325_ms": 0,
+  "timing_max_ms": 302.8186999999889,
+  "beta_max_ms": 301.7436000000089,
+  "timing_deadline_fallbacks": 2,
+  "soak": {
+    "elapsed_seconds": 7200.891,
+    "plies": 62580,
+    "batches": 5215,
+    "cancellations": 5215,
+    "replay_audits": 5215,
+    "render_checks": 783,
+    "deadline_fallbacks": {
+      "Iota": 153,
+      "Beta": 138,
+      "Rho": 148
+    },
+    "failures": [],
+    "owned_processes_exited": true
+  },
+  "orphan_check": "pass: no processes from the soak installation remain",
+  "runtime_sha256": {
+    "skallagrim.exe": "ffb217d53e9ae38680c5802cb15eaaad84bef00f77b7c26204d2a149bc06aca4",
+    "skallagrim-gui.exe": "5e60715152c21cd304621a2c44eea8daaf46aa07f3ebe07aeceb1c4fc1e3374d",
+    "skallagrim-referee.exe": "2a759bb17e0a8b78335fb19f390fb4d1ff3405bb69ea228987a95a5937e7385b"
+  },
+  "strength_evidence": false,
+  "original_timeout_cause": "Not reconstructable from the old report; deadline supervision now covers delayed computation. Historical reports preserved.",
+  "working_set_peak_mib": {
+    "Iota": 5.55,
+    "Beta": 17.8,
+    "Rho": 5.76,
+    "referee": 5.54
+  }
+}

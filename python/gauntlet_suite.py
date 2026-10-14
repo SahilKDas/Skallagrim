@@ -25,6 +25,7 @@ def main():
     p.add_argument("--resume", action="store_true")
     p.add_argument("--allow-unaudited", action="store_true")
     p.add_argument("--load-note", default="Ambient desktop load uncontrolled")
+    p.add_argument("--config", type=Path, default=ROOT / "benchmarks/engines.json")
     args = p.parse_args()
     args.output = args.output.resolve()
     if args.report_output:
@@ -40,6 +41,8 @@ def main():
             cmd = [
                 sys.executable,
                 str(ROOT / "python/benchmark.py"),
+                "--config",
+                str(args.config),
                 "--candidate",
                 candidate,
                 "--opponents",

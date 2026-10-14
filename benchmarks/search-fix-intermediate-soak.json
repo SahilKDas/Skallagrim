@@ -1,0 +1,84 @@
+{
+  "version": "0.5.0-beta.1",
+  "status": "aborted by tester: superseded before final validation",
+  "payloads_verified": 141,
+  "archive_sha256": "2052c525aae6848695c98c07421be3f281bed8b6f183a4c662d95b5c160cd9e6",
+  "requested_seconds": 7200.0,
+  "batches": 140,
+  "plies": 1680,
+  "cancellations": 140,
+  "replay_audits": 140,
+  "render_checks": 21,
+  "memory_samples": [
+    {
+      "seconds": 1,
+      "engine_bytes": [
+        5332992,
+        5619712,
+        4780032
+      ],
+      "referee_bytes": 5328896
+    },
+    {
+      "seconds": 29,
+      "engine_bytes": [
+        5406720,
+        5963776,
+        5345280
+      ],
+      "referee_bytes": 5431296
+    },
+    {
+      "seconds": 56,
+      "engine_bytes": [
+        5382144,
+        6406144,
+        5242880
+      ],
+      "referee_bytes": 5496832
+    },
+    {
+      "seconds": 86,
+      "engine_bytes": [
+        5419008,
+        12726272,
+        5406720
+      ],
+      "referee_bytes": 5505024
+    },
+    {
+      "seconds": 114,
+      "engine_bytes": [
+        5373952,
+        16105472,
+        5373952
+      ],
+      "referee_bytes": 5533696
+    },
+    {
+      "seconds": 141,
+      "engine_bytes": [
+        5419008,
+        15233024,
+        5742592
+      ],
+      "referee_bytes": 5574656
+    },
+    {
+      "seconds": 169,
+      "engine_bytes": [
+        5459968,
+        15986688,
+        5505024
+      ],
+      "referee_bytes": 5513216
+    }
+  ],
+  "failures": [],
+  "native_gui_checks": "untested: native control unavailable",
+  "full_training": "not run",
+  "strength_gauntlets": "not run",
+  "live_discord": "not run: no application ID",
+  "elapsed_seconds": 195.218,
+  "note": "Process tree deliberately stopped; any referee-exited error during shutdown is not an engine search failure."
+}

@@ -38,8 +38,10 @@ def main():
                         f"Timing fixture now terminal: {state['outcome']}"
                     )
                 elapsed = []
+                fallbacks = 0
                 for _ in range(args.trials):
-                    move, milliseconds, _, _ = engine.go(300, 2000)
+                    move, milliseconds, _, lines = engine.go(300, 2000)
+                    fallbacks += "info string deadline-fallback" in lines
                     assert move in state["moves"]
                     elapsed.append(milliseconds)
                 row = dict(
@@ -51,6 +53,7 @@ def main():
                     over_300=sum(v > 300 for v in elapsed),
                     over_325=sum(v > 325 for v in elapsed),
                     elapsed_ms=elapsed,
+                    deadline_fallbacks=fallbacks,
                 )
                 results.append(row)
                 print(json.dumps(row), flush=True)
