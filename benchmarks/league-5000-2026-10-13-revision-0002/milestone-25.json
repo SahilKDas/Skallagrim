@@ -1,0 +1,44 @@
+{
+  "milestone": "nnue-collection-25%",
+  "captured_at": 1791955906.0728314,
+  "collection": {
+    "completed": 1641,
+    "requested": 6250,
+    "roles": {
+      "Attacker": 822,
+      "Defender": 819
+    },
+    "attempts": 1657,
+    "exclusions": {
+      "timeout": 16
+    },
+    "outcomes": {
+      "Attacker": 141,
+      "Defender": 1500
+    },
+    "seconds": 22486.348999999842,
+    "parallel_seconds": 6987.891000000032,
+    "imported_games": 131,
+    "parallel_completed": 1510,
+    "games_per_hour": 777.9171140477113,
+    "deadline_fallbacks": 14791,
+    "cpus": [
+      4,
+      6,
+      8,
+      10
+    ],
+    "storage_available_bytes": 16014057472,
+    "free_disk_bytes": 18161541120,
+    "updated": 1791955884.139373,
+    "remaining_hours_estimate": 5.924795735651242
+  },
+  "campaign_bytes": 385166906,
+  "free_disk_bytes": 18159153152,
+  "training": "pending",
+  "best_candidate_checkpoint": null,
+  "promotion": "pending",
+  "frozen_inputs_verified": true,
+  "metadata_retry_sha256": "a570a9876e3f02118e7e9228e6238c05f6c19bccde92cee0277d168f6096ab97",
+  "github_milestone_published": true
+}
