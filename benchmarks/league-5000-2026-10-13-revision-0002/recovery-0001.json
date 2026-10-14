@@ -1,0 +1,21 @@
+{
+  "reason": "Windows PermissionError replacing atomic progress file",
+  "implementation_changes": false,
+  "frozen_inputs_verified": true,
+  "completed_committed_games": 793,
+  "workers": {
+    "0": 211,
+    "1": 152,
+    "2": 217,
+    "3": 213
+  },
+  "roles": {
+    "Attacker": 398,
+    "Defender": 395
+  },
+  "checked": 1791948760.2632005,
+  "resume": "original frozen controller, original source and four-worker layout",
+  "controller_launch_pid": 31712,
+  "current_completed": 791,
+  "current_progress_age_seconds": 1702.9203488826752
+}
