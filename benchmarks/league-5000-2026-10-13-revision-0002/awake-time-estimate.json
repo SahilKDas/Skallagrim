@@ -1,0 +1,63 @@
+{
+  "captured_at": 1792009802.2111259,
+  "evidence": "Windows Kernel-Power506/507 standby/resume events",
+  "standby_intervals_utc": [
+    [
+      "2026-10-14T05:43:31.671864+00:00",
+      "2026-10-14T10:18:13.626961+00:00"
+    ],
+    [
+      "2026-10-14T10:18:13.632079+00:00",
+      "2026-10-14T20:21:24.339929+00:00"
+    ]
+  ],
+  "standby_seconds": 52672.662947,
+  "raw_parallel_seconds": 60904.281000000046,
+  "estimated_awake_parallel_seconds": 8231.61805300005,
+  "completed": 1845,
+  "roles": {
+    "Attacker": 922,
+    "Defender": 923
+  },
+  "new_parallel_games": 1714,
+  "awake_games_per_hour": 749.5974619171222,
+  "raw_remaining_hours_including_standby": 43.47908689955273,
+  "aggregate_remaining_active_hours_estimate": 5.876487346600741,
+  "worker_quota_remaining_active_hours_estimate": 9.645695784516553,
+  "worker_estimates": [
+    {
+      "worker": 0,
+      "cpu": 4,
+      "completed": 515,
+      "quota": 1564,
+      "awake_games_per_hour": 210.35961445865564,
+      "remaining_active_hours_estimate": 4.986698624160922
+    },
+    {
+      "worker": 1,
+      "cpu": 6,
+      "completed": 326,
+      "quota": 1562,
+      "awake_games_per_hour": 128.14005620870293,
+      "remaining_active_hours_estimate": 9.645695784516553
+    },
+    {
+      "worker": 2,
+      "cpu": 8,
+      "completed": 507,
+      "quota": 1562,
+      "awake_games_per_hour": 207.7355860038699,
+      "remaining_active_hours_estimate": 5.078571371880147
+    },
+    {
+      "worker": 3,
+      "cpu": 10,
+      "completed": 497,
+      "quota": 1562,
+      "awake_games_per_hour": 203.3622052458937,
+      "remaining_active_hours_estimate": 5.2369613061201035
+    }
+  ],
+  "limitations": "Historical estimates assume observed awake throughput persists; fixed worker quotas make the slowest worker decisive. Neither estimate includes later auditing, training or gauntlets. Original frozen progress records are unchanged.",
+  "keep_awake_permission": "pending; no power settings changed"
+}
