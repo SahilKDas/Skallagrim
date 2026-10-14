@@ -1,0 +1,84 @@
+{
+  "checked": 1792011617.3613892,
+  "completed": 2003,
+  "roles": {
+    "Attacker": 998,
+    "Defender": 1005
+  },
+  "timeout_audit": {
+    "checked": 1792011592.165511,
+    "excluded_timeout_attempts": 48,
+    "all_timeout_samples_excluded": true,
+    "last_30_minutes": 28,
+    "recent": [
+      {
+        "worker": "worker-2",
+        "attempt": 2237,
+        "accepted": false,
+        "samples": 0,
+        "timestamp": 1792011426.365943,
+        "clock": {
+          "budget_ms": 1100,
+          "elapsed_ms": 2505,
+          "reason": "timeout",
+          "source": "clock"
+        }
+      },
+      {
+        "worker": "worker-2",
+        "attempt": 2244,
+        "accepted": false,
+        "samples": 0,
+        "timestamp": 1792011479.5534334,
+        "clock": {
+          "budget_ms": 1100,
+          "elapsed_ms": 1650,
+          "reason": "timeout",
+          "source": "clock"
+        }
+      },
+      {
+        "worker": "worker-2",
+        "attempt": 2252,
+        "accepted": false,
+        "samples": 0,
+        "timestamp": 1792011577.5543866,
+        "clock": {
+          "budget_ms": 1100,
+          "elapsed_ms": 1163,
+          "reason": "timeout",
+          "source": "clock"
+        }
+      },
+      {
+        "worker": "worker-0",
+        "attempt": 2289,
+        "accepted": false,
+        "samples": 0,
+        "timestamp": 1792011579.5675106,
+        "clock": {
+          "budget_ms": 1100,
+          "elapsed_ms": 2108,
+          "reason": "timeout",
+          "source": "clock"
+        }
+      },
+      {
+        "worker": "worker-1",
+        "attempt": 1443,
+        "accepted": false,
+        "samples": 0,
+        "timestamp": 1792011587.329772,
+        "clock": {
+          "budget_ms": 1100,
+          "elapsed_ms": 1152,
+          "reason": "timeout",
+          "source": "clock"
+        }
+      }
+    ]
+  },
+  "frozen_inputs_verified": true,
+  "worker_priorities_and_affinities_verified": true,
+  "clocks_and_required_counts_changed": false
+}
