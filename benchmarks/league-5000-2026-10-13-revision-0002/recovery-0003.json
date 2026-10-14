@@ -19,7 +19,7 @@
   "implementation_changes": false,
   "approved_metadata_layer_retained": true,
   "checked": 1792013554.8430152,
-  "state": "awaiting-host-capacity",
+  "state": "resuming-replay-validation",
   "free_physical_memory_kib": 1212824,
   "observed_host_cpu_percent": [
     79,
@@ -31,5 +31,17 @@
     "host_cpu_percent_max": 60,
     "reason": "Allow headroom for the previously measured roughly1.5-1.7GiB four-worker tree; avoid immediate repeated referee stalls"
   },
-  "requirements_changed": false
+  "requirements_changed": false,
+  "launch": {
+    "launched": true,
+    "pid": 21344,
+    "available_ram_bytes": 3262652416,
+    "cpu_percent_3second": 18.989547038327526,
+    "frozen_inputs_verified": true,
+    "shim_verified": true,
+    "started": 1792018617.3672056
+  },
+  "updated": 1792018713.5783327,
+  "controller_actual_pid": 38556,
+  "current_errors": ""
 }
