@@ -1,0 +1,17 @@
+{
+  "state": "awaiting-host-capacity",
+  "committed_games": 4463,
+  "roles": {
+    "Attacker": 2235,
+    "Defender": 2228
+  },
+  "exclusions": {
+    "timeout": 95
+  },
+  "checked": 1792106819.8597734,
+  "old_process_tree_exited": true,
+  "frozen_inputs_verified": true,
+  "shim_verified": true,
+  "reason": "Worker1 referee snapshot response mismatch",
+  "requirements_changed": false
+}
