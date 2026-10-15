@@ -1,5 +1,5 @@
 {
-  "state": "awaiting-host-capacity",
+  "state": "resuming-replay-validation",
   "checked": 1792038936.9860744,
   "committed_games": 3826,
   "roles": {
@@ -13,5 +13,17 @@
   "available_ram_kib": 1646988,
   "host_cpu_percent": 18,
   "reason": "Worker2 failure, including taskkill cleanup timeout; complete traceback preserved",
-  "requirements_changed": false
+  "requirements_changed": false,
+  "launch": {
+    "launched": true,
+    "pid": 37980,
+    "capacity": {
+      "cpu": 13,
+      "ram": 3177760,
+      "processes": 0
+    },
+    "started": 1792076121.3286288,
+    "frozen_inputs_verified": true,
+    "shim_verified": true
+  }
 }
