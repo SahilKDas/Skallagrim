@@ -1,5 +1,5 @@
 {
-  "state": "resuming-replay-validation",
+  "state": "collecting",
   "checked": 1792038936.9860744,
   "committed_games": 3826,
   "roles": {
@@ -25,5 +25,16 @@
     "started": 1792076121.3286288,
     "frozen_inputs_verified": true,
     "shim_verified": true
-  }
+  },
+  "resume_verified": true,
+  "controller_actual_pid": 33964,
+  "current_completed": 3866,
+  "current_roles": {
+    "Attacker": 1936,
+    "Defender": 1930
+  },
+  "current_exclusions": {
+    "timeout": 85
+  },
+  "updated": 1792076987.8674424
 }
