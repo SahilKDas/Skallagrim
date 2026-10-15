@@ -1,5 +1,5 @@
 {
-  "state": "awaiting-host-capacity",
+  "state": "resuming-replay-validation",
   "committed_games": 4463,
   "roles": {
     "Attacker": 2235,
@@ -13,5 +13,21 @@
   "frozen_inputs_verified": true,
   "shim_verified": true,
   "reason": "Worker1 referee snapshot response mismatch",
-  "requirements_changed": false
+  "requirements_changed": false,
+  "launch": {
+    "launched": true,
+    "pid": 11284,
+    "capacity": {
+      "ram": 3919852,
+      "processes": 0
+    },
+    "cpu_samples": [
+      19.43,
+      17.85,
+      14.79
+    ],
+    "started": 1792108097.1434305,
+    "frozen_inputs_verified": true,
+    "shim_verified": true
+  }
 }
