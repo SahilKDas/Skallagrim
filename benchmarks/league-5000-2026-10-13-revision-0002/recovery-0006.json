@@ -1,5 +1,5 @@
 {
-  "state": "awaiting-host-capacity",
+  "state": "resuming-final-assembly",
   "checked": 1792210418.625707,
   "reason": "Final assembly StorageBudget check failed; cap or disk reserve guard, exact trigger not captured",
   "committed_games": 6250,
@@ -18,5 +18,21 @@
   "requirements_changed": false,
   "free_ram_kib": 1739696,
   "current_free_disk_bytes": 12395945984,
-  "final_assembly_audit_complete": false
+  "final_assembly_audit_complete": false,
+  "launch": {
+    "launched": true,
+    "pid": 464,
+    "started": 1792251833.2766693,
+    "free_ram_kib": 3297348,
+    "cpu_samples": [
+      37.25,
+      34.4,
+      34.87
+    ],
+    "storage_available_bytes": 14583123968,
+    "frozen_inputs_verified": true,
+    "shim_verified": true,
+    "prior_process_tree_exited": true
+  },
+  "resume_verified": false
 }
