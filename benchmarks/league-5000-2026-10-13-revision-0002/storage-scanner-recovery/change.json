@@ -1,0 +1,15 @@
+{
+  "approval": "explicit user: Fix repeated directory scans; preserve games, audits, resource limits; test before restart",
+  "shim_sha256": "5f996982bc44bd90bb10c79277b350739a32e5bb531d38783cf86f459dda27f2",
+  "scanner_sha256": "142fc99060c1cb5282d4e8e0b74de3745ebc34c4aecb49d36090a11ab6089c64",
+  "scope": "exact single-pass storage enumeration; no caching, thresholds or audit changes",
+  "state": "prepared-not-enabled",
+  "tests_passed": 15,
+  "overlay_probe_passed": true,
+  "benchmark_original_seconds": 3.0213022,
+  "benchmark_optimized_seconds": 0.0852688,
+  "equal_byte_totals": true,
+  "prior_tree_exited": true,
+  "partial_assembly_preserved": true,
+  "checked": 1792260374.6823058
+}

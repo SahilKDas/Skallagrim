@@ -1,0 +1,42 @@
+{
+  "state": "resuming-final-assembly",
+  "checked": 1792260546.654724,
+  "reason": "User-approved tested exact storage scanner optimization",
+  "committed_games": 6250,
+  "roles": {
+    "Attacker": 3125,
+    "Defender": 3125
+  },
+  "excluded_attempts": 115,
+  "reported_exclusions": {
+    "timeout": 115
+  },
+  "transaction_hashes_verified": true,
+  "frozen_inputs_verified": true,
+  "shim_verified": true,
+  "old_process_tree_exited": true,
+  "requirements_changed": false,
+  "free_ram_kib": 5002664,
+  "current_free_disk_bytes": 12854157312,
+  "final_assembly_audit_complete": false,
+  "approval": "explicit human request in chat",
+  "resource_limits_changed": false,
+  "storage_implementation_changed": true,
+  "change_manifest": "recovery-0007/change.json",
+  "launch": {
+    "launched": true,
+    "pid": 30544,
+    "started": 1792260592.5826213,
+    "free_ram_kib": 4966500,
+    "cpu_samples": [
+      10.85,
+      9.27,
+      10.09
+    ],
+    "storage_available_bytes": 10704322560,
+    "frozen_inputs_verified": true,
+    "shim_verified": true,
+    "prior_process_tree_exited": true
+  },
+  "resume_verified": false
+}

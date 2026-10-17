@@ -1,5 +1,6 @@
 """A storage budget scoped to one explicitly selected learning run."""
 
+import os
 import shutil
 from pathlib import Path
 
@@ -12,12 +13,23 @@ class StorageBudget:
 
     def available_bytes(self):
         used = 0
-        for path in self.root.rglob("*"):
+        # DirEntry carries Windows enumeration metadata. Path.rglob followed by
+        # is_file/stat repeatedly enumerates directories and requests metadata
+        # again for every file. Visit each directory once per exact check.
+        directories = [self.root]
+        while directories:
             try:
-                if path.is_file():
-                    used += path.stat().st_size
+                with os.scandir(directories.pop()) as entries:
+                    for entry in entries:
+                        try:
+                            if entry.is_dir(follow_symlinks=False):
+                                directories.append(entry.path)
+                            elif entry.is_file():
+                                used += entry.stat().st_size
+                        except FileNotFoundError:
+                            pass  # Concurrent atomic replacement or removal.
             except FileNotFoundError:
-                pass  # A child may have atomically replaced a temporary file.
+                pass  # A child may have removed a temporary directory.
         return min(
             self.max_bytes - used,
             shutil.disk_usage(self.root).free - self.reserve_bytes,

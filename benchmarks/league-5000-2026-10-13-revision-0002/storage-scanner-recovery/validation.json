@@ -1,0 +1,23 @@
+{
+  "samples": [
+    {
+      "original_seconds": 2.5435386000008293,
+      "optimized_seconds": 0.046082900000328664,
+      "bytes": 1031678116
+    },
+    {
+      "original_seconds": 7.713044899999659,
+      "optimized_seconds": 0.06903220000094734,
+      "bytes": 1031678116
+    },
+    {
+      "original_seconds": 6.875774899999669,
+      "optimized_seconds": 0.19070770000143966,
+      "bytes": 1031678116
+    }
+  ],
+  "median_speedup": 99.60243045861658,
+  "exact_counts": true,
+  "tests_passed": 15,
+  "overlay_probe_passed": true
+}
