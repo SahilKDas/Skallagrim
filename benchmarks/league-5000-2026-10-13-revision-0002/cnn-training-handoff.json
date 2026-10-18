@@ -1,0 +1,39 @@
+{
+  "checked": 1792294595.2732067,
+  "state": "training-started",
+  "trainer_pid": 26824,
+  "controller_pid": 27020,
+  "assembly": {
+    "games": 6250,
+    "roles": {
+      "Attacker": 3125,
+      "Defender": 3125
+    },
+    "attempts": 6309,
+    "corpus": {
+      "path": "C:\\SahilAppProjects\\Skallagrim\\runs\\league-5000-2026-10-13\\revision-0002\\cnn\\generation-0000\\selfplay.jsonl.gz",
+      "sha256": "e1ec04431ae167262a5f04b97e1a310baf8fb550ae5f77b73708ff74215dc789"
+    },
+    "replays": {
+      "path": "C:\\SahilAppProjects\\Skallagrim\\runs\\league-5000-2026-10-13\\revision-0002\\cnn\\generation-0000\\selfplay.referee.jsonl.gz",
+      "sha256": "6ff81a021c03f06bf448052bb085f12fb922d8eb1dc56dcc98029fcf73784dfd"
+    }
+  },
+  "corpus_hashes_verified": true,
+  "exact_disjoint_split_roles": {
+    "training": {
+      "Defender": 2500,
+      "Attacker": 2500
+    },
+    "validation": {
+      "Attacker": 625,
+      "Defender": 625
+    }
+  },
+  "replay_samples": 276837,
+  "epochs_requested": 10,
+  "completed_epochs": 0,
+  "priority": "Idle",
+  "cpu": 6,
+  "current_errors": ""
+}
