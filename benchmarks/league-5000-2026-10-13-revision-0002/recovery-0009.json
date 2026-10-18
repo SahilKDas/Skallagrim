@@ -1,5 +1,5 @@
 {
-  "state": "resuming-cnn-collection",
+  "state": "collecting",
   "reason": "Transient PermissionError reading worker0 collection-progress.json",
   "checked": 1792282701.1429737,
   "completed_epochs": 10,
@@ -24,5 +24,7 @@
   "started": 1792282702.435126,
   "frozen_inputs_verified": true,
   "overlay_pins_verified": true,
-  "model_hashes_verified": true
+  "model_hashes_verified": true,
+  "resume_verified": true,
+  "resumed_completed": 3023
 }
