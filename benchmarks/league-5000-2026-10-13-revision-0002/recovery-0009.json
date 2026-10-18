@@ -1,0 +1,28 @@
+{
+  "state": "resuming-cnn-collection",
+  "reason": "Transient PermissionError reading worker0 collection-progress.json",
+  "checked": 1792282701.1429737,
+  "completed_epochs": 10,
+  "best_epoch": 1,
+  "nnue_games_retained": 6250,
+  "committed_games": 2961,
+  "roles": {
+    "Attacker": 1481,
+    "Defender": 1480
+  },
+  "excluded_attempts": 24,
+  "transaction_hashes_verified": true,
+  "free_ram_kib": 4468456,
+  "cpu_samples": [
+    11.98,
+    11.97,
+    24.41
+  ],
+  "prior_process_tree_exited": true,
+  "requirements_changed": false,
+  "launch_pid": 3340,
+  "started": 1792282702.435126,
+  "frozen_inputs_verified": true,
+  "overlay_pins_verified": true,
+  "model_hashes_verified": true
+}
