@@ -1,0 +1,225 @@
+{
+  "format": "skallagrim-search-baseline-v1",
+  "campaign": "C:\\SahilAppProjects\\Skallagrim\\runs\\league-5000-2026-10-13\\revision-0002",
+  "engine": {
+    "path": "C:\\SahilAppProjects\\Skallagrim\\runs\\league-5000-2026-10-13\\revision-0002\\runtime\\skallagrim.exe",
+    "sha256": "ffb217d53e9ae38680c5802cb15eaaad84bef00f77b7c26204d2a149bc06aca4"
+  },
+  "champions": {
+    "nnue": {
+      "promoted": false,
+      "artifacts": {
+        "nnue.json": {
+          "path": "C:\\SahilAppProjects\\Skallagrim\\runs\\league-5000-2026-10-13\\revision-0002\\runtime\\models\\nnue.json",
+          "sha256": "e52b7555465cda3cb59129e94b2710e645186be7b1b3f1a1af81f6323340f24d"
+        },
+        "nnue.pt": {
+          "path": "C:\\SahilAppProjects\\Skallagrim\\runs\\league-5000-2026-10-13\\revision-0002\\runtime\\models\\nnue.pt",
+          "sha256": "fb569d9f07155a0a8361e50f79230d0167ce153f8e8fdb44cfc3c193914981a0"
+        },
+        "nnue.meta.json": {
+          "path": "C:\\SahilAppProjects\\Skallagrim\\runs\\league-5000-2026-10-13\\revision-0002\\runtime\\models\\nnue.meta.json",
+          "sha256": "c4c787063ed24bad6d2791aecbf54c0e04c85ef04ff6281967b3764338a772fe"
+        }
+      },
+      "decision": {
+        "path": "C:\\SahilAppProjects\\Skallagrim\\runs\\league-5000-2026-10-13\\revision-0002\\nnue\\generation-0000\\complete.json",
+        "sha256": "632493cabf983d48374a93169382e4d7888903b008ce5e63f62c72a64aa29ec6"
+      }
+    },
+    "cnn": {
+      "promoted": false,
+      "artifacts": {
+        "cnn.json": {
+          "path": "C:\\SahilAppProjects\\Skallagrim\\runs\\league-5000-2026-10-13\\revision-0002\\runtime\\models\\cnn.json",
+          "sha256": "560afe89f16b03a89a77cdb109500b4be49aad306afc0468c7d723a1d4b3b9b2"
+        },
+        "cnn.pt": {
+          "path": "C:\\SahilAppProjects\\Skallagrim\\runs\\league-5000-2026-10-13\\revision-0002\\runtime\\models\\cnn.pt",
+          "sha256": "a67569894a05db47cfcc3936b1e980939021b11b00a30fb3e3e019f41a3a405e"
+        },
+        "cnn.meta.json": {
+          "path": "C:\\SahilAppProjects\\Skallagrim\\runs\\league-5000-2026-10-13\\revision-0002\\runtime\\models\\cnn.meta.json",
+          "sha256": "8f668b4cbe7c569d3f0a1c70f69b435031d4184aa644139eb32e43054816f6e1"
+        }
+      },
+      "decision": {
+        "path": "C:\\SahilAppProjects\\Skallagrim\\runs\\league-5000-2026-10-13\\revision-0002\\cnn\\generation-0000\\complete.json",
+        "sha256": "1ca072a63677ae984f8b2dc475772cacd15ac64da04bbb664519ced13054ad6a"
+      }
+    }
+  },
+  "replay_audit": {
+    "path": "C:\\SahilAppProjects\\Skallagrim\\runs\\league-5000-2026-10-13\\revision-0002\\replay-audit.json",
+    "sha256": "fff308ca1bd425bd529a30bfcfeb1d585ce4baf245119bee15ebd6d042fc8452"
+  },
+  "clocks": {
+    "movetime_ms": 300,
+    "ipc_allowance_ms": 25
+  },
+  "strength_claim": "Promotion decisions only; retain published timing and upstream limitations",
+  "config": {
+    "engines": {
+      "rho": {
+        "command": [
+          "C:\\SahilAppProjects\\Skallagrim\\runs\\league-5000-2026-10-13\\revision-0002\\runtime\\skallagrim.exe"
+        ],
+        "options": {
+          "Bot": "Rho",
+          "CNNFile": "C:\\SahilAppProjects\\Skallagrim\\runs\\league-5000-2026-10-13\\revision-0002\\runtime\\models\\cnn.json"
+        },
+        "artifacts": [
+          "C:\\SahilAppProjects\\Skallagrim\\runs\\league-5000-2026-10-13\\revision-0002\\runtime\\skallagrim.exe",
+          "C:\\SahilAppProjects\\Skallagrim\\runs\\league-5000-2026-10-13\\revision-0002\\runtime\\models\\cnn.json",
+          "C:\\SahilAppProjects\\Skallagrim\\runs\\league-5000-2026-10-13\\revision-0002\\runtime\\models\\cnn.meta.json"
+        ],
+        "rules_audited": true,
+        "resources": "single-thread CPU scalar CNN",
+        "training_metadata": [
+          "C:\\SahilAppProjects\\Skallagrim\\runs\\league-5000-2026-10-13\\revision-0002\\runtime\\models\\cnn.meta.json"
+        ]
+      },
+      "iota": {
+        "command": [
+          "C:\\SahilAppProjects\\Skallagrim\\runs\\league-5000-2026-10-13\\revision-0002\\runtime\\skallagrim.exe"
+        ],
+        "options": {
+          "Bot": "Iota",
+          "NNUEFile": "C:\\SahilAppProjects\\Skallagrim\\runs\\league-5000-2026-10-13\\revision-0002\\runtime\\models\\nnue.json"
+        },
+        "artifacts": [
+          "C:\\SahilAppProjects\\Skallagrim\\runs\\league-5000-2026-10-13\\revision-0002\\runtime\\skallagrim.exe",
+          "C:\\SahilAppProjects\\Skallagrim\\runs\\league-5000-2026-10-13\\revision-0002\\runtime\\models\\nnue.json",
+          "C:\\SahilAppProjects\\Skallagrim\\runs\\league-5000-2026-10-13\\revision-0002\\runtime\\models\\nnue.meta.json"
+        ],
+        "rules_audited": true,
+        "resources": "single-thread CPU NNUE",
+        "training_metadata": [
+          "C:\\SahilAppProjects\\Skallagrim\\runs\\league-5000-2026-10-13\\revision-0002\\runtime\\models\\nnue.meta.json"
+        ]
+      },
+      "beta": {
+        "command": [
+          "C:\\SahilAppProjects\\Skallagrim\\runs\\league-5000-2026-10-13\\revision-0002\\runtime\\skallagrim.exe"
+        ],
+        "options": {
+          "Bot": "Beta",
+          "NNUEFile": "C:\\SahilAppProjects\\Skallagrim\\runs\\league-5000-2026-10-13\\revision-0002\\runtime\\models\\nnue.json"
+        },
+        "artifacts": [
+          "C:\\SahilAppProjects\\Skallagrim\\runs\\league-5000-2026-10-13\\revision-0002\\runtime\\skallagrim.exe",
+          "C:\\SahilAppProjects\\Skallagrim\\runs\\league-5000-2026-10-13\\revision-0002\\runtime\\models\\nnue.json",
+          "C:\\SahilAppProjects\\Skallagrim\\runs\\league-5000-2026-10-13\\revision-0002\\runtime\\models\\nnue.meta.json"
+        ],
+        "rules_audited": true,
+        "resources": "single-thread CPU NNUE; uniform PUCT priors",
+        "training_metadata": [
+          "C:\\SahilAppProjects\\Skallagrim\\runs\\league-5000-2026-10-13\\revision-0002\\runtime\\models\\nnue.meta.json"
+        ]
+      },
+      "baseline": {
+        "command": [
+          "C:\\SahilAppProjects\\Skallagrim\\target\\release\\skallagrim.exe"
+        ],
+        "options": {
+          "Bot": "Baseline"
+        },
+        "artifacts": [
+          "C:\\SahilAppProjects\\Skallagrim\\target\\release\\skallagrim.exe"
+        ],
+        "rules_audited": true,
+        "resources": "single-thread CPU",
+        "training_metadata": []
+      },
+      "taflzero": {
+        "command": [
+          "C:\\SahilAppProjects\\Skallagrim\\external\\taflzero\\target\\release\\taflzero.exe",
+          "--net",
+          "C:\\SahilAppProjects\\Skallagrim\\external\\taflzero\\default_nn.onnx"
+        ],
+        "options": {
+          "Variant": "copenhagen11x11"
+        },
+        "artifacts": [
+          "C:\\SahilAppProjects\\Skallagrim\\external\\taflzero\\target\\release\\taflzero.exe",
+          "C:\\SahilAppProjects\\Skallagrim\\external\\taflzero\\default_nn.onnx",
+          "C:\\SahilAppProjects\\Skallagrim\\benchmarks\\opponents.lock.json"
+        ],
+        "warmup": true,
+        "rules_audited": false,
+        "resources": "single-thread ONNX CPU; batch 8; overruns are timeouts",
+        "warmup_ms": 1000,
+        "training_metadata": []
+      },
+      "nicholas": {
+        "command": [
+          "C:\\SahilAppProjects\\Skallagrim\\.venv\\Scripts\\python.exe",
+          "C:\\SahilAppProjects\\Skallagrim\\python\\adapters\\neural_opponent.py",
+          "--kind",
+          "nicholas",
+          "--repo",
+          "C:\\SahilAppProjects\\Skallagrim\\external\\nicholas",
+          "--weights",
+          "C:\\SahilAppProjects\\Skallagrim\\external\\nicholas\\model.ckpt"
+        ],
+        "artifacts": [
+          "C:\\SahilAppProjects\\Skallagrim\\external\\nicholas\\model.ckpt",
+          "C:\\SahilAppProjects\\Skallagrim\\external\\nicholas\\model.meta.json",
+          "C:\\SahilAppProjects\\Skallagrim\\python\\adapters\\neural_opponent.py",
+          "C:\\SahilAppProjects\\Skallagrim\\benchmarks\\nicholas-rules-audit.json",
+          "C:\\SahilAppProjects\\Skallagrim\\benchmarks\\opponents.lock.json"
+        ],
+        "rules_audited": false,
+        "resources": "single-thread PyTorch CPU; timed upstream MCTS; transition JIT warmed; 30-ms reserve",
+        "training_metadata": [
+          "C:\\SahilAppProjects\\Skallagrim\\external\\nicholas\\model.meta.json"
+        ]
+      },
+      "luizz": {
+        "command": [
+          "C:\\SahilAppProjects\\Skallagrim\\.venv\\Scripts\\python.exe",
+          "C:\\SahilAppProjects\\Skallagrim\\python\\adapters\\neural_opponent.py",
+          "--kind",
+          "luizz",
+          "--repo",
+          "C:\\SahilAppProjects\\Skallagrim\\external\\luizz",
+          "--weights",
+          "C:\\SahilAppProjects\\Skallagrim\\external\\luizz\\model.pt"
+        ],
+        "artifacts": [
+          "C:\\SahilAppProjects\\Skallagrim\\external\\luizz\\model.pt",
+          "C:\\SahilAppProjects\\Skallagrim\\external\\luizz\\model.meta.json",
+          "C:\\SahilAppProjects\\Skallagrim\\python\\adapters\\neural_opponent.py",
+          "C:\\SahilAppProjects\\Skallagrim\\python\\adapters\\luizz_lazy.py",
+          "C:\\SahilAppProjects\\Skallagrim\\benchmarks\\luizz-rules-audit.json",
+          "C:\\SahilAppProjects\\Skallagrim\\benchmarks\\opponents.lock.json"
+        ],
+        "rules_audited": false,
+        "resources": "single-thread CPU PyTorch; upstream PUCT with lazy state materialization verified at fixed 10 simulations; 30-ms reserve",
+        "training_metadata": [
+          "C:\\SahilAppProjects\\Skallagrim\\external\\luizz\\model.meta.json"
+        ]
+      },
+      "opentafl": {
+        "command": [
+          "C:\\SahilAppProjects\\Skallagrim\\.venv\\Scripts\\python.exe",
+          "C:\\SahilAppProjects\\Skallagrim\\python\\adapters\\opentafl.py",
+          "--classpath",
+          "C:\\SahilAppProjects\\Skallagrim\\external\\opentafl\\build\\classes\\java\\main;C:\\SahilAppProjects\\Skallagrim\\external\\opentafl\\lib\\*"
+        ],
+        "artifacts": [
+          "C:\\SahilAppProjects\\Skallagrim\\external\\opentafl\\bridge\\OpenTaflBridge.class",
+          "C:\\SahilAppProjects\\Skallagrim\\benchmarks\\opentafl-build.json",
+          "C:\\SahilAppProjects\\Skallagrim\\python\\adapters\\opentafl.py",
+          "C:\\SahilAppProjects\\Skallagrim\\python\\adapters\\OpenTaflBridge.java",
+          "C:\\SahilAppProjects\\Skallagrim\\benchmarks\\opponents.lock.json"
+        ],
+        "warmup": true,
+        "rules_audited": false,
+        "resources": "Java CPU, 256-MiB heap; native alpha-beta/TT/order; public continuation/horizon off for short clocks; volatile cancellation visibility patch; 150-ms reserve for native cancellation drain; ZGC one concurrent/parallel collector thread",
+        "warmup_ms": 1500,
+        "training_metadata": []
+      }
+    }
+  }
+}

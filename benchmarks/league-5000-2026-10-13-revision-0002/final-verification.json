@@ -1,0 +1,677 @@
+{
+  "checked": 1792420836.1696792,
+  "families": {
+    "nnue": {
+      "accepted_games": 6250,
+      "audit_attempts": 6365,
+      "split_roles": {
+        "training": {
+          "Defender": 2500,
+          "Attacker": 2500
+        },
+        "validation": {
+          "Attacker": 625,
+          "Defender": 625
+        }
+      },
+      "assembly": {
+        "games": 6250,
+        "roles": {
+          "Attacker": 3125,
+          "Defender": 3125
+        },
+        "attempts": 6365,
+        "corpus": {
+          "path": "C:\\SahilAppProjects\\Skallagrim\\runs\\league-5000-2026-10-13\\revision-0002\\nnue\\generation-0000\\selfplay.jsonl.gz",
+          "sha256": "165666a74ea116a8cb544a89cd7029db26c56edab7c433256664755cd3b514ac"
+        },
+        "replays": {
+          "path": "C:\\SahilAppProjects\\Skallagrim\\runs\\league-5000-2026-10-13\\revision-0002\\nnue\\generation-0000\\selfplay.referee.jsonl.gz",
+          "sha256": "85a5e325fb305b341a499f51ea57714630c4d3852d69dce7068dbebb14c53ef2"
+        }
+      },
+      "accepted": false
+    },
+    "cnn": {
+      "accepted_games": 6250,
+      "audit_attempts": 6309,
+      "split_roles": {
+        "training": {
+          "Defender": 2500,
+          "Attacker": 2500
+        },
+        "validation": {
+          "Attacker": 625,
+          "Defender": 625
+        }
+      },
+      "assembly": {
+        "games": 6250,
+        "roles": {
+          "Attacker": 3125,
+          "Defender": 3125
+        },
+        "attempts": 6309,
+        "corpus": {
+          "path": "C:\\SahilAppProjects\\Skallagrim\\runs\\league-5000-2026-10-13\\revision-0002\\cnn\\generation-0000\\selfplay.jsonl.gz",
+          "sha256": "e1ec04431ae167262a5f04b97e1a310baf8fb550ae5f77b73708ff74215dc789"
+        },
+        "replays": {
+          "path": "C:\\SahilAppProjects\\Skallagrim\\runs\\league-5000-2026-10-13\\revision-0002\\cnn\\generation-0000\\selfplay.referee.jsonl.gz",
+          "sha256": "6ff81a021c03f06bf448052bb085f12fb922d8eb1dc56dcc98029fcf73784dfd"
+        }
+      },
+      "accepted": false
+    }
+  },
+  "audit": {
+    "games": 1050,
+    "plies": 21263,
+    "replay_verified": true,
+    "independent_rules_certification": false,
+    "verified_artifacts": 25
+  },
+  "comparisons": [
+    {
+      "pairing": "beta/luizz",
+      "games": 50,
+      "wins": 50,
+      "draws": 0,
+      "losses": 0,
+      "score_rate": 1,
+      "paired_bootstrap_95": [
+        1.0,
+        1.0
+      ],
+      "by_side": {
+        "Attacker": {
+          "games": 25,
+          "wins": 25,
+          "draws": 0,
+          "losses": 0,
+          "score_rate": 1
+        },
+        "Defender": {
+          "games": 25,
+          "wins": 25,
+          "draws": 0,
+          "losses": 0,
+          "score_rate": 1
+        }
+      },
+      "termination_counts": {
+        "corner-escape": 2,
+        "engine-failure": 14,
+        "perpetual-repetition": 14,
+        "timeout": 20
+      },
+      "completed": true,
+      "strength_evidence": false,
+      "latency_ms": {
+        "mean": 275.9348137303666,
+        "max": 355.6626000026881
+      }
+    },
+    {
+      "pairing": "beta/nicholas",
+      "games": 50,
+      "wins": 48,
+      "draws": 0,
+      "losses": 2,
+      "score_rate": 0.96,
+      "paired_bootstrap_95": [
+        0.9,
+        1.0
+      ],
+      "by_side": {
+        "Attacker": {
+          "games": 25,
+          "wins": 24,
+          "draws": 0,
+          "losses": 1,
+          "score_rate": 0.96
+        },
+        "Defender": {
+          "games": 25,
+          "wins": 24,
+          "draws": 0,
+          "losses": 1,
+          "score_rate": 0.96
+        }
+      },
+      "termination_counts": {
+        "illegal-move": 7,
+        "perpetual-repetition": 4,
+        "rules-incompatibility": 2,
+        "timeout": 37
+      },
+      "completed": true,
+      "strength_evidence": false,
+      "latency_ms": {
+        "mean": 272.2407007926572,
+        "max": 373.5467999977118
+      }
+    },
+    {
+      "pairing": "beta/opentafl",
+      "games": 50,
+      "wins": 49,
+      "draws": 0,
+      "losses": 1,
+      "score_rate": 0.98,
+      "paired_bootstrap_95": [
+        0.94,
+        1.0
+      ],
+      "by_side": {
+        "Attacker": {
+          "games": 25,
+          "wins": 24,
+          "draws": 0,
+          "losses": 1,
+          "score_rate": 0.96
+        },
+        "Defender": {
+          "games": 25,
+          "wins": 25,
+          "draws": 0,
+          "losses": 0,
+          "score_rate": 1
+        }
+      },
+      "termination_counts": {
+        "timeout": 50
+      },
+      "completed": true,
+      "strength_evidence": false,
+      "latency_ms": {
+        "mean": 258.5981283332785,
+        "max": 442.2381000003952
+      }
+    },
+    {
+      "pairing": "beta/taflzero",
+      "games": 50,
+      "wins": 50,
+      "draws": 0,
+      "losses": 0,
+      "score_rate": 1,
+      "paired_bootstrap_95": [
+        1.0,
+        1.0
+      ],
+      "by_side": {
+        "Attacker": {
+          "games": 25,
+          "wins": 25,
+          "draws": 0,
+          "losses": 0,
+          "score_rate": 1
+        },
+        "Defender": {
+          "games": 25,
+          "wins": 25,
+          "draws": 0,
+          "losses": 0,
+          "score_rate": 1
+        }
+      },
+      "termination_counts": {
+        "timeout": 50
+      },
+      "completed": true,
+      "strength_evidence": false,
+      "latency_ms": {
+        "mean": 267.5787000001583,
+        "max": 276.7407999999705
+      }
+    },
+    {
+      "pairing": "iota/beta",
+      "games": 50,
+      "wins": 14,
+      "draws": 0,
+      "losses": 36,
+      "score_rate": 0.28,
+      "paired_bootstrap_95": [
+        0.18,
+        0.4
+      ],
+      "by_side": {
+        "Attacker": {
+          "games": 25,
+          "wins": 1,
+          "draws": 0,
+          "losses": 24,
+          "score_rate": 0.04
+        },
+        "Defender": {
+          "games": 25,
+          "wins": 13,
+          "draws": 0,
+          "losses": 12,
+          "score_rate": 0.52
+        }
+      },
+      "termination_counts": {
+        "corner-escape": 20,
+        "perpetual-repetition": 2,
+        "timeout": 28
+      },
+      "completed": true,
+      "strength_evidence": false,
+      "latency_ms": {
+        "mean": 276.5868049769043,
+        "max": 318.182800001523
+      }
+    },
+    {
+      "pairing": "iota/luizz",
+      "games": 50,
+      "wins": 43,
+      "draws": 0,
+      "losses": 7,
+      "score_rate": 0.86,
+      "paired_bootstrap_95": [
+        0.74,
+        0.96
+      ],
+      "by_side": {
+        "Attacker": {
+          "games": 25,
+          "wins": 23,
+          "draws": 0,
+          "losses": 2,
+          "score_rate": 0.92
+        },
+        "Defender": {
+          "games": 25,
+          "wins": 20,
+          "draws": 0,
+          "losses": 5,
+          "score_rate": 0.8
+        }
+      },
+      "termination_counts": {
+        "corner-escape": 3,
+        "perpetual-repetition": 8,
+        "timeout": 39
+      },
+      "completed": true,
+      "strength_evidence": false,
+      "latency_ms": {
+        "mean": 285.59982714548704,
+        "max": 318.6245999968378
+      }
+    },
+    {
+      "pairing": "iota/nicholas",
+      "games": 50,
+      "wins": 48,
+      "draws": 0,
+      "losses": 2,
+      "score_rate": 0.96,
+      "paired_bootstrap_95": [
+        0.9,
+        1.0
+      ],
+      "by_side": {
+        "Attacker": {
+          "games": 25,
+          "wins": 23,
+          "draws": 0,
+          "losses": 2,
+          "score_rate": 0.92
+        },
+        "Defender": {
+          "games": 25,
+          "wins": 25,
+          "draws": 0,
+          "losses": 0,
+          "score_rate": 1
+        }
+      },
+      "termination_counts": {
+        "corner-escape": 5,
+        "illegal-move": 13,
+        "rules-incompatibility": 2,
+        "timeout": 30
+      },
+      "completed": true,
+      "strength_evidence": false,
+      "latency_ms": {
+        "mean": 280.73200375200054,
+        "max": 322.34159999961776
+      }
+    },
+    {
+      "pairing": "iota/opentafl",
+      "games": 50,
+      "wins": 50,
+      "draws": 0,
+      "losses": 0,
+      "score_rate": 1,
+      "paired_bootstrap_95": [
+        1.0,
+        1.0
+      ],
+      "by_side": {
+        "Attacker": {
+          "games": 25,
+          "wins": 25,
+          "draws": 0,
+          "losses": 0,
+          "score_rate": 1
+        },
+        "Defender": {
+          "games": 25,
+          "wins": 25,
+          "draws": 0,
+          "losses": 0,
+          "score_rate": 1
+        }
+      },
+      "termination_counts": {
+        "timeout": 50
+      },
+      "completed": true,
+      "strength_evidence": false,
+      "latency_ms": {
+        "mean": 274.1645618561492,
+        "max": 314.4948999979533
+      }
+    },
+    {
+      "pairing": "iota/taflzero",
+      "games": 50,
+      "wins": 47,
+      "draws": 0,
+      "losses": 3,
+      "score_rate": 0.94,
+      "paired_bootstrap_95": [
+        0.86,
+        1.0
+      ],
+      "by_side": {
+        "Attacker": {
+          "games": 25,
+          "wins": 22,
+          "draws": 0,
+          "losses": 3,
+          "score_rate": 0.88
+        },
+        "Defender": {
+          "games": 25,
+          "wins": 25,
+          "draws": 0,
+          "losses": 0,
+          "score_rate": 1
+        }
+      },
+      "termination_counts": {
+        "timeout": 50
+      },
+      "completed": true,
+      "strength_evidence": false,
+      "latency_ms": {
+        "mean": 288.5931384623221,
+        "max": 308.4571000072174
+      }
+    },
+    {
+      "pairing": "rho/beta",
+      "games": 50,
+      "wins": 18,
+      "draws": 0,
+      "losses": 32,
+      "score_rate": 0.36,
+      "paired_bootstrap_95": [
+        0.24,
+        0.5
+      ],
+      "by_side": {
+        "Attacker": {
+          "games": 25,
+          "wins": 9,
+          "draws": 0,
+          "losses": 16,
+          "score_rate": 0.36
+        },
+        "Defender": {
+          "games": 25,
+          "wins": 9,
+          "draws": 0,
+          "losses": 16,
+          "score_rate": 0.36
+        }
+      },
+      "termination_counts": {
+        "perpetual-repetition": 2,
+        "timeout": 48
+      },
+      "completed": true,
+      "strength_evidence": false,
+      "latency_ms": {
+        "mean": 279.1312491884677,
+        "max": 319.6158000064315
+      }
+    },
+    {
+      "pairing": "rho/iota",
+      "games": 50,
+      "wins": 17,
+      "draws": 0,
+      "losses": 33,
+      "score_rate": 0.34,
+      "paired_bootstrap_95": [
+        0.2,
+        0.48
+      ],
+      "by_side": {
+        "Attacker": {
+          "games": 25,
+          "wins": 9,
+          "draws": 0,
+          "losses": 16,
+          "score_rate": 0.36
+        },
+        "Defender": {
+          "games": 25,
+          "wins": 8,
+          "draws": 0,
+          "losses": 17,
+          "score_rate": 0.32
+        }
+      },
+      "termination_counts": {
+        "corner-escape": 9,
+        "king-captured": 1,
+        "perpetual-repetition": 6,
+        "timeout": 34
+      },
+      "completed": true,
+      "strength_evidence": false,
+      "latency_ms": {
+        "mean": 285.89671580324875,
+        "max": 319.76609998673666
+      }
+    },
+    {
+      "pairing": "rho/luizz",
+      "games": 50,
+      "wins": 46,
+      "draws": 0,
+      "losses": 4,
+      "score_rate": 0.92,
+      "paired_bootstrap_95": [
+        0.84,
+        0.98
+      ],
+      "by_side": {
+        "Attacker": {
+          "games": 25,
+          "wins": 24,
+          "draws": 0,
+          "losses": 1,
+          "score_rate": 0.96
+        },
+        "Defender": {
+          "games": 25,
+          "wins": 22,
+          "draws": 0,
+          "losses": 3,
+          "score_rate": 0.88
+        }
+      },
+      "termination_counts": {
+        "corner-escape": 8,
+        "engine-failure": 4,
+        "perpetual-repetition": 21,
+        "timeout": 17
+      },
+      "completed": true,
+      "strength_evidence": false,
+      "latency_ms": {
+        "mean": 285.05766500484197,
+        "max": 320.0439000065671
+      }
+    },
+    {
+      "pairing": "rho/nicholas",
+      "games": 50,
+      "wins": 47,
+      "draws": 0,
+      "losses": 3,
+      "score_rate": 0.94,
+      "paired_bootstrap_95": [
+        0.86,
+        1.0
+      ],
+      "by_side": {
+        "Attacker": {
+          "games": 25,
+          "wins": 22,
+          "draws": 0,
+          "losses": 3,
+          "score_rate": 0.88
+        },
+        "Defender": {
+          "games": 25,
+          "wins": 25,
+          "draws": 0,
+          "losses": 0,
+          "score_rate": 1
+        }
+      },
+      "termination_counts": {
+        "corner-escape": 3,
+        "perpetual-repetition": 11,
+        "timeout": 36
+      },
+      "completed": true,
+      "strength_evidence": false,
+      "latency_ms": {
+        "mean": 280.08178202014983,
+        "max": 321.6138999996474
+      }
+    },
+    {
+      "pairing": "rho/opentafl",
+      "games": 50,
+      "wins": 50,
+      "draws": 0,
+      "losses": 0,
+      "score_rate": 1,
+      "paired_bootstrap_95": [
+        1.0,
+        1.0
+      ],
+      "by_side": {
+        "Attacker": {
+          "games": 25,
+          "wins": 25,
+          "draws": 0,
+          "losses": 0,
+          "score_rate": 1
+        },
+        "Defender": {
+          "games": 25,
+          "wins": 25,
+          "draws": 0,
+          "losses": 0,
+          "score_rate": 1
+        }
+      },
+      "termination_counts": {
+        "timeout": 50
+      },
+      "completed": true,
+      "strength_evidence": false,
+      "latency_ms": {
+        "mean": 267.1564204312588,
+        "max": 319.2317000066396
+      }
+    },
+    {
+      "pairing": "rho/taflzero",
+      "games": 50,
+      "wins": 49,
+      "draws": 0,
+      "losses": 1,
+      "score_rate": 0.98,
+      "paired_bootstrap_95": [
+        0.94,
+        1.0
+      ],
+      "by_side": {
+        "Attacker": {
+          "games": 25,
+          "wins": 24,
+          "draws": 0,
+          "losses": 1,
+          "score_rate": 0.96
+        },
+        "Defender": {
+          "games": 25,
+          "wins": 25,
+          "draws": 0,
+          "losses": 0,
+          "score_rate": 1
+        }
+      },
+      "termination_counts": {
+        "timeout": 50
+      },
+      "completed": true,
+      "strength_evidence": false,
+      "latency_ms": {
+        "mean": 289.49983437405535,
+        "max": 316.0663999879034
+      }
+    }
+  ],
+  "termination_counts": {
+    "corner-escape": 50,
+    "engine-failure": 18,
+    "perpetual-repetition": 68,
+    "timeout": 589,
+    "illegal-move": 20,
+    "rules-incompatibility": 4,
+    "king-captured": 1
+  },
+  "upstream_limitations": "Replay verified; not independent rules certification. Timing and upstream compatibility limitations prevent strength claims. Both candidates rejected; baseline retains incumbents.",
+  "conservative_generated_storage_bytes": {
+    "runs": 3555464291,
+    "target": 1840961236,
+    "dist": 89971279,
+    "build": 0
+  },
+  "disk_free_bytes": 21936627712,
+  "handoff": {
+    "baseline": "champion-baseline.json",
+    "study": "Exactly one persisted 3600-second elapsed study authorized; not yet launched",
+    "profiling": "Pending fixed champion-weight profiling and correctness/parity/timing/two-hour soak/50-game qualification; no automatic adoption",
+    "power": "Original AC300second sleep/lid Sleep restored; DC unchanged",
+    "storage_total_conservative_bytes": 5486396806
+  }
+}
