@@ -178,7 +178,10 @@ struct Node {
 }
 /// Includes command handling and worker startup in the response budget.
 pub fn response_deadline(start: Instant, budget: Duration) -> Instant {
-    start + budget.saturating_sub(Duration::from_millis(10).min(budget / 5))
+    // Leave room for publication, pipe delivery and the referee's move request
+    // on a shared, Idle-priority Windows core. This spends less of the requested
+    // budget; it never extends the external match clock.
+    start + budget.saturating_sub(Duration::from_millis(100).min(budget / 3))
 }
 
 fn supervise(
@@ -564,6 +567,22 @@ fn search_publishing(
 #[cfg(test)]
 mod deadline_tests {
     use super::*;
+
+    #[test]
+    fn response_margin_is_inside_requested_budget_and_scales_for_short_searches() {
+        let start = Instant::now();
+        for request_ms in [0, 5, 100, 300, 1000] {
+            let requested = Duration::from_millis(request_ms);
+            assert_eq!(
+                response_deadline(start, requested),
+                start + requested.saturating_sub(Duration::from_millis(100).min(requested / 3))
+            );
+        }
+        assert_eq!(
+            response_deadline(start, Duration::from_millis(300)),
+            start + Duration::from_millis(200)
+        );
+    }
 
     fn fallback() -> SearchResult {
         let mv = Game::default().legal_moves()[0];

@@ -1,0 +1,21 @@
+{
+  "started": 1792450279.1298823,
+  "deadline": 1792457479.1298823,
+  "seconds": 7200,
+  "binary_sha256": "e49b7ce7b72b17cf165490d4f5ad230bba75bf5c524bdc8efb1dd1808045300e",
+  "movetime_ms": 300,
+  "allowance_ms": 25,
+  "cpu": 6,
+  "automatic_adoption": false,
+  "searches": 22270,
+  "deadline_misses": 158,
+  "fallbacks": 228,
+  "errors": [
+    "PermissionError(13, 'Access is denied')"
+  ],
+  "rounds": 149,
+  "complete": true,
+  "updated": 1792462916.0507085,
+  "qualification_passed": false,
+  "limitation": "158 timing misses and interrupted metadata recovery; deadline unchanged. Wall completion processed after long host pause; not uninterrupted two active hours."
+}

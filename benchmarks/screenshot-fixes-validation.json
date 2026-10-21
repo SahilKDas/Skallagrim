@@ -1,0 +1,64 @@
+{
+  "state": "complete",
+  "results": [
+    {
+      "command": [
+        "cargo",
+        "fmt",
+        "--check"
+      ],
+      "returncode": 0
+    },
+    {
+      "command": [
+        "cargo",
+        "clippy",
+        "--all-targets",
+        "-j",
+        "1",
+        "--",
+        "-D",
+        "warnings"
+      ],
+      "returncode": 0
+    },
+    {
+      "command": [
+        "cargo",
+        "test",
+        "-j",
+        "1"
+      ],
+      "returncode": 0
+    },
+    {
+      "command": [
+        "C:\\SahilAppProjects\\Skallagrim\\.venv\\Scripts\\python.exe",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "python",
+        "-p",
+        "test_*.py"
+      ],
+      "returncode": 0
+    }
+  ],
+  "cpu": 6,
+  "priority": "Idle",
+  "jobs": 1,
+  "started": 1792456653.670251,
+  "current": [
+    "C:\\SahilAppProjects\\Skallagrim\\.venv\\Scripts\\python.exe",
+    "-m",
+    "unittest",
+    "discover",
+    "-s",
+    "python",
+    "-p",
+    "test_*.py"
+  ],
+  "finished": 1792463094.7310283,
+  "passed": true
+}

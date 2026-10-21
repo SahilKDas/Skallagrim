@@ -2,6 +2,7 @@ use crate::game::{Game, Piece, SQ, Side};
 use serde::{Deserialize, Serialize};
 use std::path::Path;
 pub const FEATURES: usize = SQ * 3 + 1;
+pub const EXPERIMENTAL_FEATURES: usize = FEATURES + 45;
 pub const PLANES: usize = 6;
 
 pub fn features(g: &Game) -> Vec<usize> {
@@ -17,6 +18,57 @@ pub fn features(g: &Game) -> Vec<usize> {
     if g.side == Side::Attacker {
         active.push(3 * SQ);
     }
+    active
+}
+
+pub fn experimental_features(g: &Game) -> Vec<usize> {
+    let mut active = features(g);
+    let Some(king) = g.board.iter().position(|p| *p == Piece::King) else {
+        return active;
+    };
+    let (y, x) = (king / 11, king % 11);
+    let adjacent = [(-1, 0), (1, 0), (0, -1), (0, 1)]
+        .iter()
+        .filter(|&&(dy, dx)| {
+            let (yy, xx) = (y as i32 + dy, x as i32 + dx);
+            (0..11).contains(&yy)
+                && (0..11).contains(&xx)
+                && g.board[yy as usize * 11 + xx as usize] == Piece::Attacker
+        })
+        .count();
+    let mut rays = 0;
+    for (bit, (dy, dx)) in [(-1, 0), (1, 0), (0, -1), (0, 1)].into_iter().enumerate() {
+        let (mut yy, mut xx) = (y as i32 + dy, x as i32 + dx);
+        let mut clear = true;
+        while (0..11).contains(&yy) && (0..11).contains(&xx) {
+            if g.board[yy as usize * 11 + xx as usize] != Piece::Empty {
+                clear = false;
+            }
+            yy += dy;
+            xx += dx;
+        }
+        let end = ((yy - dy) as usize, (xx - dx) as usize);
+        if clear && [(0, 0), (0, 10), (10, 0), (10, 10)].contains(&end) && end != (y, x) {
+            rays |= 1 << bit;
+        }
+    }
+    let fen = g.fen();
+    let repeats = g
+        .history
+        .iter()
+        .filter(|f| f.as_ref() == fen)
+        .count()
+        .min(2);
+    let distance = [y + x, y + 10 - x, 10 - y + x, 20 - y - x]
+        .into_iter()
+        .min()
+        .unwrap();
+    active.extend([
+        FEATURES + repeats,
+        FEATURES + 3 + distance,
+        FEATURES + 24 + adjacent,
+        FEATURES + 29 + rays,
+    ]);
     active
 }
 pub fn planes(g: &Game) -> Vec<f32> {
@@ -61,11 +113,22 @@ pub struct Accumulator {
     pub active: Vec<usize>,
 }
 impl Nnue {
+    pub fn active(&self, g: &Game) -> Vec<usize> {
+        if self.format == "skallagrim-nnue-v2" {
+            experimental_features(g)
+        } else {
+            features(g)
+        }
+    }
     pub fn validate(&self) -> Result<(), String> {
-        if self.format != "skallagrim-nnue-v1"
-            || self.hidden == 0
+        let count = match self.format.as_str() {
+            "skallagrim-nnue-v1" => FEATURES,
+            "skallagrim-nnue-v2" => EXPERIMENTAL_FEATURES,
+            _ => return Err("invalid NNUE format".into()),
+        };
+        if self.hidden == 0
             || self.hidden > 1024
-            || self.weights.len() != FEATURES * self.hidden
+            || self.weights.len() != count * self.hidden
             || self.bias.len() != self.hidden
             || self.output.len() != self.hidden
         {
@@ -84,7 +147,7 @@ impl Nnue {
         Ok(())
     }
     pub fn accumulator(&self, g: &Game) -> Accumulator {
-        let active = features(g);
+        let active = self.active(g);
         let mut values = self.bias.clone();
         for &f in &active {
             for (j, v) in values.iter_mut().enumerate() {
@@ -94,7 +157,7 @@ impl Nnue {
         Accumulator { values, active }
     }
     pub fn update(&self, previous: &Accumulator, g: &Game) -> Accumulator {
-        let active = features(g);
+        let active = self.active(g);
         let mut values = previous.values.clone();
         for &f in &previous.active {
             if !active.contains(&f) {
@@ -142,6 +205,25 @@ impl Conv {
     }
     fn run(&self, input: &[f32], cancelled: &impl Fn() -> bool) -> Option<Vec<f32>> {
         let mut out = vec![0.0; self.output * SQ];
+        if self.kernel == 1 {
+            for oc in 0..self.output {
+                let weights = &self.weights[oc * self.input..(oc + 1) * self.input];
+                for y in 0..11 {
+                    if cancelled() {
+                        return None;
+                    }
+                    for x in 0..11 {
+                        let square = y * 11 + x;
+                        let mut value = self.bias[oc];
+                        for (ic, weight) in weights.iter().enumerate() {
+                            value += input[ic * SQ + square] * weight;
+                        }
+                        out[oc * SQ + square] = value;
+                    }
+                }
+            }
+            return Some(out);
+        }
         let pad = (self.kernel / 2) as i32;
         for oc in 0..self.output {
             for y in 0..11 {
@@ -269,6 +351,7 @@ pub struct Models {
     pub nnue: Option<Nnue>,
     pub cnn: Option<Cnn>,
 }
+
 impl Models {
     pub fn load_nnue(&mut self, path: &Path) -> Result<(), String> {
         let n: Nnue = serde_json::from_slice(&std::fs::read(path).map_err(|e| e.to_string())?)
@@ -283,5 +366,39 @@ impl Models {
         n.validate()?;
         self.cnn = Some(n);
         Ok(())
+    }
+}
+
+#[cfg(test)]
+mod convolution_tests {
+    use super::*;
+
+    #[test]
+    fn pointwise_convolution_preserves_scalar_order_and_cancellation() {
+        for channels in [1, 8, 17, 128] {
+            let conv = Conv {
+                input: channels,
+                output: 40,
+                kernel: 1,
+                weights: (0..channels * 40)
+                    .map(|i| (i as f32 % 19.0 - 9.0) / 13.0)
+                    .collect(),
+                bias: (0..40).map(|i| (i as f32 - 20.0) / 17.0).collect(),
+            };
+            let input: Vec<f32> = (0..channels * SQ)
+                .map(|i| (i as f32 % 31.0 - 15.0) / 11.0)
+                .collect();
+            let actual = conv.run(&input, &|| false).unwrap();
+            for oc in 0..40 {
+                for square in 0..SQ {
+                    let mut expected = conv.bias[oc];
+                    for ic in 0..channels {
+                        expected += input[ic * SQ + square] * conv.weights[oc * channels + ic];
+                    }
+                    assert_eq!(actual[oc * SQ + square].to_bits(), expected.to_bits());
+                }
+            }
+            assert!(conv.run(&input, &|| true).is_none());
+        }
     }
 }

@@ -1,0 +1,83 @@
+{
+  "status": "blocked-environment-qualification-pending",
+  "timing_fixed": false,
+  "adopted": false,
+  "incumbent_unchanged": true,
+  "source_changes": [
+    "Pointwise CNN fast path with exact parity",
+    "Batched protocol reply",
+    "100ms internal reserve capped at one third of requested budget",
+    "Opt-in stage telemetry; default protocol unchanged"
+  ],
+  "checks": {
+    "rust_fmt_clippy_tests_release": "pass",
+    "python": "74 tests, 1 skip, pass after preserved earlier retry",
+    "neural_parity": "40 positions pass",
+    "stage_profile": "450 searches, 4 timing misses",
+    "reserve100_soak": "26256 searches, 47 misses, 863 fallbacks, interruption preserved; fail",
+    "reserve100_match": "41 wins, 9 losses; 2 candidate and 35 control timeouts; fail",
+    "replay_audit": "50 games, 2212 plies, artifact hashes pass"
+  },
+  "cpu_diagnostic": {
+    "searches": 450,
+    "misses": 1,
+    "failures": [
+      {
+        "index": 320,
+        "observation": {
+          "game": "control-30.json",
+          "trial": 160,
+          "started": 21192.1854754,
+          "passed": false,
+          "elapsed_ms": 329.64979999815114,
+          "partial_trace": [
+            {
+              "observed": 21192.5150831,
+              "line": "info string deadline-fallback"
+            }
+          ],
+          "late_reply": [
+            "c1d1",
+            [
+              "info depth 0 score cp 309 nodes 0 time 328 pv c1d1",
+              "info string policy [[\"c1d1\",1.0]]",
+              "bestmove c1d1"
+            ]
+          ],
+          "late_trace": [
+            {
+              "observed": 21192.5151366,
+              "line": "info depth 0 score cp 309 nodes 0 time 328 pv c1d1"
+            },
+            {
+              "observed": 21192.5151401,
+              "line": "info string policy [[\"c1d1\",1.0]]"
+            },
+            {
+              "observed": 21192.5151426,
+              "line": "bestmove c1d1"
+            }
+          ],
+          "process_cpu_ms": 140.625,
+          "final_wall_ms": 329.8607999968226
+        },
+        "stage": {
+          "entered_us": 139,
+          "publication_us": 329033,
+          "flushed_us": 329147,
+          "search_us": 328891,
+          "fallback": true
+        }
+      }
+    ]
+  },
+  "finding": "Failure consumed 140.625ms engine process CPU across 329.861ms wall time. Entry 0.139ms, publication 329.033ms, flush 329.147ms. Supports scheduling/wait latency, not a deterministic neural hot-path overrun; exact OS event unconfirmed. Earlier trace also showed a 40ms publication span.",
+  "required_next_step": "An awake, less-contended qualification window under the original clocks and all gates. Do not exclude existing failures, extend expired deadlines, change priority/power policy, retrain, or adopt automatically. Further implementation changes require evidence of a fixable code cause.",
+  "pending": [
+    "Passing original timing profile",
+    "Uninterrupted two-hour soak with zero timing failures",
+    "Original paired 50-game role/confidence/failure gates and replay audit for any final candidate"
+  ],
+  "sources_uncommitted": true,
+  "monitor": "Deleted after diagnosing environment scheduling/wait limitation; qualification remains pending, not complete."
+}

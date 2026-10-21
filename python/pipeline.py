@@ -5,19 +5,31 @@ baseline warm start is followed by neural self-play, never called proven strengt
 """
 
 import argparse
+import hashlib
 import json
+import os
+import shutil
+import signal
 import subprocess
 import sys
-import os
-import signal
-import hashlib
-import shutil
 import time
 from pathlib import Path
+
+from dataset import DatasetIndex, archive_data, make_replay, make_replay_sqlite
 from records import save
-from transport import ROOT
-from dataset import make_replay, make_replay_sqlite, archive_data, DatasetIndex
 from resources import StorageBudget
+from transport import ROOT
+
+
+def replay_sources(run, folder, seeded):
+    """Seeded generations split their own exact corpus; other runs use a window."""
+    return [
+        source
+        for source in sorted(run.glob("generation-*/selfplay.jsonl*"))
+        if source.name in {"selfplay.jsonl", "selfplay.jsonl.gz"}
+        and (source.parent == folder if seeded else source.parent.name <= folder.name)
+        and not (source.suffix == ".gz" and source.with_suffix("").exists())
+    ]
 
 
 def validate_checkpoint(path, minimum_training=1000, minimum_validation=0):
@@ -78,11 +90,15 @@ def run(*args, budget=None):
 def main():
     from league import (
         checkpoint as league_checkpoint,
-        manifest as league_manifest,
+    )
+    from league import (
         load_positions,
         pin,
-        verify_manifest,
         run_gates,
+        verify_manifest,
+    )
+    from league import (
+        manifest as league_manifest,
     )
 
     p = argparse.ArgumentParser()
@@ -253,8 +269,8 @@ def main():
                     (args.collection_source / "league.json").read_text()
                 )
                 verify_manifest(original)
-                from transport import ENGINE
                 from referee import REFEREE_NAME
+                from transport import ENGINE
 
                 referee_binary = Path(
                     os.environ.get("SKALLAGRIM_REFEREE", ROOT / REFEREE_NAME)
@@ -339,17 +355,11 @@ def main():
             replay = folder / (
                 "replay.sqlite" if args.initial_champion else "replay.jsonl"
             )
-            sources = [
-                s
-                for s in sorted(args.run.glob("generation-*/selfplay.jsonl*"))
-                if s.name in {"selfplay.jsonl", "selfplay.jsonl.gz"}
-                and s.parent.name <= folder.name
-                and not (s.suffix == ".gz" and s.with_suffix("").exists())
-            ]
+            sources = replay_sources(args.run, folder, bool(args.initial_champion))
             selection = (make_replay_sqlite if args.initial_champion else make_replay)(
                 sources,
                 replay,
-                args.window_games,
+                args.games if args.initial_champion else args.window_games,
                 min(int(args.replay_max_gib * 1024**3), budget.available_bytes()),
                 check=budget.check,
                 excluded_fens={row["fen"] for row in position_suite["evaluation"]},

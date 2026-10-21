@@ -5,7 +5,7 @@ import random
 import json
 from pathlib import Path
 import torch
-from models import CNN, NNUE, encode, policy_index
+from models import CNN, NNUE, encode, encode_nnue, policy_index
 from transport import Engine
 
 
@@ -17,7 +17,8 @@ def main():
     torch.set_num_threads(1)
     nn = json.loads((args.models / "nnue.json").read_text())
     cn = json.loads((args.models / "cnn.json").read_text())
-    nnue = NNUE(nn["hidden"])
+    version = nn["format"].removeprefix("skallagrim-nnue-")
+    nnue = NNUE(nn["hidden"], version)
     cnn = CNN(cn["channels"], len(cn["blocks"]))
     nnue.load_state_dict(torch.load(args.models / "nnue.pt", weights_only=True))
     cnn.load_state_dict(torch.load(args.models / "cnn.pt", weights_only=True))
@@ -40,6 +41,11 @@ def main():
             x, f = encode(state["fen"], state["history"])
             assert torch.equal(torch.tensor(result["planes"]), x.flatten())
             assert set(result["features"]) == set(f.nonzero().flatten().tolist())
+            f = encode_nnue(state["fen"], state["history"], version)
+            if version == "v2":
+                assert set(result["nnue_features"]) == set(
+                    f.nonzero().flatten().tolist()
+                )
             with torch.no_grad():
                 n = nnue(f[None]).item()
                 v, policy = cnn(x[None])

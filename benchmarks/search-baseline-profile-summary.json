@@ -1,0 +1,36 @@
+{
+  "engines": {
+    "iota": {
+      "searches": 150,
+      "deadline_misses": 1,
+      "means": {
+        "transport_ms": 286.64817600064754,
+        "eval_roundtrip_ms": 0.46939399966504425,
+        "depth": 1.9395973154362416,
+        "nodes": 2343.44966442953
+      }
+    },
+    "beta": {
+      "searches": 150,
+      "deadline_misses": 0,
+      "means": {
+        "transport_ms": 271.50308733359753,
+        "eval_roundtrip_ms": 0.6009520014049485,
+        "depth": 7.36,
+        "nodes": 15881.173333333334
+      }
+    },
+    "rho": {
+      "searches": 150,
+      "deadline_misses": 0,
+      "means": {
+        "transport_ms": 285.5930779998501,
+        "eval_roundtrip_ms": 5.594559999881312,
+        "depth": 6.82,
+        "nodes": 3126.1666666666665
+      }
+    }
+  },
+  "limitation": "Baseline binary lacks inference telemetry. Eval roundtrip is standalone diagnostic, not cumulative search inference. Beta/Rho depth is MCTS telemetry, not alpha-beta completed depth. One Iota timeout is a failed trial.",
+  "next": "Instrument unoptimized working-source build then attribute one measured bottleneck; no optimization/adoption yet"
+}

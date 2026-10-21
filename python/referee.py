@@ -5,15 +5,21 @@ import os
 import queue
 import subprocess
 import threading
+import time
 from pathlib import Path
-from transport import ROOT
 
+from transport import ROOT
 
 REFEREE_NAME = "skallagrim-referee.exe" if os.name == "nt" else "skallagrim-referee"
 
 
+class MatchTimeout(TimeoutError):
+    """A synchronized referee reply adjudicating the game clock."""
+
+
 class Referee:
     def __init__(self, executable=None, log_dir=None):
+        self.log_dir = Path(log_dir) if log_dir else ROOT / "runs/referee"
         self.executable = Path(
             executable
             or os.environ.get(
@@ -36,6 +42,8 @@ class Referee:
         self.replies = queue.Queue()
         self.state = {}
         self.sequence = 0
+        self.failed = False
+        self.latencies = []
 
         def read():
             try:
@@ -53,6 +61,47 @@ class Referee:
             raise
 
     def call(self, command, **fields):
+        if self.failed:
+            raise RuntimeError("referee connection unusable after protocol failure")
+        started = time.perf_counter()
+        try:
+            return self._call(command, **fields)
+        except MatchTimeout:
+            raise
+        except (RuntimeError, OSError, json.JSONDecodeError, KeyError):
+            self.failed = True
+            raise
+        finally:
+            self.latencies.append(
+                dict(
+                    command=command,
+                    milliseconds=(time.perf_counter() - started) * 1000,
+                    failed=self.failed,
+                )
+            )
+            # Bounded diagnostics, independent of the referee game clock.
+            del self.latencies[:-256]
+            if self.failed:
+                try:
+                    self.log_dir.mkdir(parents=True, exist_ok=True)
+                    (
+                        self.log_dir / f"protocol-failure-{self.proc.pid}.json"
+                    ).write_text(
+                        json.dumps(
+                            dict(
+                                sequence=self.sequence,
+                                command=command,
+                                revision=self.state.get("revision"),
+                                response=getattr(self, "protocol_failure", None),
+                                latencies=self.latencies,
+                            )
+                        ),
+                        encoding="utf-8",
+                    )
+                except OSError:
+                    pass  # Do not mask the original protocol failure.
+
+    def _call(self, command, **fields):
         self.sequence += 1
         request = dict(command=command, id=self.sequence, **fields)
         if (
@@ -79,11 +128,16 @@ class Referee:
             raise RuntimeError("referee exited")
         response = json.loads(line)
         if response.get("id") != self.sequence:
+            self.protocol_failure = dict(
+                expected_id=self.sequence,
+                received_id=response.get("id"),
+                reply=line[:8192],
+            )
             raise RuntimeError("referee response mismatch")
         self.state = response["state"]
         if not response["ok"]:
             if (self.state.get("outcome") or {}).get("reason") == "timeout":
-                raise TimeoutError(response["error"])
+                raise MatchTimeout(response["error"])
             raise ValueError(response["error"])
         return response["result"]
 

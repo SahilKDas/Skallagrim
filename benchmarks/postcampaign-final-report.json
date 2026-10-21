@@ -1,0 +1,249 @@
+{
+  "complete": true,
+  "finished": 1792464171.3405027,
+  "adopted": false,
+  "qualification": "rejected",
+  "study": {
+    "started": 1792420920.3766835,
+    "deadline": 1792424520.3766835,
+    "finished": 1792448453.2671583,
+    "results": [
+      {
+        "name": "control",
+        "state": "incomplete-budget",
+        "returncode": 75,
+        "checkpoint_present": true
+      },
+      {
+        "name": "lower-lr",
+        "state": "unstarted-budget-exhausted"
+      },
+      {
+        "name": "regularized",
+        "state": "unstarted-budget-exhausted"
+      },
+      {
+        "name": "symmetry",
+        "state": "unstarted-budget-exhausted"
+      },
+      {
+        "name": "features-v2",
+        "state": "unstarted-budget-exhausted"
+      },
+      {
+        "name": "hidden-128",
+        "state": "unstarted-budget-exhausted"
+      }
+    ],
+    "control": {
+      "epoch": 1,
+      "epochs": 10,
+      "best_epoch": 1,
+      "best_loss": 0.2440766487160449,
+      "training_games": 5000,
+      "validation_games": 1250,
+      "metrics": [
+        {
+          "epoch": 1,
+          "train_loss": 0.23917705831648153,
+          "validation_loss": 0.2440766487160449,
+          "seconds": 387.92199999999866
+        }
+      ],
+      "complete": false,
+      "identity": {
+        "kind": "nnue",
+        "data": "03f33b933b79e26863506cf547bdd4fc1fca7e8de6a275b43c4894cf9c5384e0",
+        "data_format": ".sqlite",
+        "split": "19283a22c9e7ce077a6700cced336b87813ad2491f9d8e9f1bde1ed475b57a57",
+        "seed": 42,
+        "epochs": 10,
+        "batch": 64,
+        "hidden": 64,
+        "channels": 8,
+        "blocks": 1,
+        "device": "cuda",
+        "training_games": 5000,
+        "validation_games": 1250,
+        "initial_sha256": "fb569d9f07155a0a8361e50f79230d0167ce153f8e8fdb44cfc3c193914981a0",
+        "experiment": {
+          "learning_rate": 0.001,
+          "weight_decay": 0.01,
+          "patience": 2,
+          "min_improvement": 0,
+          "feature_version": "v1",
+          "migrate": false,
+          "augment": false,
+          "samples_per_game": 0,
+          "target_mix": 0,
+          "labels": null
+        }
+      },
+      "model_artifacts": {
+        "nnue.json": "605db871403cec11367270fd726afa9e1d9f371c05baac830d6cd59aa8855361",
+        "nnue.pt": "a2f6f9b0a6812368f45b6fbdf902205af6459792e057720d80e83f7e5127d6e0"
+      }
+    },
+    "automatic_adoption": false,
+    "limitation": "Only one control epoch committed. Elapsed wall deadline expired; no extension. Completion processed later; no claim of one hour of active compute."
+  },
+  "timing": {
+    "alternating": {
+      "control": {
+        "searches": 150,
+        "deadline_misses": 2,
+        "mean_cnn_inference_ns": 683532,
+        "mean_nodes": 3154.2533333333336
+      },
+      "candidate": {
+        "searches": 150,
+        "deadline_misses": 2,
+        "mean_cnn_inference_ns": 545284,
+        "mean_nodes": 4887.566666666667
+      }
+    },
+    "timing_gate_passed": false,
+    "automatic_adoption": false,
+    "parity": "40 positions full policy/value maxerror6.68e-6; exactpointwisearithmetic regression passed",
+    "limitation": "Separate profile candidate6misses control0; alternating both2misses. No failure excluded; host sensitivity unresolved."
+  },
+  "soak": {
+    "started": 1792450279.1298823,
+    "deadline": 1792457479.1298823,
+    "seconds": 7200,
+    "binary_sha256": "e49b7ce7b72b17cf165490d4f5ad230bba75bf5c524bdc8efb1dd1808045300e",
+    "movetime_ms": 300,
+    "allowance_ms": 25,
+    "cpu": 6,
+    "automatic_adoption": false,
+    "searches": 22270,
+    "deadline_misses": 158,
+    "fallbacks": 228,
+    "errors": [
+      "PermissionError(13, 'Access is denied')"
+    ],
+    "rounds": 149,
+    "complete": true,
+    "updated": 1792462916.0507085,
+    "qualification_passed": false,
+    "limitation": "158 timing misses and interrupted metadata recovery; deadline unchanged. Wall completion processed after long host pause; not uninterrupted two active hours."
+  },
+  "gauntlet": {
+    "games": 50,
+    "wins": 21,
+    "draws": 0,
+    "losses": 29,
+    "score_rate": 0.42,
+    "paired_bootstrap_95": [
+      0.26,
+      0.58
+    ],
+    "by_side": {
+      "Attacker": {
+        "games": 25,
+        "wins": 9,
+        "draws": 0,
+        "losses": 16,
+        "score_rate": 0.36
+      },
+      "Defender": {
+        "games": 25,
+        "wins": 12,
+        "draws": 0,
+        "losses": 13,
+        "score_rate": 0.48
+      }
+    },
+    "termination_counts": {
+      "corner-escape": 13,
+      "perpetual-repetition": 1,
+      "timeout": 36
+    },
+    "completed": true,
+    "strength_evidence": false,
+    "latency_ms": {
+      "mean": 285.71068309649615,
+      "max": 324.81999999436084
+    }
+  },
+  "replay_audit": {
+    "games": 50,
+    "plies": 2020,
+    "replay_verified": true,
+    "independent_rules_certification": false,
+    "verified_artifacts": 5
+  },
+  "original_role_confidence_gate_passed": false,
+  "screenshot_validation": {
+    "state": "complete",
+    "results": [
+      {
+        "command": [
+          "cargo",
+          "fmt",
+          "--check"
+        ],
+        "returncode": 0
+      },
+      {
+        "command": [
+          "cargo",
+          "clippy",
+          "--all-targets",
+          "-j",
+          "1",
+          "--",
+          "-D",
+          "warnings"
+        ],
+        "returncode": 0
+      },
+      {
+        "command": [
+          "cargo",
+          "test",
+          "-j",
+          "1"
+        ],
+        "returncode": 0
+      },
+      {
+        "command": [
+          "C:\\SahilAppProjects\\Skallagrim\\.venv\\Scripts\\python.exe",
+          "-m",
+          "unittest",
+          "discover",
+          "-s",
+          "python",
+          "-p",
+          "test_*.py"
+        ],
+        "returncode": 0
+      }
+    ],
+    "cpu": 6,
+    "priority": "Idle",
+    "jobs": 1,
+    "started": 1792456653.670251,
+    "current": [
+      "C:\\SahilAppProjects\\Skallagrim\\.venv\\Scripts\\python.exe",
+      "-m",
+      "unittest",
+      "discover",
+      "-s",
+      "python",
+      "-p",
+      "test_*.py"
+    ],
+    "finished": 1792463094.7310283,
+    "passed": true
+  },
+  "generated_storage_bytes": {
+    "runs": 3572575139,
+    "target": 1843978238,
+    "dist": 89971279,
+    "build": 0
+  },
+  "disk_free_bytes": 19287175168,
+  "limitation": "Standalone CNN inference improved20-25%; timing and role/confidence qualification failed. No stronger engine claim. Working-source optimization remains experimental; pinned incumbent configuration unchanged. One-hour study ended with one partial control configuration and no additional study allowed."
+}

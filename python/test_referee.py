@@ -37,6 +37,18 @@ class RefereeTests(unittest.TestCase):
     def referee(self):
         return Referee(os.environ.get("SKALLAGRIM_REFEREE"))
 
+    def test_late_move_timeout_allows_export_and_next_game(self):
+        with self.referee() as ref:
+            move = ref.snapshot()["moves"][0]
+            ref.start_clock(20)
+            time.sleep(0.06)
+            with self.assertRaises(TimeoutError):
+                ref.play(move)
+            self.assertFalse(ref.failed)
+            self.assertEqual(ref.snapshot()["outcome"]["reason"], "timeout")
+            self.assertEqual(ref.export()["outcome"]["reason"], "timeout")
+            self.assertIsNone(ref.position([])["outcome"])
+
     def test_owns_moves_history_and_rejects_stale_revision(self):
         with self.referee() as ref:
             original = ref.snapshot()

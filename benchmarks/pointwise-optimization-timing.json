@@ -1,0 +1,20 @@
+{
+  "alternating": {
+    "control": {
+      "searches": 150,
+      "deadline_misses": 2,
+      "mean_cnn_inference_ns": 683532,
+      "mean_nodes": 3154.2533333333336
+    },
+    "candidate": {
+      "searches": 150,
+      "deadline_misses": 2,
+      "mean_cnn_inference_ns": 545284,
+      "mean_nodes": 4887.566666666667
+    }
+  },
+  "timing_gate_passed": false,
+  "automatic_adoption": false,
+  "parity": "40 positions full policy/value maxerror6.68e-6; exactpointwisearithmetic regression passed",
+  "limitation": "Separate profile candidate6misses control0; alternating both2misses. No failure excluded; host sensitivity unresolved."
+}

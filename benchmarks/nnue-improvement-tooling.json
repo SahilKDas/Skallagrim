@@ -1,0 +1,102 @@
+{
+  "format": "skallagrim-nnue-tooling-verification-v1",
+  "passed": true,
+  "checked": 1792276968.4658291,
+  "source_files": {
+    "python/train.py": {
+      "path": "C:\\SahilAppProjects\\Skallagrim\\python\\train.py",
+      "sha256": "cf6f7a2fd6cedef933364b786159f99e40205cec70e82eb811ea504d0d4009f0"
+    },
+    "python/models.py": {
+      "path": "C:\\SahilAppProjects\\Skallagrim\\python\\models.py",
+      "sha256": "2ec4b8cc55d014bf6b673fbcf92f60284b474ed52ea07eea226c26cfe88674c3"
+    },
+    "python/referee.py": {
+      "path": "C:\\SahilAppProjects\\Skallagrim\\python\\referee.py",
+      "sha256": "6bf666fd6ba308aa0b8e9d1bc19ffe2e2df13e7f6fa4e1c621e9bdae82b9390f"
+    },
+    "python/transport.py": {
+      "path": "C:\\SahilAppProjects\\Skallagrim\\python\\transport.py",
+      "sha256": "1d955389379b18976369e30689846e8235a7ddaa8c0cb8fc4d94923d32162b65"
+    },
+    "python/verify_models.py": {
+      "path": "C:\\SahilAppProjects\\Skallagrim\\python\\verify_models.py",
+      "sha256": "028fb050ab1d248596c2ac80923e8ead33cd6740bef53fed45d8e91b1f864f3b"
+    },
+    "python/nnue_experiments.py": {
+      "path": "C:\\SahilAppProjects\\Skallagrim\\python\\nnue_experiments.py",
+      "sha256": "9197ff66f27a40a932de47ed82df54079a829a9b0a85356b57dd071ae8b02b9c"
+    },
+    "python/nnue_dataset_report.py": {
+      "path": "C:\\SahilAppProjects\\Skallagrim\\python\\nnue_dataset_report.py",
+      "sha256": "997c04a15305d21eb4fb7da39c38e64c0e947a8169d2e42d5e9ebf9cb56bde3d"
+    },
+    "python/run_nnue_experiments.py": {
+      "path": "C:\\SahilAppProjects\\Skallagrim\\python\\run_nnue_experiments.py",
+      "sha256": "4f49f3e79f38e2f2c626944aa33ea801e413b42b330d52d5e5e383eb18cc5f89"
+    },
+    "python/profile_search.py": {
+      "path": "C:\\SahilAppProjects\\Skallagrim\\python\\profile_search.py",
+      "sha256": "bfb26431cad68f47a5b15b028ed7f134192a88d316b0323ee9b245f17b02551a"
+    },
+    "python/pin_campaign_baseline.py": {
+      "path": "C:\\SahilAppProjects\\Skallagrim\\python\\pin_campaign_baseline.py",
+      "sha256": "ca4544642e6d41be501723d06530f0757f2cced5a16802596c9b82ef26c119f8"
+    },
+    "python/dataset.py": {
+      "path": "C:\\SahilAppProjects\\Skallagrim\\python\\dataset.py",
+      "sha256": "46705f359d90de801775e35f66a4c6de41b5209b4c923fb3dc01323ef11026f8"
+    },
+    "python/resources.py": {
+      "path": "C:\\SahilAppProjects\\Skallagrim\\python\\resources.py",
+      "sha256": "142fc99060c1cb5282d4e8e0b74de3745ebc34c4aecb49d36090a11ab6089c64"
+    },
+    "python/league.py": {
+      "path": "C:\\SahilAppProjects\\Skallagrim\\python\\league.py",
+      "sha256": "51252fc9b8bd2e199024e8365059130426ab4fc20cc0db8035d2602aed2df029"
+    },
+    "python/records.py": {
+      "path": "C:\\SahilAppProjects\\Skallagrim\\python\\records.py",
+      "sha256": "2ae84e74dcf0e2c8e41ad1073dcf2165976ec1b202ffb875b616ecf9d7183413"
+    },
+    "src/neural.rs": {
+      "path": "C:\\SahilAppProjects\\Skallagrim\\src\\neural.rs",
+      "sha256": "87eada8219d93bea0a2adf39b3e4ca2fb6882a5945abb01822d817e4d5500d7c"
+    },
+    "src/main.rs": {
+      "path": "C:\\SahilAppProjects\\Skallagrim\\src\\main.rs",
+      "sha256": "332f10d3e96e69bfd6122a6c716c15ed3711f10822057de2e1842321241b46bb"
+    },
+    "python/test_nnue_experiments.py": {
+      "path": "C:\\SahilAppProjects\\Skallagrim\\python\\test_nnue_experiments.py",
+      "sha256": "2b0a3da4b768acf4249b974106cc2db47656f481a68039855932d6114b2da300"
+    },
+    "tests/nnue_experimental.rs": {
+      "path": "C:\\SahilAppProjects\\Skallagrim\\tests\\nnue_experimental.rs",
+      "sha256": "ca12ac1e54f6e5182414adf2d2c09ab872508081681e73f2cf25d737f1413c0c"
+    }
+  },
+  "checks": {
+    "python_distinct_regressions_passed": 30,
+    "rust_conformance_and_experimental_passed": 42,
+    "python_rust_parity_positions": 40,
+    "exact_interrupted_epoch_resume": true,
+    "early_stopping": true,
+    "study_budget_never_renews": true,
+    "python_ruff_E9_F": true,
+    "rust_clippy": true,
+    "formatting": true
+  },
+  "qualification": {
+    "training_study_started": false,
+    "profile_started": false,
+    "two_hour_soak_completed": false,
+    "promotion_evidence": false
+  },
+  "notes": [
+    "Only tooling verification, not a playing-strength or speed claim",
+    "Current frozen campaign untouched",
+    "One-hour study remains gated on full campaign completion",
+    "No new collection authorized"
+  ]
+}

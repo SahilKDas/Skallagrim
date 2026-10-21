@@ -39,6 +39,26 @@ def pin_process(process, cpu):
         os.sched_setaffinity(process.pid, {cpu})
 
 
+def pin_current_process(cpu=6):
+    """Apply the existing sequential-study CPU and Idle process policy."""
+    if os.name == "nt":
+        import ctypes
+        from ctypes import wintypes
+
+        kernel = ctypes.WinDLL("kernel32", use_last_error=True)
+        kernel.GetCurrentProcess.restype = wintypes.HANDLE
+        handle = kernel.GetCurrentProcess()
+        kernel.SetProcessAffinityMask.argtypes = [wintypes.HANDLE, ctypes.c_size_t]
+        kernel.SetPriorityClass.argtypes = [wintypes.HANDLE, wintypes.DWORD]
+        if not kernel.SetProcessAffinityMask(
+            handle, 1 << cpu
+        ) or not kernel.SetPriorityClass(handle, 0x40):
+            raise ctypes.WinError(ctypes.get_last_error())
+    else:
+        os.sched_setaffinity(0, {cpu})
+        os.nice(19)
+
+
 class Engine:
     def __init__(self, command=None, options=None, cwd=None, stderr=None, cpu=None):
         self.lines = queue.Queue()
@@ -130,9 +150,33 @@ class Engine:
         move, lines = self.until("bestmove", (milliseconds + allowance_ms) / 1000)
         elapsed = (time.perf_counter() - started) * 1000
         policy = []
+        self.last_search_timing = {
+            "transport_ms": elapsed,
+            "engine_ms": None,
+            "depth": None,
+            "nodes": None,
+            "fallback": False,
+        }
         for line in lines:
+            if line == "info string deadline-fallback":
+                self.last_search_timing["fallback"] = True
+            if line.startswith("info depth "):
+                fields = line.split()
+                for token, key in [
+                    ("depth", "depth"),
+                    ("nodes", "nodes"),
+                    ("time", "engine_ms"),
+                ]:
+                    if token in fields:
+                        self.last_search_timing[key] = int(
+                            fields[fields.index(token) + 1]
+                        )
             if line.startswith("info string policy "):
                 policy = json.loads(line[len("info string policy ") :])
+        engine_ms = self.last_search_timing["engine_ms"]
+        self.last_search_timing["observation_overhead_ms"] = (
+            None if engine_ms is None else elapsed - engine_ms
+        )
         return move, elapsed, policy, lines
 
     def close(self):

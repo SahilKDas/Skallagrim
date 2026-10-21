@@ -16,6 +16,35 @@ fn emit(s: &str) {
     println!("{s}");
     let _ = io::stdout().flush();
 }
+fn search_reply(r: &search::SearchResult, side_sign: f32) -> String {
+    let fallback = if r.deadline_fallback {
+        "info string deadline-fallback\n"
+    } else {
+        ""
+    };
+    let best = r
+        .best
+        .map(|m| m.to_string())
+        .unwrap_or_else(|| "0000".into());
+    let policy = serde_json::to_string(
+        &r.policy
+            .iter()
+            .map(|(m, p)| (m.to_string(), *p))
+            .collect::<Vec<_>>(),
+    )
+    .unwrap();
+    format!(
+        "{fallback}info depth {} score cp {} nodes {} time {} pv {}\ninfo string policy {}\nbestmove {}\n",
+        r.depth,
+        (r.value * side_sign * 1000.0) as i32,
+        r.nodes,
+        r.elapsed.as_millis(),
+        r.best.map(|m| m.to_string()).unwrap_or_default(),
+        policy,
+        best
+    )
+}
+
 fn stop_worker(worker: &mut Option<(Arc<AtomicBool>, thread::JoinHandle<()>)>) {
     if let Some((stop, handle)) = worker.take() {
         stop.store(true, Ordering::Relaxed);
@@ -147,10 +176,15 @@ fn main() {
                         .join(" ")
                 )),
                 "eval" => {
-                    let acc = models.nnue.as_ref().map(|n| n.accumulator(&game));
+                    let started = std::time::Instant::now();
+                    let nnue = models.nnue.as_ref().map(|n| n.value(&n.accumulator(&game)));
+                    let nnue_ns = nnue.map(|_| started.elapsed().as_nanos());
+                    let started = std::time::Instant::now();
+                    let cnn = models.cnn.as_ref().map(|n| n.infer(&game));
+                    let cnn_ns = cnn.as_ref().map(|_| started.elapsed().as_nanos());
                     emit(&format!(
                         "eval {}",
-                        serde_json::json!({"features": skallagrim::neural::features(&game), "planes": skallagrim::neural::planes(&game), "nnue": acc.map(|a| models.nnue.as_ref().unwrap().value(&a)), "cnn": models.cnn.as_ref().map(|n| n.infer(&game))})
+                        serde_json::json!({"features": skallagrim::neural::features(&game), "nnue_features": models.nnue.as_ref().map(|n| n.active(&game)), "planes": skallagrim::neural::planes(&game), "nnue": nnue, "cnn": cnn, "timing": {"nnue_rebuild_value_ns": nnue_ns, "cnn_inference_ns": cnn_ns}})
                     ));
                 }
                 "perft" if p.len() == 2 => emit(&format!(
@@ -196,6 +230,7 @@ fn main() {
                         }
                     }
                     let deadline = search::response_deadline(received, limits.time);
+                    let trace_timing = std::env::var_os("SKALLAGRIM_TRACE_TIMING").is_some();
                     let g = game.clone();
                     let models = models.clone();
                     let stop = Arc::new(AtomicBool::new(false));
@@ -203,6 +238,7 @@ fn main() {
                     worker = Some((
                         stop,
                         thread::spawn(move || {
+                            let entered_us = received.elapsed().as_micros();
                             let side_sign = g.side.sign();
                             search::search_with_deadline(
                                 g,
@@ -213,33 +249,20 @@ fn main() {
                                 deadline,
                                 |result| match result {
                                     Ok(r) => {
-                                        if r.deadline_fallback {
-                                            emit("info string deadline-fallback");
+                                        let publication_us = received.elapsed().as_micros();
+                                        let reply = search_reply(&r, side_sign);
+                                        let mut stdout = io::stdout().lock();
+                                        let _ = stdout.write_all(reply.as_bytes());
+                                        let _ = stdout.flush();
+                                        drop(stdout);
+                                        if trace_timing {
+                                            eprintln!(
+                                                "{{\"entered_us\":{entered_us},\"publication_us\":{publication_us},\"flushed_us\":{},\"search_us\":{},\"fallback\":{}}}",
+                                                received.elapsed().as_micros(),
+                                                r.elapsed.as_micros(),
+                                                r.deadline_fallback
+                                            );
                                         }
-                                        emit(&format!(
-                                            "info depth {} score cp {} nodes {} time {} pv {}",
-                                            r.depth,
-                                            (r.value * side_sign * 1000.0) as i32,
-                                            r.nodes,
-                                            r.elapsed.as_millis(),
-                                            r.best.map(|m| m.to_string()).unwrap_or_default()
-                                        ));
-                                        emit(&format!(
-                                            "info string policy {}",
-                                            serde_json::to_string(
-                                                &r.policy
-                                                    .iter()
-                                                    .map(|(m, p)| (m.to_string(), *p))
-                                                    .collect::<Vec<_>>()
-                                            )
-                                            .unwrap()
-                                        ));
-                                        emit(&format!(
-                                            "bestmove {}",
-                                            r.best
-                                                .map(|m| m.to_string())
-                                                .unwrap_or_else(|| "0000".into())
-                                        ));
                                     }
                                     Err(e) => {
                                         emit(&format!("info string error {e}"));
@@ -264,4 +287,30 @@ fn main() {
         }
     }
     stop_worker(&mut worker);
+}
+
+#[cfg(test)]
+mod reply_tests {
+    use super::*;
+    #[test]
+    fn batched_reply_preserves_policy_before_exactly_one_bestmove() {
+        let mv = Game::default().legal_moves()[0];
+        let result = search::SearchResult {
+            best: Some(mv),
+            value: 0.5,
+            nodes: 42,
+            depth: 2,
+            elapsed: Duration::from_millis(240),
+            policy: vec![(mv, 1.0)],
+            deadline_fallback: true,
+        };
+        let reply = search_reply(&result, -1.0);
+        let lines: Vec<_> = reply.lines().collect();
+        assert_eq!(lines.len(), 4);
+        assert_eq!(lines[0], "info string deadline-fallback");
+        assert!(lines[1].contains("score cp -500"));
+        assert!(lines[2].starts_with("info string policy "));
+        assert_eq!(lines[3], format!("bestmove {mv}"));
+        assert_eq!(reply.matches("bestmove ").count(), 1);
+    }
 }

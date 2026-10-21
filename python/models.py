@@ -7,6 +7,65 @@ from torch import nn
 
 SQUARES = 121
 FEATURES = 364
+EXPERIMENTAL_FEATURES = FEATURES + 45
+
+
+def encode_nnue(fen, history=None, version="v1"):
+    planes, base = encode(fen, history)
+    if version == "v1":
+        return base
+    if version != "v2":
+        raise ValueError("unknown NNUE feature version")
+    y, x = (int(v) for v in planes[2].nonzero()[0])
+    occupied = planes[:3].sum(dim=0)
+    adjacent = sum(
+        int(planes[0, yy, xx])
+        for yy, xx in [(y - 1, x), (y + 1, x), (y, x - 1), (y, x + 1)]
+        if 0 <= yy < 11 and 0 <= xx < 11
+    )
+    rays = 0
+    for bit, (dy, dx) in enumerate([(-1, 0), (1, 0), (0, -1), (0, 1)]):
+        yy, xx = y + dy, x + dx
+        clear = True
+        while 0 <= yy < 11 and 0 <= xx < 11:
+            if occupied[yy, xx]:
+                clear = False
+            yy += dy
+            xx += dx
+        ey, ex = yy - dy, xx - dx
+        if (
+            clear
+            and (ey, ex) in [(0, 0), (0, 10), (10, 0), (10, 10)]
+            and (ey, ex) != (y, x)
+        ):
+            rays |= 1 << bit
+    distance = min(y + x, y + 10 - x, 10 - y + x, 20 - y - x)
+    extra = torch.zeros(45)
+    extra[min((history or [fen]).count(fen), 2)] = 1
+    extra[3 + distance] = 1
+    extra[24 + adjacent] = 1
+    extra[29 + rays] = 1
+    return torch.cat((base, extra))
+
+
+def migrate_nnue(model, state):
+    """Expand compatible networks without changing their initial evaluations."""
+    old_hidden, old_features = state["input.weight"].shape
+    if old_hidden > model.hidden or old_features > model.input.in_features:
+        raise ValueError("NNUE migration cannot shrink dimensions")
+    with torch.no_grad():
+        added_weights = model.input.weight[old_hidden:, :old_features].clone()
+        for parameter in model.parameters():
+            parameter.zero_()
+        model.input.weight[:old_hidden, :old_features].copy_(state["input.weight"])
+        model.input.bias[:old_hidden].copy_(state["input.bias"])
+        model.output.weight[:, :old_hidden].copy_(state["output.weight"])
+        model.output.bias.copy_(state["output.bias"])
+        # Added units have zero output contribution but nonzero activations so
+        # they can learn. New input features remain exactly zero initially.
+        if model.hidden > old_hidden:
+            model.input.weight[old_hidden:, :old_features].copy_(added_weights)
+            model.input.bias[old_hidden:].fill_(0.5)
 
 
 def encode(fen, history=None):
@@ -78,10 +137,15 @@ def policy_index(move):
 
 
 class NNUE(nn.Module):
-    def __init__(self, hidden=64):
+    def __init__(self, hidden=64, feature_version="v1"):
         super().__init__()
         self.hidden = hidden
-        self.input = nn.Linear(FEATURES, hidden)
+        self.feature_version = feature_version
+        if feature_version not in {"v1", "v2"}:
+            raise ValueError("unknown NNUE feature version")
+        self.input = nn.Linear(
+            FEATURES if feature_version == "v1" else EXPERIMENTAL_FEATURES, hidden
+        )
         self.output = nn.Linear(hidden, 1)
 
     def forward(self, x):
@@ -91,7 +155,7 @@ class NNUE(nn.Module):
         save(
             path,
             dict(
-                format="skallagrim-nnue-v1",
+                format=f"skallagrim-nnue-{self.feature_version}",
                 hidden=self.hidden,
                 weights=self.input.weight.detach().t().contiguous().flatten().tolist(),
                 bias=self.input.bias.detach().tolist(),

@@ -3,8 +3,9 @@
 import argparse
 import json
 from pathlib import Path
-from transport import Engine
+
 from records import save
+from transport import Engine
 
 
 def board(fen):
@@ -89,6 +90,17 @@ def main():
                     state = referee.play(move)
                 if state["outcome"] != rows[-1]["outcome"]:
                     raise ValueError("outcome mismatch")
+                winner = state["outcome"]["winner"]
+                expected_target = {"Attacker": 1.0, "Defender": -1.0, None: 0.0}[winner]
+                for row in rows:
+                    if row.get("target") != expected_target:
+                        raise ValueError(
+                            "training target disagrees with verified winner"
+                        )
+                    if row.get("outcome") != state["outcome"]:
+                        raise ValueError(
+                            "sample outcome disagrees with verified outcome"
+                        )
             except (ValueError, RuntimeError) as exc:
                 rejected.append(dict(game=rows[0]["game"], reason=str(exc)))
                 return
