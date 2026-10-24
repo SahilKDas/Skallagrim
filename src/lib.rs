@@ -1,3 +1,4 @@
+pub mod evaluation;
 pub mod fort;
 pub mod game;
 pub mod neural;

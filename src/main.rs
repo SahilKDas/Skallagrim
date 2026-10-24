@@ -96,6 +96,8 @@ fn main() {
                     emit("option name Variant type combo default Copenhagen var Copenhagen");
                     emit("option name NNUEFile type string default <empty>");
                     emit("option name CNNFile type string default <empty>");
+                    emit("option name HandcraftedWeight type spin default -1 min -1 max 100");
+                    emit("info string HandcraftedWeight -1 uses bot defaults: Iota 25, Beta/Rho 0");
                     emit(&format!(
                         "info string rules {}; conservative exit-fort detector; see docs/RULES.md",
                         skallagrim::game::RULES_VERSION
@@ -116,6 +118,20 @@ fn main() {
                     let value = p[i + 1..].join(" ");
                     match name.as_str() {
                         "Bot" => bot = value.parse()?,
+                        "HandcraftedWeight" => {
+                            let weight = value
+                                .parse::<i16>()
+                                .ok()
+                                .filter(|v| (-1..=100).contains(v))
+                                .ok_or(
+                                    "HandcraftedWeight must be -1 (auto) or an integer in 0..100",
+                                )?;
+                            models.handcrafted_weight = if weight == -1 {
+                                None
+                            } else {
+                                Some(weight as u8)
+                            };
+                        }
                         "Variant"
                             if value.eq_ignore_ascii_case("Copenhagen")
                                 || value.eq_ignore_ascii_case("copenhagen11x11") => {}
@@ -182,9 +198,16 @@ fn main() {
                     let started = std::time::Instant::now();
                     let cnn = models.cnn.as_ref().map(|n| n.infer(&game));
                     let cnn_ns = cnn.as_ref().map(|_| started.elapsed().as_nanos());
+                    let handcrafted = skallagrim::evaluation::evaluate(&game);
+                    let blend_weight = bot.handcrafted_weight(&models);
+                    let blended_nnue =
+                        nnue.map(|v| skallagrim::evaluation::blend(&game, v, blend_weight));
+                    let blended_cnn = cnn
+                        .as_ref()
+                        .map(|v| skallagrim::evaluation::blend(&game, v.0, blend_weight));
                     emit(&format!(
                         "eval {}",
-                        serde_json::json!({"features": skallagrim::neural::features(&game), "nnue_features": models.nnue.as_ref().map(|n| n.active(&game)), "planes": skallagrim::neural::planes(&game), "nnue": nnue, "cnn": cnn, "timing": {"nnue_rebuild_value_ns": nnue_ns, "cnn_inference_ns": cnn_ns}})
+                        serde_json::json!({"features": skallagrim::neural::features(&game), "nnue_features": models.nnue.as_ref().map(|n| n.active(&game)), "planes": skallagrim::neural::planes(&game), "nnue": nnue, "cnn": cnn, "handcrafted": handcrafted, "handcrafted_version": skallagrim::evaluation::VERSION, "handcrafted_weight": blend_weight, "blended_nnue": blended_nnue, "blended_cnn": blended_cnn, "timing": {"nnue_rebuild_value_ns": nnue_ns, "cnn_inference_ns": cnn_ns}})
                     ));
                 }
                 "perft" if p.len() == 2 => emit(&format!(

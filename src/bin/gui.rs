@@ -58,6 +58,16 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     };
     let renderer = Renderer::default();
     let mut models = Models::default();
+    if let Some(i) = args.iter().position(|s| s == "--handcrafted-weight") {
+        models.handcrafted_weight = Some(
+            args.get(i + 1)
+                .ok_or("--handcrafted-weight needs 0..100")?
+                .parse::<u8>()
+                .ok()
+                .filter(|v| *v <= 100)
+                .ok_or("--handcrafted-weight needs 0..100")?,
+        );
+    }
     if data_root.join("models/nnue.json").exists() {
         models.load_nnue(&data_root.join("models/nnue.json"))?;
     }

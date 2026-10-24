@@ -350,6 +350,8 @@ pub fn policy_index(m: crate::game::Move) -> usize {
 pub struct Models {
     pub nnue: Option<Nnue>,
     pub cnn: Option<Cnn>,
+    /// Explicit 0..100 percent override; None selects the bot's default.
+    pub handcrafted_weight: Option<u8>,
 }
 
 impl Models {

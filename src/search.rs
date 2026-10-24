@@ -16,6 +16,14 @@ pub enum Bot {
     Beta,
     Baseline,
 }
+impl Bot {
+    /// Iota uses the screened blend; Beta and Rho remain neural-only.
+    pub fn handcrafted_weight(self, models: &Models) -> u8 {
+        models
+            .handcrafted_weight
+            .unwrap_or(if self == Self::Iota { 25 } else { 0 })
+    }
+}
 impl std::str::FromStr for Bot {
     type Err = String;
     fn from_str(s: &str) -> Result<Self, String> {
@@ -104,7 +112,7 @@ impl Context<'_> {
             return handcrafted(g);
         }
         if self.bot == Bot::Rho {
-            return self
+            let value = self
                 .models
                 .cnn
                 .as_ref()
@@ -113,13 +121,15 @@ impl Context<'_> {
                 .map(|result| result.0)
                 .filter(|v| v.is_finite())
                 .unwrap_or_else(|| handcrafted(g));
+            return crate::evaluation::blend(g, value, self.bot.handcrafted_weight(self.models));
         }
         let nn = self.models.nnue.as_ref().unwrap();
-        if let Some(a) = acc {
+        let value = if let Some(a) = acc {
             nn.value(a)
         } else {
             nn.value(&nn.accumulator(g))
-        }
+        };
+        crate::evaluation::blend(g, value, self.bot.handcrafted_weight(self.models))
     }
     fn alphabeta(
         &mut self,
@@ -479,11 +489,16 @@ fn search_publishing(
                     else {
                         break 'simulations;
                     };
-                    v = if val.is_finite() {
+                    let neural = if val.is_finite() {
                         val
                     } else {
                         handcrafted(&arena[at].g)
                     };
+                    v = crate::evaluation::blend(
+                        &arena[at].g,
+                        neural,
+                        bot.handcrafted_weight(models),
+                    );
                     logits = moves
                         .iter()
                         .map(|m| {
